@@ -1,0 +1,10 @@
+.idea
+*.iws
+*.iml
+*.ipr
+Files
+logs
+Auth.env
+target
+src/main/resources/token
+tokens
