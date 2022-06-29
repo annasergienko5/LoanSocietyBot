@@ -2,7 +2,6 @@
 *.iws
 *.iml
 *.ipr
-Files
 logs
 Auth.env
 target
