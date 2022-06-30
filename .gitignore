@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Default ignored files
 /shelf/
 .idea
@@ -5,3 +6,14 @@ env
 target
 devGringottsTool_bot
 devGringottsTool_bot.wal.0
+=======
+.idea
+*.iws
+*.iml
+*.ipr
+logs
+Auth.env
+target
+src/main/resources/token
+tokens
+>>>>>>> GT_GoogleSheetService
