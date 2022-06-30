@@ -20,17 +20,17 @@ public class MessageHandler {
         String inputText = message.getText();
         log.info(inputText);
 
-        if (inputText == null) {
-            throw new IllegalArgumentException();
-        } else if (inputText.equals("/start")) {
-            return getStartMessage(chatId);
-        } else {
-            return new SendMessage(chatId, "404");
+        switch (inputText){
+            case "/start":
+                return getStartMessage(chatId);
+            case "":
+            default:
+                return new SendMessage(chatId, "Неизвестная команда");
         }
     }
 
     private SendMessage getStartMessage(String chatId) {
-        SendMessage sendMessage = new SendMessage(chatId, "200");
+        SendMessage sendMessage = new SendMessage(chatId, "Привет");
         sendMessage.enableMarkdown(true);
         return sendMessage;
     }
