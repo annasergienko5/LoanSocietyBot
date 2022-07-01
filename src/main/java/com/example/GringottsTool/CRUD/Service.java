@@ -21,6 +21,7 @@ public class Service {
     }
 
     public ArrayList<String> findBy(String range, String expend) throws IOException {
+        String majorDimension = new ValueRange().getMajorDimension();
         ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
         List<List<Object>> values = response.getValues();
         String dem = new DimensionRange()
