@@ -6,14 +6,13 @@ env
 target
 devGringottsTool_bot
 devGringottsTool_bot.wal.0
+client_secret_266641561922_5llknmfdn3oam08tgf3vbjunjg87t8qk_apps.json
 =======
-.idea
 *.iws
 *.iml
 *.ipr
 logs
 Auth.env
-target
 src/main/resources/token
 tokens
 >>>>>>> GT_GoogleSheetService
