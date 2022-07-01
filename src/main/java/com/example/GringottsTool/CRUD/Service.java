@@ -15,9 +15,35 @@ import java.util.List;
 @Component
 public class Service {
     private static final Logger logger = LogManager.getLogger();
+    Sheets sheets = GoogleSheets.getSheetsService();
+
+    public Service() throws GeneralSecurityException, IOException {
+    }
+
+    public ArrayList<String> findBy(String range, String expend) throws IOException {
+        ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
+        List<List<Object>> values = response.getValues();
+        String dem = new DimensionRange()
+                .setSheetId(0)
+                .setDimension("Rows")
+                .getDimension();
+        logger.info(dem);
+        ArrayList<String> result = new ArrayList<>();
+        if (values == null || values.isEmpty()) {
+            logger.info("No data found.");
+        } else {
+            for (List row : values) {
+                for (Object value : row){
+                    if (value.toString().equals(expend)) {
+                        result.add(value.toString());
+                    }
+                }
+            }
+        }
+        return result;
+    }
 
     public StringBuilder readAllFromSheet(String range) throws GeneralSecurityException, IOException {
-        Sheets sheets = GoogleSheets.getSheetsService();
         ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
         List<List<Object>> values = response.getValues();
         StringBuilder result = new StringBuilder();
@@ -32,7 +58,6 @@ public class Service {
         return result;
     }
     public void addRowToSheet() throws GeneralSecurityException, IOException {
-        Sheets sheets = GoogleSheets.getSheetsService();
         ValueRange appendBody = new ValueRange()
                 .setValues(Arrays.asList(Arrays.asList("3","Stepan", "4000")));
         AppendValuesResponse appendResult = sheets.spreadsheets().values()
@@ -43,7 +68,6 @@ public class Service {
         logger.info("Row added.");
     }
     public void updateValue() throws GeneralSecurityException, IOException {
-        Sheets sheets = GoogleSheets.getSheetsService();
         ValueRange body = new ValueRange()
                 .setValues(Arrays.asList(Arrays.asList(500.545)));
         UpdateValuesResponse result = sheets.spreadsheets().values()
@@ -53,7 +77,6 @@ public class Service {
         logger.info("Value updated.");
     }
     public void deleteRow() throws GeneralSecurityException, IOException {
-        Sheets sheets = GoogleSheets.getSheetsService();
         DeleteDimensionRequest deleteDimensionRequest = new DeleteDimensionRequest()
                 .setRange( new DimensionRange()
                         .setSheetId(0)

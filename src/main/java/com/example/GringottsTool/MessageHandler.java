@@ -32,14 +32,21 @@ public class MessageHandler {
                 return getStartMessage(chatId);
             case "/svodka":
                 return getSummary(chatId);
+//            case "/search":
+//                return getSearch(chatId);
             default:
                 return new SendMessage(chatId, "Неизвестная команда");
         }
     }
 
+//    private BotApiMethod<?> getSearch(String chatId) {
+//        String range = "Участники!A1:A20";
+//        return
+//    }
+
     private BotApiMethod<?> getSummary(String chatId) throws GeneralSecurityException, IOException {
         String range = "Сводка!A1:C23";
-        String result = service.readAllFromSheet(range).toString();
+        String result = service.findBy(range, "АБ").toString();
         SendMessage sendMessage = new SendMessage(chatId, result);
         return sendMessage;
     }
