@@ -36,3 +36,8 @@ https://api.telegram.org/bot<токен бота>/setWebhook?url=<URL, полу�
 * TOKEN_BOT - токен бота
 * BOT_USERNAME - имя бота
 * PORT - порт, который вы задали при запуске ngrok
+* APPLICATION_NAME - имя приложения (пример: Google Sheet Service)
+* CREDENTIALS_FILE_PATH - путь к файлу json для подключения к google api (файл должен лежать в resource)
+* SHEET_ID - id таблички из url 
+(пример: https://docs.google.com/spreadsheets/d/1234abcd/edit#gid=1825291932
+  1234abcd - это id)
