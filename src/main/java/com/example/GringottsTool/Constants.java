@@ -1,11 +1,13 @@
 package com.example.GringottsTool;
 
+import org.springframework.beans.factory.annotation.Value;
+
 public interface Constants {
-    String bot_token=System.getenv("TOKEN_BOT");
-    String bot_username=System.getenv("BOT_USERNAME");
-    long CREATOR_ID=Long.parseLong(System.getenv("CREATOR_ID"));
-    String START_REPLY = "Start using the telegram bot if you are lonely or bored";
-    String CHOOSE_OPTION = "Make a choice";
-    String DISCUSSION = "Let's discuss!";
-    String SMALL_TALK = "Let's talk!";
+    String BOT_TOKEN=System.getenv("TOKEN_BOT");
+    String BOT_USERNAME=System.getenv("BOT_USERNAME");
+    String WEBHOOK_PATH=System.getenv("WEBHOOK_PATH");
+    String APPLICATION_NAME=System.getenv("APPLICATION_NAME");
+    String CREDENTIALS_FILE_PATH=System.getenv("CREDENTIALS_FILE_PATH");
+    String TOKENS_DIRECTORY_PATH=System.getenv("TOKENS_DIRECTORY_PATH");
+    String SHEET_ID=System.getenv("SHEET_ID");
 }

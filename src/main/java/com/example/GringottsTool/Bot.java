@@ -6,8 +6,8 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.starter.SpringWebhookBot;
 
-
-
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 
 public class Bot extends SpringWebhookBot {
     private String botPath;
@@ -39,7 +39,13 @@ public class Bot extends SpringWebhookBot {
         if (update.hasMessage()){
             Message message = update.getMessage();
             if (message != null){
-                return messageHandler.answerMessage(update.getMessage());
+                try {
+                    return messageHandler.answerMessage(update.getMessage());
+                } catch (GeneralSecurityException e) {
+                    throw new RuntimeException(e);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
         return null;

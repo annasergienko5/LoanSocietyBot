@@ -6,7 +6,7 @@ env
 target
 devGringottsTool_bot
 devGringottsTool_bot.wal.0
-client_secret_266641561922_5llknmfdn3oam08tgf3vbjunjg87t8qk_apps.json
+src/main/resources/token/client_secret_266641561922_5llknmfdn3oam08tgf3vbjunjg87t8qk_apps.json
 =======
 *.iws
 *.iml

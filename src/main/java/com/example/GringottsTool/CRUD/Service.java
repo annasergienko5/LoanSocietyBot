@@ -1,32 +1,35 @@
-package com.githab.KonstantinZhee.service;
+package com.example.GringottsTool.CRUD;
 
-import com.githab.KonstantinZhee.DAO.Constants;
-import com.githab.KonstantinZhee.DAO.GoogleSheets;
+import com.example.GringottsTool.Constants;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
+@Component
 public class Service {
     private static final Logger logger = LogManager.getLogger();
 
-    public void readAllFromSheet(String range) throws GeneralSecurityException, IOException {
+    public StringBuilder readAllFromSheet(String range) throws GeneralSecurityException, IOException {
         Sheets sheets = GoogleSheets.getSheetsService();
         ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
         List<List<Object>> values = response.getValues();
+        StringBuilder result = new StringBuilder();
         if (values == null || values.isEmpty()) {
             logger.info("No data found.");
         } else {
             for (List row : values) {
+                result.append(row).append("\n");
                 logger.info(row);
             }
         }
+        return result;
     }
     public void addRowToSheet() throws GeneralSecurityException, IOException {
         Sheets sheets = GoogleSheets.getSheetsService();
