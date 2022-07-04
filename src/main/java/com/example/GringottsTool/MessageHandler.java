@@ -30,8 +30,8 @@ public class MessageHandler {
         switch (inputText){
             case "/start":
                 return getStartMessage(chatId);
-            case "/svodka":
-                return getSummary(chatId);
+            case "/search":
+                return getSearch(chatId);
 //            case "/search":
 //                return getSearch(chatId);
             default:
@@ -44,9 +44,9 @@ public class MessageHandler {
 //        return
 //    }
 
-    private BotApiMethod<?> getSummary(String chatId) throws GeneralSecurityException, IOException {
-        String range = "Сводка!A1:C23";
-        String result = service.findBy(range, "АБ").toString();
+    private BotApiMethod<?> getSearch(String chatId) throws IOException {
+        String range = "Участники!A2:M";
+        String result = service.findByPartner(range, "АБ").toString();
         SendMessage sendMessage = new SendMessage(chatId, result);
         return sendMessage;
     }

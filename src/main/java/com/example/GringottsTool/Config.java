@@ -1,15 +1,41 @@
 package com.example.GringottsTool;
 
-import com.example.GringottsTool.CRUD.Service;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 
+import javax.net.ssl.HttpsURLConnection;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.security.GeneralSecurityException;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 @Configuration
 public class Config {
+
+    Logger log =  LogManager.getLogger();
+
+    @Bean
+    public  void registerTgBot() throws IOException {
+        URL url = new URL("https://api.telegram.org/bot" + Constants.BOT_TOKEN + "/setWebhook?url=" + Constants.WEBHOOK_PATH);
+        HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+        try (final BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+            String inputLine;
+            final StringBuilder content = new StringBuilder();
+            while ((inputLine = in.readLine()) != null) {
+                content.append(inputLine);
+            }
+            if (content.equals("{\"ok\":true,\"result\":true,\"description\":\"Webhook was set\"}")){
+                log.info("registerTgBot : true");
+            }else log.info("registerTgBot : false");
+
+        } catch (final Exception ex) {
+            ex.printStackTrace();
+        }
+    }
 
     @Bean
     public SetWebhook setWebhookInstance() {

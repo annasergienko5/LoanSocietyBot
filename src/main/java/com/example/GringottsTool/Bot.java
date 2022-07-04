@@ -13,7 +13,6 @@ public class Bot extends SpringWebhookBot {
     private String botPath;
     private String botUserName;
     private String botToken;
-
     private MessageHandler messageHandler;
 
 
