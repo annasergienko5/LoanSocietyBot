@@ -60,7 +60,7 @@ public class Service {
         }return null;
     }
 
-    public  ArrayList<Partner> findDebt(String expend) throws IOException {
+    public  ArrayList<Partner> findPartner(String expend) throws IOException {
         String range = "Участники!A2:M";
         ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
         List<List<Object>> values = response.getValues();
