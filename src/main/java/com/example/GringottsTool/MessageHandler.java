@@ -28,7 +28,7 @@ public class MessageHandler {
         String chatId = message.getChatId().toString();
         String tgId = message.getChat().getUserName();
         log.info(tgId);
-        String[] inputText = message.getText().split(" ", 1);
+        String[] inputText = message.getText().split(" ", 2);
         log.info(inputText);
 
         switch (inputText[0]){
