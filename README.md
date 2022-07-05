@@ -24,11 +24,6 @@
 
 Регистрируйте вебхук в Telegram, формируя в строке браузера запрос вида:
 
-https://api.telegram.org/bot<токен бота>/setWebhook?url=<URL, полученный от ngrok>
-… видим ответ:
-
-{"ok":true,"result":true,"description":"Webhook was set"}
-
 … и запускаем приложение в своей IDE!
 
 Переменные окружения при запуске:
