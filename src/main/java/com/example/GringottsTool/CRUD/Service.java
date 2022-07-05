@@ -1,6 +1,7 @@
 package com.example.GringottsTool.CRUD;
 
 import com.example.GringottsTool.Constants;
+import com.example.GringottsTool.Enteties.Info;
 import com.example.GringottsTool.Enteties.Partner;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.*;
@@ -22,11 +23,27 @@ public class Service {
     public Service() throws GeneralSecurityException, IOException {
     }
 
-    public  ArrayList<Partner> findByPartner(String range, String expend) throws IOException {
+    public Info findInfo() throws IOException {
+        String range = "Сводка!B7:B11";
+        ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
+        List<List<Object>> values = response.getValues();
+        if (values == null || values.isEmpty()) {
+            logger.info("No data found.");
+        } else {
+            String capital = values.get(0).toString();
+            String borrowedMoney = values.get(1).toString();
+            String overdue = values.get(2).toString();
+            String reserve = values.get(3).toString();
+            String active = values.get(4).toString();
+            return new Info(capital, borrowedMoney, overdue, reserve, active);
+        }return null;
+    }
+
+    public  ArrayList<Partner> findByPartner(String expend) throws IOException {
+        String range = "Участники!A2:M";
         ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
         List<List<Object>> values = response.getValues();
         ArrayList<Partner> result = new ArrayList<>();
-
         if (values == null || values.isEmpty()) {
             logger.info("No data found.");
         } else {
@@ -45,7 +62,7 @@ public class Service {
                     if (row.get(6).toString() != ""){
                         loan = Integer.parseInt(row.get(6).toString());
                     }
-                    if (row.get(6).toString() != ""){
+                    if (row.get(7).toString() != ""){
                         debt = Integer.parseInt(row.get(7).toString());
                     }
                     String returnDate = row.get(8).toString();
@@ -70,6 +87,26 @@ public class Service {
         }
         return result;
     }
+    public  ArrayList<Partner> findByPartner() throws IOException {
+        String range = "Участники!A2:M";
+        ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
+        List<List<Object>> values = response.getValues();
+        ArrayList<Partner> result = new ArrayList<>();
+        if (values == null || values.isEmpty()) {
+            logger.info("No data found.");
+        } else {
+            for (List row : values) {
+                int debt = Integer.parseInt(row.get(7).toString());
+                if (debt != 0){
+                    String returnDate = row.get(8).toString();
+                    String name = row.get(0).toString();
+                    result.add(new Partner(name, debt, returnDate ));
+                    }
+                }
+            }
+        return result;
+        }
+
 
     public StringBuilder readAllFromSheet(String range) throws GeneralSecurityException, IOException {
         ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();

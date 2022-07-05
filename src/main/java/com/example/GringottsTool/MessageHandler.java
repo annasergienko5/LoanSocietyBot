@@ -32,6 +32,9 @@ public class MessageHandler {
             case "/start":
                 return getStartMessage(chatId);
             case "/search":
+                if (inputText.length < 2){
+                    return new SendMessage(chatId, Constants.NOT_PARAMETERS);
+                }
                 return getSearch(chatId, inputText[1]);
             case "/status":
                 return getStatus(chatId);
@@ -72,17 +75,28 @@ public class MessageHandler {
         return null;
     }
 
-    private BotApiMethod<?> getDebts(String chatId) {
-        return null;
+    private BotApiMethod<?> getDebts(String chatId) throws IOException {
+        StringBuffer result = new StringBuffer();
+        ArrayList<Partner> debts = service.findByPartner();
+        if (debts.size() == 0){
+            return new SendMessage(chatId, Constants.NO_DEBTS);
+        }
+        for (Partner partner : debts){
+            result.append("\n")
+                    .append(partner.getName())
+                    .append(" занял ").append(partner.getDebt())
+                    .append(" и обещал вернуть до ").append(partner.getReturnDate());
+        }
+        return new SendMessage(chatId, result.toString());
     }
 
-    private BotApiMethod<?> getStatus(String chatId) {
-        return null;
+    private BotApiMethod<?> getStatus(String chatId) throws IOException {
+        String result = service.findInfo().toString();
+        return new SendMessage(chatId, result);
     }
 
     private BotApiMethod<?> getSearch(String chatId, String expected) throws IOException {
-        String range = "Участники!A2:M";
-        ArrayList<Partner> resultList = service.findByPartner(range, expected);
+        ArrayList<Partner> resultList = service.findByPartner(expected);
         SendMessage sendMessage;
         if (resultList.size() == 0){
             return new SendMessage(chatId, Constants.NOT_FOUND_DATA);
