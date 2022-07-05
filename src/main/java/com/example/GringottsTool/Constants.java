@@ -12,4 +12,5 @@ public interface Constants {
     String NOT_FOUND_DATA = "Данные не найдены";
     String NOT_PARAMETERS = "Нет параметров поиска. Укажи через пробел после /search";
     String NO_DEBTS = "Должников нет";
+    String RULE = "https://docs.google.com/document/d/1u_evBnYo7TzMIhOuwN9YZzKkYu0uPQPft0OxtZapp-Y/edit";
 }

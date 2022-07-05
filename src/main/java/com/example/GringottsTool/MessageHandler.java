@@ -2,6 +2,7 @@ package com.example.GringottsTool;
 
 import com.example.GringottsTool.CRUD.Service;
 import com.example.GringottsTool.Enteties.Cards;
+import com.example.GringottsTool.Enteties.Contributions;
 import com.example.GringottsTool.Enteties.Partner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,8 +26,9 @@ public class MessageHandler {
 
     public BotApiMethod<?> answerMessage(Message message) throws GeneralSecurityException, IOException {
         String chatId = message.getChatId().toString();
-
-        String[] inputText = message.getText().split(" ");
+        String tgId = message.getChat().getUserName();
+        log.info(tgId);
+        String[] inputText = message.getText().split(" ", 1);
         log.info(inputText);
 
         switch (inputText[0]){
@@ -46,9 +48,9 @@ public class MessageHandler {
             case "/rules":
                 return getRules(chatId);
             case "/aboutme":
-                return getAboutme(chatId);
+                return getAboutme(chatId, tgId);
             case "/aboutmypayment":
-                return getAboutMyPayment(chatId);
+                return getAboutMyPayment(chatId, tgId);
             case "/ducklist":
                 return getDucklist(chatId);
             default:
@@ -57,19 +59,36 @@ public class MessageHandler {
     }
 
     private BotApiMethod<?> getRules(String chatId) {
-        return null;
+        return new SendMessage(chatId, Constants.RULE);
     }
 
     private BotApiMethod<?> getDucklist(String chatId) {
         return null;
     }
 
-    private BotApiMethod<?> getAboutMyPayment(String chatId) {
-        return null;
+    private BotApiMethod<?> getAboutMyPayment(String chatId, String tgId) throws IOException {
+        String expected = service.findPartner(tgId).get(0).getName();
+        Contributions contributions = service.findContribution(expected);
+        return new SendMessage(chatId, contributions.toString());
     }
 
-    private BotApiMethod<?> getAboutme(String chatId) {
-        return null;
+    private BotApiMethod<?> getAboutme(String chatId, String tgId) throws IOException {
+        ArrayList<Partner> resultList = service.findPartner(tgId);
+        SendMessage sendMessage;
+        if (resultList.size() == 0) {
+            return new SendMessage(chatId, Constants.NOT_FOUND_DATA);
+        }
+        if (resultList.size() > 1) {
+            StringBuffer res = new StringBuffer();
+            res.append(Constants.FIND_MORE_RESULT);
+            for (Partner partner : resultList) {
+                res.append("\n" + partner.getTgId());
+            }
+            sendMessage = new SendMessage(chatId, res.toString());
+            return sendMessage;
+        }
+        sendMessage = new SendMessage(chatId, resultList.get(0).toString());
+        return sendMessage;
     }
 
     private BotApiMethod<?> getCards(String chatId) throws IOException {
