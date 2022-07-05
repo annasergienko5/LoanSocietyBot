@@ -1,6 +1,7 @@
 package com.example.GringottsTool.CRUD;
 
 import com.example.GringottsTool.Constants;
+import com.example.GringottsTool.Enteties.Partner;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.*;
 import org.apache.logging.log4j.LogManager;
@@ -12,6 +13,7 @@ import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
 @Component
 public class Service {
     private static final Logger logger = LogManager.getLogger();
@@ -20,24 +22,49 @@ public class Service {
     public Service() throws GeneralSecurityException, IOException {
     }
 
-    public ArrayList<String> findBy(String range, String expend) throws IOException {
-        String majorDimension = new ValueRange().getMajorDimension();
+    public  ArrayList<Partner> findByPartner(String range, String expend) throws IOException {
         ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
         List<List<Object>> values = response.getValues();
-        String dem = new DimensionRange()
-                .setSheetId(0)
-                .setDimension("Rows")
-                .getDimension();
-        logger.info(dem);
-        ArrayList<String> result = new ArrayList<>();
+        ArrayList<Partner> result = new ArrayList<>();
+
         if (values == null || values.isEmpty()) {
             logger.info("No data found.");
         } else {
             for (List row : values) {
-                for (Object value : row){
-                    if (value.toString().equals(expend)) {
-                        result.add(value.toString());
+                String name = row.get(0).toString();
+                String tgId = row.get(1).toString();
+                if (name.equalsIgnoreCase(expend) || tgId.equals(expend)) {
+                    String vk = row.get(2).toString();
+                    String city = row.get(3).toString();
+                    int contributions = Integer.parseInt(row.get(4).toString());
+                    double sumContributions = Double.parseDouble(row.get(5).toString().replace(",","."));
+                    int loan = 0;
+                    int debt = 0;
+                    int dosrochka = 0;
+                    int prosrochka = 0;
+                    if (row.get(6).toString() != ""){
+                        loan = Integer.parseInt(row.get(6).toString());
                     }
+                    if (row.get(6).toString() != ""){
+                        debt = Integer.parseInt(row.get(7).toString());
+                    }
+                    String returnDate = row.get(8).toString();
+                    if (!row.get(9).toString().equals("")){
+                        dosrochka = Integer.parseInt(row.get(9).toString());
+                    }
+                    if (!row.get(10).toString().equals("")){
+                        prosrochka = Integer.parseInt(row.get(10).toString());
+                    }
+
+                    boolean elite = false;
+                    boolean vznosZaMesac = false;
+                    if (row.get(11).toString().equals("1")){
+                        elite = true;
+                    }
+                    if (row.get(12).toString().equals("1")){
+                        vznosZaMesac = true;
+                    }
+                    result.add(new Partner(name, tgId, vk, city, contributions, sumContributions, loan, debt, returnDate, dosrochka, prosrochka, elite, vznosZaMesac));
                 }
             }
         }
