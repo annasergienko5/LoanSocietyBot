@@ -1,6 +1,7 @@
 package com.example.GringottsTool;
 
 import com.example.GringottsTool.CRUD.Service;
+import com.example.GringottsTool.Enteties.Cards;
 import com.example.GringottsTool.Enteties.Partner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,6 +33,9 @@ public class MessageHandler {
             case "/start":
                 return getStartMessage(chatId);
             case "/search":
+                if (inputText.length < 2){
+                    return new SendMessage(chatId, Constants.NOT_PARAMETERS);
+                }
                 return getSearch(chatId, inputText[1]);
             case "/status":
                 return getStatus(chatId);
@@ -68,21 +72,37 @@ public class MessageHandler {
         return null;
     }
 
-    private BotApiMethod<?> getCards(String chatId) {
-        return null;
+    private BotApiMethod<?> getCards(String chatId) throws IOException {
+        StringBuffer res = new StringBuffer();
+        ArrayList<Cards> cards = service.findCards();
+        for (Cards card : cards){
+            res.append("\n").append(card.toString());
+        }
+        return new SendMessage(chatId, res.toString());
     }
 
-    private BotApiMethod<?> getDebts(String chatId) {
-        return null;
+    private BotApiMethod<?> getDebts(String chatId) throws IOException {
+        StringBuffer result = new StringBuffer();
+        ArrayList<Partner> debts = service.findDebt();
+        if (debts.size() == 0){
+            return new SendMessage(chatId, Constants.NO_DEBTS);
+        }
+        for (Partner partner : debts){
+            result.append("\n")
+                    .append(partner.getName())
+                    .append(" занял ").append(partner.getDebt())
+                    .append(" и обещал вернуть до ").append(partner.getReturnDate());
+        }
+        return new SendMessage(chatId, result.toString());
     }
 
-    private BotApiMethod<?> getStatus(String chatId) {
-        return null;
+    private BotApiMethod<?> getStatus(String chatId) throws IOException {
+        String result = service.findInfo().toString();
+        return new SendMessage(chatId, result);
     }
 
     private BotApiMethod<?> getSearch(String chatId, String expected) throws IOException {
-        String range = "Участники!A2:M";
-        ArrayList<Partner> resultList = service.findByPartner(range, expected);
+        ArrayList<Partner> resultList = service.findDebt(expected);
         SendMessage sendMessage;
         if (resultList.size() == 0){
             return new SendMessage(chatId, Constants.NOT_FOUND_DATA);

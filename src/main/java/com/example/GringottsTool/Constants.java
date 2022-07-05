@@ -10,4 +10,6 @@ public interface Constants {
     String FIND_MORE_RESULT = "Много таких, уточни:";
     String UKNOWN_COMMAND = "Не выдумывай, нет таких команд";
     String NOT_FOUND_DATA = "Данные не найдены";
+    String NOT_PARAMETERS = "Нет параметров поиска. Укажи через пробел после /search";
+    String NO_DEBTS = "Должников нет";
 }
