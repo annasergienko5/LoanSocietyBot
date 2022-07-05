@@ -10,7 +10,6 @@ import javax.net.ssl.HttpsURLConnection;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 @Configuration
@@ -28,10 +27,7 @@ public class Config {
             while ((inputLine = in.readLine()) != null) {
                 content.append(inputLine);
             }
-            if (content.equals("{\"ok\":true,\"result\":true,\"description\":\"Webhook was set\"}")){
-                log.info("registerTgBot : true");
-            }else log.info("registerTgBot : false");
-
+            log.info(content);
         } catch (final Exception ex) {
             ex.printStackTrace();
         }

@@ -32,8 +32,8 @@ public class Service {
         } else {
             for (List row : values) {
                 String name = row.get(0).toString();
-                if (name.equals(expend)) {
-                    String tgId = row.get(1).toString();
+                String tgId = row.get(1).toString();
+                if (name.equalsIgnoreCase(expend) || tgId.equals(expend)) {
                     String vk = row.get(2).toString();
                     String city = row.get(3).toString();
                     int contributions = Integer.parseInt(row.get(4).toString());

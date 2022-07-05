@@ -31,6 +31,10 @@ public class Partner {
         this.vznosZaMesac = vznosZaMesac;
     }
 
+    public String getTgId() {
+        return tgId;
+    }
+
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
