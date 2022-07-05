@@ -102,7 +102,7 @@ public class MessageHandler {
     }
 
     private BotApiMethod<?> getSearch(String chatId, String expected) throws IOException {
-        ArrayList<Partner> resultList = service.findDebt(expected);
+        ArrayList<Partner> resultList = service.findPartner(expected);
         SendMessage sendMessage;
         if (resultList.size() == 0){
             return new SendMessage(chatId, Constants.NOT_FOUND_DATA);
