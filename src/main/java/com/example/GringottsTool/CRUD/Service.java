@@ -1,6 +1,7 @@
 package com.example.GringottsTool.CRUD;
 
 import com.example.GringottsTool.Constants;
+import com.example.GringottsTool.Enteties.Cards;
 import com.example.GringottsTool.Enteties.Info;
 import com.example.GringottsTool.Enteties.Partner;
 import com.google.api.services.sheets.v4.Sheets;
@@ -22,6 +23,26 @@ public class Service {
 
     public Service() throws GeneralSecurityException, IOException {
     }
+    public ArrayList<Cards> findCards() throws IOException {
+        String range = "Держатели!A2:B";
+        ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
+        List<List<Object>> values = response.getValues();
+        ArrayList<Cards> result = new ArrayList<>();
+        if (values == null || values.isEmpty()) {
+            logger.info("No data found.");
+        } else {
+            for (List row : values){
+                String str = row.get(1).toString();
+                if (row.get(1).toString().equals("")){
+                    String card = row.get(0).toString();
+                    Double sum = Double.parseDouble(row.get(1).toString().replace(",", "."));
+                    result.add(new Cards(card, sum));
+                }
+            }
+            return result;
+        }
+        return null;
+    }
 
     public Info findInfo() throws IOException {
         String range = "Сводка!B7:B11";
@@ -39,7 +60,7 @@ public class Service {
         }return null;
     }
 
-    public  ArrayList<Partner> findByPartner(String expend) throws IOException {
+    public  ArrayList<Partner> findDebt(String expend) throws IOException {
         String range = "Участники!A2:M";
         ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
         List<List<Object>> values = response.getValues();
@@ -87,7 +108,7 @@ public class Service {
         }
         return result;
     }
-    public  ArrayList<Partner> findByPartner() throws IOException {
+    public  ArrayList<Partner> findDebt() throws IOException {
         String range = "Участники!A2:M";
         ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
         List<List<Object>> values = response.getValues();

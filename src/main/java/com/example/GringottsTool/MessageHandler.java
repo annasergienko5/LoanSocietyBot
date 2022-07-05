@@ -1,6 +1,7 @@
 package com.example.GringottsTool;
 
 import com.example.GringottsTool.CRUD.Service;
+import com.example.GringottsTool.Enteties.Cards;
 import com.example.GringottsTool.Enteties.Partner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -71,13 +72,18 @@ public class MessageHandler {
         return null;
     }
 
-    private BotApiMethod<?> getCards(String chatId) {
-        return null;
+    private BotApiMethod<?> getCards(String chatId) throws IOException {
+        StringBuffer res = new StringBuffer();
+        ArrayList<Cards> cards = service.findCards();
+        for (Cards card : cards){
+            res.append("\n").append(card.toString());
+        }
+        return new SendMessage(chatId, res.toString());
     }
 
     private BotApiMethod<?> getDebts(String chatId) throws IOException {
         StringBuffer result = new StringBuffer();
-        ArrayList<Partner> debts = service.findByPartner();
+        ArrayList<Partner> debts = service.findDebt();
         if (debts.size() == 0){
             return new SendMessage(chatId, Constants.NO_DEBTS);
         }
@@ -96,7 +102,7 @@ public class MessageHandler {
     }
 
     private BotApiMethod<?> getSearch(String chatId, String expected) throws IOException {
-        ArrayList<Partner> resultList = service.findByPartner(expected);
+        ArrayList<Partner> resultList = service.findDebt(expected);
         SendMessage sendMessage;
         if (resultList.size() == 0){
             return new SendMessage(chatId, Constants.NOT_FOUND_DATA);
