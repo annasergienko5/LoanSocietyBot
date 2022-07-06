@@ -37,7 +37,7 @@ public class Bot extends SpringWebhookBot {
     public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
         if (update.hasMessage()){
             Message message = update.getMessage();
-            if (message != null){
+            if (message.getText() != null){
                 try {
                     return messageHandler.answerMessage(update.getMessage());
                 } catch (GeneralSecurityException e) {

@@ -2,6 +2,7 @@ package com.example.GringottsTool.CRUD;
 
 import com.example.GringottsTool.Constants;
 import com.example.GringottsTool.Enteties.Cards;
+import com.example.GringottsTool.Enteties.Contributions;
 import com.example.GringottsTool.Enteties.Info;
 import com.example.GringottsTool.Enteties.Partner;
 import com.google.api.services.sheets.v4.Sheets;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 @Component
@@ -22,6 +24,31 @@ public class Service {
     Sheets sheets = GoogleSheets.getSheetsService();
 
     public Service() throws GeneralSecurityException, IOException {
+    }
+
+    public Contributions findContribution(String expend) throws IOException {
+        String range = "Взносы!A:AD";
+        ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
+        List<List<Object>> values = response.getValues();
+        ArrayList<Cards> result = new ArrayList<>();
+        if (values == null || values.isEmpty()) {
+            logger.info("No data found.");
+        } else {
+            for (List row : values){
+                String name = row.get(0).toString();
+                if (name.equals(expend)){
+                    HashMap<String, String> pay = new HashMap<>();
+                    String also = row.get(29).toString();
+                    for (int i = 3; i < 29; i++) {
+                        if (!row.get(i).toString().equals("!")){
+                            pay.put(values.get(0).get(i).toString(), row.get(i).toString());
+                        }
+                    }
+                    return new Contributions(name, pay, also);
+                }
+            }
+        }
+        return null;
     }
     public ArrayList<Cards> findCards() throws IOException {
         String range = "Держатели!A2:B";
@@ -32,8 +59,11 @@ public class Service {
             logger.info("No data found.");
         } else {
             for (List row : values){
+                if (row.size() < 2){
+                    continue;
+                }
                 String str = row.get(1).toString();
-                if (row.get(1).toString().equals("")){
+                if (!row.get(1).toString().equals("")){
                     String card = row.get(0).toString();
                     Double sum = Double.parseDouble(row.get(1).toString().replace(",", "."));
                     result.add(new Cards(card, sum));

@@ -12,7 +12,7 @@ public class Cards {
     @Override
     public String toString() {
         StringBuffer res = new StringBuffer();
-        res.append(this.card).append(" ").append(this.sum);
+        res.append(this.card).append(" - ").append(this.sum);
         return res.toString();
     }
 }
