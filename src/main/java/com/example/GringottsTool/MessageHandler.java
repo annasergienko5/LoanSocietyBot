@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
@@ -107,12 +108,18 @@ public class MessageHandler {
             return new SendMessage(chatId, Constants.NO_DEBTS);
         }
         for (Partner partner : debts){
-            result.append("\n")
+            result.append("\nУчастник:\t<strong>")
                     .append(partner.getName())
-                    .append(" занял ").append(partner.getDebt())
-                    .append(" и обещал вернуть до ").append(partner.getReturnDate());
+                    .append("</strong>\nТекущий долг:\t<strong>").append(partner.getDebt())
+                    .append("</strong>₽\n")
+                    .append("Вернуть до:\t<strong>").append(partner.getReturnDate())
+                    .append("</strong>\n");
         }
-        return new SendMessage(chatId, result.toString());
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setText(result.toString());
+        sendMessage.setChatId(chatId);
+        sendMessage.setParseMode(ParseMode.HTML);
+        return sendMessage;
     }
 
     private BotApiMethod<?> getStatus(String chatId) throws IOException {
