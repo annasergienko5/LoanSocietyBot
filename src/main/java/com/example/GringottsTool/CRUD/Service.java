@@ -34,13 +34,13 @@ public class Service {
         if (values == null || values.isEmpty()) {
             logger.info("No data found.");
         } else {
-            for (List row : values){
+            for (List row : values) {
                 String name = row.get(0).toString();
-                if (name.equals(expend)){
+                if (name.equals(expend)) {
                     HashMap<String, String> pay = new HashMap<>();
                     String also = row.get(29).toString();
                     for (int i = 3; i < 29; i++) {
-                        if (!row.get(i).toString().equals("!")){
+                        if (!row.get(i).toString().equals("!")) {
                             pay.put(values.get(0).get(i).toString(), row.get(i).toString());
                         }
                     }
@@ -50,6 +50,7 @@ public class Service {
         }
         return null;
     }
+
     public ArrayList<Cards> findCards() throws IOException {
         String range = "Держатели!A2:B";
         ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
@@ -58,12 +59,12 @@ public class Service {
         if (values == null || values.isEmpty()) {
             logger.info("No data found.");
         } else {
-            for (List row : values){
-                if (row.size() < 2){
+            for (List row : values) {
+                if (row.size() < 2) {
                     continue;
                 }
                 String str = row.get(1).toString();
-                if (!row.get(1).toString().equals("")){
+                if (!row.get(1).toString().equals("")) {
                     String card = row.get(0).toString();
                     Double sum = Double.parseDouble(row.get(1).toString().replace(",", "."));
                     result.add(new Cards(card, sum));
@@ -87,10 +88,11 @@ public class Service {
             String reserve = values.get(3).toString();
             String active = values.get(4).toString();
             return new Info(capital, borrowedMoney, overdue, reserve, active);
-        }return null;
+        }
+        return null;
     }
 
-    public  ArrayList<Partner> findPartner(String expend) throws IOException {
+    public ArrayList<Partner> findPartner(String expend) throws IOException {
         String range = "Участники!A2:M";
         ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
         List<List<Object>> values = response.getValues();
@@ -105,31 +107,31 @@ public class Service {
                     String vk = row.get(2).toString();
                     String city = row.get(3).toString();
                     int contributions = Integer.parseInt(row.get(4).toString());
-                    double sumContributions = Double.parseDouble(row.get(5).toString().replace(",","."));
+                    double sumContributions = Double.parseDouble(row.get(5).toString().replace(",", "."));
                     int loan = 0;
                     int debt = 0;
                     int dosrochka = 0;
                     int prosrochka = 0;
-                    if (row.get(6).toString() != ""){
+                    if (row.get(6).toString() != "") {
                         loan = Integer.parseInt(row.get(6).toString());
                     }
-                    if (row.get(7).toString() != ""){
+                    if (row.get(7).toString() != "") {
                         debt = Integer.parseInt(row.get(7).toString());
                     }
                     String returnDate = row.get(8).toString();
-                    if (!row.get(9).toString().equals("")){
+                    if (!row.get(9).toString().equals("")) {
                         dosrochka = Integer.parseInt(row.get(9).toString());
                     }
-                    if (!row.get(10).toString().equals("")){
+                    if (!row.get(10).toString().equals("")) {
                         prosrochka = Integer.parseInt(row.get(10).toString());
                     }
 
                     boolean elite = false;
                     boolean vznosZaMesac = false;
-                    if (row.get(11).toString().equals("1")){
+                    if (row.get(11).toString().equals("1")) {
                         elite = true;
                     }
-                    if (row.get(12).toString().equals("1")){
+                    if (row.get(12).toString().equals("1")) {
                         vznosZaMesac = true;
                     }
                     result.add(new Partner(name, tgId, vk, city, contributions, sumContributions, loan, debt, returnDate, dosrochka, prosrochka, elite, vznosZaMesac));
@@ -138,7 +140,8 @@ public class Service {
         }
         return result;
     }
-    public  ArrayList<Partner> findDebt() throws IOException {
+
+    public ArrayList<Partner> findDebt() throws IOException {
         String range = "Участники!A2:M";
         ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
         List<List<Object>> values = response.getValues();
@@ -148,15 +151,34 @@ public class Service {
         } else {
             for (List row : values) {
                 int debt = Integer.parseInt(row.get(7).toString());
-                if (debt != 0){
+                if (debt != 0) {
                     String returnDate = row.get(8).toString();
                     String name = row.get(0).toString();
-                    result.add(new Partner(name, debt, returnDate ));
-                    }
+                    result.add(new Partner(name, debt, returnDate));
                 }
             }
-        return result;
         }
+        return result;
+    }
+
+    public ArrayList<Partner> getDuckList() throws IOException {
+        ValueRange resNames = sheets.spreadsheets().values().get(Constants.SHEET_ID, "Участники!A2:L").execute();
+        List<List<Object>> names = resNames.getValues();
+        ArrayList<Partner> partners = new ArrayList<>();
+        if (names == null || names.isEmpty()) {
+            logger.info("No data found.");
+        } else {
+            for (List row : names) {
+                String name = row.get(0).toString();
+                int elite = Integer.parseInt(row.get(11).toString());
+                logger.info("elite" + elite);
+                if (elite == 1) {
+                    partners.add(new Partner(name));
+                }
+            }
+        }
+        return partners;
+    }
 
 
     public StringBuilder readAllFromSheet(String range) throws GeneralSecurityException, IOException {
@@ -173,35 +195,38 @@ public class Service {
         }
         return result;
     }
+
     public void addRowToSheet() throws GeneralSecurityException, IOException {
         ValueRange appendBody = new ValueRange()
-                .setValues(Arrays.asList(Arrays.asList("3","Stepan", "4000")));
+                .setValues(Arrays.asList(Arrays.asList("3", "Stepan", "4000")));
         AppendValuesResponse appendResult = sheets.spreadsheets().values()
-                .append(Constants.SHEET_ID,"Лист1",appendBody )
+                .append(Constants.SHEET_ID, "Лист1", appendBody)
                 .setValueInputOption("USER_ENTERED")
                 .setIncludeValuesInResponse(true)
                 .execute();
         logger.info("Row added.");
     }
+
     public void updateValue() throws GeneralSecurityException, IOException {
         ValueRange body = new ValueRange()
                 .setValues(Arrays.asList(Arrays.asList(500.545)));
         UpdateValuesResponse result = sheets.spreadsheets().values()
-                .update(Constants.SHEET_ID, "C3",body)
+                .update(Constants.SHEET_ID, "C3", body)
                 .setValueInputOption("RAW")
                 .execute();
         logger.info("Value updated.");
     }
+
     public void deleteRow() throws GeneralSecurityException, IOException {
         DeleteDimensionRequest deleteDimensionRequest = new DeleteDimensionRequest()
-                .setRange( new DimensionRange()
+                .setRange(new DimensionRange()
                         .setSheetId(0)
                         .setDimension("Rows")
                         .setStartIndex(10));
         List<Request> requests = new ArrayList<>();
         requests.add(new Request().setDeleteDimension(deleteDimensionRequest));
         BatchUpdateSpreadsheetRequest body = new BatchUpdateSpreadsheetRequest().setRequests(requests);
-        sheets.spreadsheets().batchUpdate(Constants.SHEET_ID,body).execute();
+        sheets.spreadsheets().batchUpdate(Constants.SHEET_ID, body).execute();
         logger.info("Rows deleted.");
     }
 }

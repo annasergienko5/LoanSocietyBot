@@ -31,11 +31,16 @@ public class Partner {
         this.vznosZaMesac = vznosZaMesac;
     }
 
+    public Partner(String name){
+        this.name = name;
+    }
+
     public Partner(String name, int debt, String returnDate) {
         this.name = name;
         this.debt = debt;
         this.returnDate = returnDate;
     }
+
 
     public String getTgId() {
         return tgId;

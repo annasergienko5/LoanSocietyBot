@@ -65,8 +65,21 @@ public class MessageHandler {
         return new SendMessage(chatId, Constants.RULE);
     }
 
-    private BotApiMethod<?> getDucklist(String chatId) {
-        return null;
+    private BotApiMethod<?> getDucklist(String chatId) throws IOException {
+        ArrayList<Partner> elitePartners = service.getDuckList();
+        StringBuffer result = new StringBuffer();
+        if (elitePartners.size() == 0) {
+            return new SendMessage(chatId, Constants.NO_DEBTS);
+        }
+        result.append("Эти уважаемые люди делали взносы последние 3 месяца:\n");
+        for (Partner partner : elitePartners) {
+            result.append("<strong>" + partner.getName() + "</strong>\n");
+        }
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setText(result.toString());
+        sendMessage.setChatId(chatId);
+        sendMessage.setParseMode(ParseMode.HTML);
+        return sendMessage;
     }
 
     private BotApiMethod<?> getAboutMyPayment(String chatId, String tgId) throws IOException {
@@ -110,12 +123,9 @@ public class MessageHandler {
             return new SendMessage(chatId, Constants.NO_DEBTS);
         }
         for (Partner partner : debts) {
-            result.append("\nУчастник:\t<strong>")
-                    .append(partner.getName())
-                    .append("</strong>\nТекущий долг:\t<strong>").append(partner.getDebt())
-                    .append("</strong>₽\n")
-                    .append("Вернуть до:\t<strong>").append(partner.getReturnDate())
-                    .append("</strong>\n");
+            result.append("Участник:\t<strong>" + partner.getName() + "</strong>\n")
+                    .append("Текущий долг:\t<strong>" + partner.getDebt() + "</strong>₽\n")
+                    .append("Вернуть до:\t<strong>" + partner.getReturnDate() + "</strong>\n\n");
         }
         SendMessage sendMessage = new SendMessage();
         sendMessage.setText(result.toString());
