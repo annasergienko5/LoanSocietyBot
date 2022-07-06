@@ -21,7 +21,7 @@ import java.util.ArrayList;
 @Component
 public class MessageHandler {
 
-    Logger log =  LogManager.getLogger();
+    Logger log = LogManager.getLogger();
     @Autowired
     Service service;
 
@@ -32,11 +32,11 @@ public class MessageHandler {
         String[] inputText = message.getText().split(" ", 2);
         log.info(inputText);
 
-        switch (inputText[0]){
+        switch (inputText[0]) {
             case "/start":
                 return getStartMessage(chatId);
             case "/search":
-                if (inputText.length < 2){
+                if (inputText.length < 2) {
                     return new SendMessage(chatId, Constants.NOT_PARAMETERS);
                 }
                 return getSearch(chatId, inputText[1]);
@@ -54,6 +54,8 @@ public class MessageHandler {
                 return getAboutMyPayment(chatId, tgId);
             case "/ducklist":
                 return getDucklist(chatId);
+            case "/proxy":
+                return getProxy(chatId);
             default:
                 return new SendMessage(chatId, Constants.UKNOWN_COMMAND);
         }
@@ -95,7 +97,7 @@ public class MessageHandler {
     private BotApiMethod<?> getCards(String chatId) throws IOException {
         StringBuffer res = new StringBuffer();
         ArrayList<Cards> cards = service.findCards();
-        for (Cards card : cards){
+        for (Cards card : cards) {
             res.append("\n").append(card.toString());
         }
         return new SendMessage(chatId, res.toString());
@@ -104,10 +106,10 @@ public class MessageHandler {
     private BotApiMethod<?> getDebts(String chatId) throws IOException {
         StringBuffer result = new StringBuffer();
         ArrayList<Partner> debts = service.findDebt();
-        if (debts.size() == 0){
+        if (debts.size() == 0) {
             return new SendMessage(chatId, Constants.NO_DEBTS);
         }
-        for (Partner partner : debts){
+        for (Partner partner : debts) {
             result.append("\nУчастник:\t<strong>")
                     .append(partner.getName())
                     .append("</strong>\nТекущий долг:\t<strong>").append(partner.getDebt())
@@ -130,13 +132,13 @@ public class MessageHandler {
     private BotApiMethod<?> getSearch(String chatId, String expected) throws IOException {
         ArrayList<Partner> resultList = service.findPartner(expected);
         SendMessage sendMessage;
-        if (resultList.size() == 0){
+        if (resultList.size() == 0) {
             return new SendMessage(chatId, Constants.NOT_FOUND_DATA);
         }
-        if (resultList.size()>1){
+        if (resultList.size() > 1) {
             StringBuffer res = new StringBuffer();
             res.append(Constants.FIND_MORE_RESULT);
-            for (Partner partner : resultList){
+            for (Partner partner : resultList) {
                 res.append("\n" + partner.getTgId());
             }
             sendMessage = new SendMessage(chatId, res.toString());
@@ -150,5 +152,9 @@ public class MessageHandler {
         SendMessage sendMessage = new SendMessage(chatId, "Привет");
         sendMessage.enableMarkdown(true);
         return sendMessage;
+    }
+
+    private BotApiMethod<?> getProxy(String chatId) {
+        return new SendMessage(chatId, "Наш прокси-сервер:\n" + Constants.PROXY);
     }
 }
