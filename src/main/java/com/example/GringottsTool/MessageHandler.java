@@ -19,7 +19,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 
 @Component
@@ -32,33 +31,51 @@ public class MessageHandler {
     public BotApiMethod<?> answerMessage(Message message) throws GeneralSecurityException, IOException, ParseException {
         String chatId = message.getChatId().toString();
         String tgId = message.getChat().getUserName();
+        Long userId = message.getChat().getId();
         log.info(tgId);
-        String[] inputText = message.getText().split(" ", 2);
-
-        switch (inputText[0]){
-            case "/start":
-                return getStartMessage(chatId);
-            case "/search":
-                if (inputText.length < 2){
-                    return new SendMessage(chatId, Constants.NOT_PARAMETERS);
-                }
-                return getSearch(chatId, inputText[1]);
-            case "/status":
-                return getStatus(chatId);
-            case "/debts":
-                return getDebts(chatId);
-            case "/cards":
-                return getCards(chatId);
-            case "/rules":
-                return getRules(chatId);
-            case "/aboutme":
-                return getAboutme(chatId, tgId);
-            case "/aboutmypayment":
-                return getAboutMyPayment(chatId, tgId);
-            case "/ducklist":
-                return getDucklist(chatId);
-            default:
-                return new SendMessage(chatId, Constants.UKNOWN_COMMAND);
+        log.info(chatId);
+        log.info(userId);
+        if (tgId == null){
+            String[] inputText = message.getText().split("@", 2);
+            switch (inputText[0]){
+                case "/status":
+                    return getStatus(chatId);
+                case "/debts":
+                    return getDebts(chatId);
+                case "/cards":
+                    return getCards(chatId);
+                case "/rules":
+                    return getRules(chatId);
+                default:
+                    return new SendMessage(chatId, Constants.UKNOWN_COMMAND);
+            }
+        }else {
+            String[] inputText = message.getText().split(" ", 2);
+            switch (inputText[0]){
+                case "/start":
+                    return getStartMessage(chatId);
+                case "/search":
+                    if (inputText.length < 2){
+                        return new SendMessage(chatId, Constants.NOT_PARAMETERS);
+                    }
+                    return getSearch(chatId, inputText[1]);
+                case "/status":
+                    return getStatus(chatId);
+                case "/debts":
+                    return getDebts(chatId);
+                case "/cards":
+                    return getCards(chatId);
+                case "/rules":
+                    return getRules(chatId);
+                case "/aboutme":
+                    return getAboutme(chatId, tgId);
+                case "/aboutmypayment":
+                    return getAboutMyPayment(chatId, tgId);
+                case "/ducklist":
+                    return getDucklist(chatId);
+                default:
+                    return new SendMessage(chatId, Constants.UKNOWN_COMMAND);
+            }
         }
     }
 
@@ -103,21 +120,6 @@ public class MessageHandler {
         }
         return new SendMessage(chatId, res.toString());
     }
-
-//    private BotApiMethod<?> getDebts(String chatId) throws IOException {
-//        StringBuffer result = new StringBuffer();
-//        ArrayList<Partner> debts = service.findDebt();
-//        if (debts.size() == 0){
-//            return new SendMessage(chatId, Constants.NO_DEBTS);
-//        }
-//        for (Partner partner : debts){
-//            result.append("\n")
-//                    .append(partner.getName())
-//                    .append(" занял ").append(partner.getDebt())
-//                    .append(" и обещал вернуть до ").append(partner.getReturnDate());
-//        }
-//        return new SendMessage(chatId, result.toString());
-//    }
 
     private BotApiMethod<?> getDebts(String chatId) throws IOException, ParseException {
         StringBuffer result = new StringBuffer();
