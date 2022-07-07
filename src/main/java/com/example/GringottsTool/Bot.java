@@ -8,6 +8,7 @@ import org.telegram.telegrambots.starter.SpringWebhookBot;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.text.ParseException;
 
 public class Bot extends SpringWebhookBot {
     private String botPath;
@@ -40,9 +41,7 @@ public class Bot extends SpringWebhookBot {
             if (message.getText() != null){
                 try {
                     return messageHandler.answerMessage(update.getMessage());
-                } catch (GeneralSecurityException e) {
-                    throw new RuntimeException(e);
-                } catch (IOException e) {
+                } catch (GeneralSecurityException | IOException | ParseException e) {
                     throw new RuntimeException(e);
                 }
             }

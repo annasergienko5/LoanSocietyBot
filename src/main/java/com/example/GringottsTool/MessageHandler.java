@@ -9,12 +9,17 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 @Component
@@ -24,7 +29,7 @@ public class MessageHandler {
     @Autowired
     Service service;
 
-    public BotApiMethod<?> answerMessage(Message message) throws GeneralSecurityException, IOException {
+    public BotApiMethod<?> answerMessage(Message message) throws GeneralSecurityException, IOException, ParseException {
         String chatId = message.getChatId().toString();
         String tgId = message.getChat().getUserName();
         log.info(tgId);
@@ -99,19 +104,43 @@ public class MessageHandler {
         return new SendMessage(chatId, res.toString());
     }
 
-    private BotApiMethod<?> getDebts(String chatId) throws IOException {
+//    private BotApiMethod<?> getDebts(String chatId) throws IOException {
+//        StringBuffer result = new StringBuffer();
+//        ArrayList<Partner> debts = service.findDebt();
+//        if (debts.size() == 0){
+//            return new SendMessage(chatId, Constants.NO_DEBTS);
+//        }
+//        for (Partner partner : debts){
+//            result.append("\n")
+//                    .append(partner.getName())
+//                    .append(" занял ").append(partner.getDebt())
+//                    .append(" и обещал вернуть до ").append(partner.getReturnDate());
+//        }
+//        return new SendMessage(chatId, result.toString());
+//    }
+
+    private BotApiMethod<?> getDebts(String chatId) throws IOException, ParseException {
         StringBuffer result = new StringBuffer();
-        ArrayList<Partner> debts = service.findDebt();
-        if (debts.size() == 0){
+        HashMap<Boolean, List<Partner>> debts = service.findDebt();
+        if (debts.size() == 0) {
             return new SendMessage(chatId, Constants.NO_DEBTS);
         }
-        for (Partner partner : debts){
-            result.append("\n")
-                    .append(partner.getName())
-                    .append(" занял ").append(partner.getDebt())
-                    .append(" и обещал вернуть до ").append(partner.getReturnDate());
+        for (Partner partner : debts.get(true)) {
+            result.append("Участник:\t<strong>" + partner.getName() + "</strong>\n")
+                    .append("Текущий долг:\t<strong>" + partner.getDebt() + "</strong>₽\n")
+                    .append("Вернуть до:\t<strong>" + partner.getReturnDate() + "</strong>")
+                    .append(" - просрочил\n\n");
         }
-        return new SendMessage(chatId, result.toString());
+        for (Partner partner : debts.get(false)) {
+            result.append("Участник:\t<strong>" + partner.getName() + "</strong>\n")
+                    .append("Текущий долг:\t<strong>" + partner.getDebt() + "</strong>₽\n")
+                    .append("Вернуть до:\t<strong>" + partner.getReturnDate() + "</strong>\n\n");
+        }
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setText(result.toString());
+        sendMessage.setChatId(chatId);
+        sendMessage.setParseMode(ParseMode.HTML);
+        return sendMessage;
     }
 
     private BotApiMethod<?> getStatus(String chatId) throws IOException {

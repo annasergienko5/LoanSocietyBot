@@ -13,10 +13,9 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Component
 public class Service {
@@ -150,20 +149,29 @@ public class Service {
         }
         return result;
     }
-    public  ArrayList<Partner> findDebt() throws IOException {
+    public  HashMap<Boolean, List<Partner>> findDebt() throws IOException, ParseException {
         String range = "Участники!A2:M";
         ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
         List<List<Object>> values = response.getValues();
-        ArrayList<Partner> result = new ArrayList<>();
+        HashMap<Boolean, List<Partner>> result = new HashMap<>();
+        result.put(true, new ArrayList<>());
+        result.put(false, new ArrayList<>());
         if (values == null || values.isEmpty()) {
             logger.info("No data found.");
         } else {
+            Date dateNow = new Date();
+            SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
             for (List row : values) {
                 int debt = Integer.parseInt(row.get(7).toString());
                 if (debt != 0){
-                    String returnDate = row.get(8).toString();
+                    boolean isProsrochka;
+                    Date date = dateFormat.parse(row.get(8).toString());
                     String name = row.get(0).toString();
-                    result.add(new Partner(name, debt, returnDate ));
+                    String returnDate = row.get(8).toString();
+                    if (date.getTime() <= dateNow.getTime()){
+                        isProsrochka = true;
+                    }else isProsrochka = false;
+                    result.get(isProsrochka).add(new Partner(name, debt, returnDate ));
                     }
                 }
             }
