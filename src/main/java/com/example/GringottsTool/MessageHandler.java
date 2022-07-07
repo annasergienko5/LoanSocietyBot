@@ -1,6 +1,6 @@
 package com.example.GringottsTool;
 
-import com.example.GringottsTool.CRUD.Service;
+import com.example.GringottsTool.Repository.Repository;
 import com.example.GringottsTool.Enteties.Cards;
 import com.example.GringottsTool.Enteties.Contributions;
 import com.example.GringottsTool.Enteties.Partner;
@@ -27,7 +27,7 @@ public class MessageHandler {
 
     Logger log =  LogManager.getLogger();
     @Autowired
-    Service service;
+    Repository repository;
 
     public BotApiMethod<?> answerMessage(Message message) throws GeneralSecurityException, IOException, ParseException {
         String chatId = message.getChatId().toString();
@@ -86,13 +86,13 @@ public class MessageHandler {
     }
 
     private BotApiMethod<?> getAboutMyPayment(String chatId, String tgId) throws IOException {
-        String expected = service.findPartner(tgId).get(0).getName();
-        Contributions contributions = service.findContribution(expected);
+        String expected = repository.findPartner(tgId).get(0).getName();
+        Contributions contributions = repository.findContribution(expected);
         return new SendMessage(chatId, contributions.toString());
     }
 
     private BotApiMethod<?> getAboutme(String chatId, String tgId) throws IOException {
-        ArrayList<Partner> resultList = service.findPartner(tgId);
+        ArrayList<Partner> resultList = repository.findPartner(tgId);
         SendMessage sendMessage;
         if (resultList.size() == 0) {
             return new SendMessage(chatId, Constants.NOT_FOUND_DATA);
@@ -112,7 +112,7 @@ public class MessageHandler {
 
     private BotApiMethod<?> getCards(String chatId) throws IOException {
         StringBuffer res = new StringBuffer();
-        ArrayList<Cards> cards = service.findCards();
+        ArrayList<Cards> cards = repository.findCards();
         for (Cards card : cards){
             res.append("\n").append(card.toString());
         }
@@ -121,7 +121,7 @@ public class MessageHandler {
 
     private BotApiMethod<?> getDebts(String chatId) throws IOException, ParseException {
         StringBuffer result = new StringBuffer();
-        HashMap<Boolean, List<Partner>> debts = service.findDebt();
+        HashMap<Boolean, List<Partner>> debts = repository.findDebt();
         if (debts.size() == 0) {
             return new SendMessage(chatId, Constants.NO_DEBTS);
         }
@@ -144,12 +144,12 @@ public class MessageHandler {
     }
 
     private BotApiMethod<?> getStatus(String chatId) throws IOException {
-        String result = service.findInfo().toString();
+        String result = repository.findInfo().toString();
         return new SendMessage(chatId, result);
     }
 
     private BotApiMethod<?> getSearch(String chatId, String expected) throws IOException {
-        ArrayList<Partner> resultList = service.findPartner(expected);
+        ArrayList<Partner> resultList = repository.findPartner(expected);
         SendMessage sendMessage;
         if (resultList.size() == 0){
             return new SendMessage(chatId, Constants.NOT_FOUND_DATA);

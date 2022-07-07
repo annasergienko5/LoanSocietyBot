@@ -1,4 +1,4 @@
-package com.example.GringottsTool.CRUD;
+package com.example.GringottsTool.Repository;
 
 import com.example.GringottsTool.Constants;
 import com.example.GringottsTool.Enteties.Cards;
@@ -21,11 +21,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 @Component
-public class Service {
+public class Repository {
     private static final Logger logger = LogManager.getLogger();
     Sheets sheets = GoogleSheets.getSheetsService();
 
-    public Service() throws GeneralSecurityException, IOException {
+    public Repository() throws GeneralSecurityException, IOException {
     }
 
     public Contributions findContribution(String expend) throws IOException {
