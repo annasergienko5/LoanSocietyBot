@@ -19,7 +19,9 @@ import java.util.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+
 @Component
 public class Repository {
     private static final Logger logger = LogManager.getLogger();
@@ -73,7 +75,6 @@ public class Repository {
                 if (row.size() != 0 && !row.get(0).toString().equals("")){
                    lists.get(i).add(row.get(0).toString());
                 }
-
             }
             for (List<String> list : lists){
                 if (list.size() < 6){
@@ -104,7 +105,7 @@ public class Repository {
         }return null;
     }
 
-    public  ArrayList<Partner> findPartner(String expend) throws IOException {
+    public ArrayList<Partner> findPartner(String expend) throws IOException {
         String range = "Участники!A2:M";
         ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
         List<List<Object>> values = response.getValues();
@@ -119,7 +120,7 @@ public class Repository {
                     String vk = row.get(2).toString();
                     String city = row.get(3).toString();
                     int contributions = Integer.parseInt(row.get(4).toString());
-                    double sumContributions = Double.parseDouble(row.get(5).toString().replace(",","."));
+                    double sumContributions = Double.parseDouble(row.get(5).toString().replace(",", "."));
                     int loan = 0;
                     int debt = 0;
                     int dosrochka = 0;
@@ -180,6 +181,25 @@ public class Repository {
             }
         return result;
         }
+
+    public ArrayList<Partner> getDuckList() throws IOException {
+        ValueRange resNames = sheets.spreadsheets().values().get(Constants.SHEET_ID, "Участники!A2:L").execute();
+        List<List<Object>> names = resNames.getValues();
+        ArrayList<Partner> partners = new ArrayList<>();
+        if (names == null || names.isEmpty()) {
+            logger.info("No data found.");
+        } else {
+            for (List row : names) {
+                String name = row.get(0).toString();
+                int elite = Integer.parseInt(row.get(11).toString());
+                logger.info("elite" + elite);
+                if (elite == 1) {
+                    partners.add(new Partner(name));
+                }
+            }
+        }
+        return partners;
+    }
 
 
     public StringBuilder readAllFromSheet(String range) throws GeneralSecurityException, IOException {
