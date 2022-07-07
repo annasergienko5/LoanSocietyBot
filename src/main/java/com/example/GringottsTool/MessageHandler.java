@@ -31,10 +31,7 @@ public class MessageHandler {
     public BotApiMethod<?> answerMessage(Message message) throws GeneralSecurityException, IOException, ParseException {
         String chatId = message.getChatId().toString();
         String tgId = message.getChat().getUserName();
-        Long userId = message.getChat().getId();
         log.info(tgId);
-        log.info(chatId);
-        log.info(userId);
         if (tgId == null){
             String[] inputText = message.getText().split("@", 2);
             switch (inputText[0]){
