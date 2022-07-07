@@ -1,20 +1,25 @@
 package com.example.GringottsTool;
 
-import com.example.GringottsTool.CRUD.Service;
 import com.example.GringottsTool.Enteties.Cards;
 import com.example.GringottsTool.Enteties.Contributions;
 import com.example.GringottsTool.Enteties.Partner;
+import com.example.GringottsTool.Repository.Repository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 
 @Component
@@ -26,11 +31,11 @@ public class MessageHandler {
 
     @Scheduled(cron = "1 * * * * ?") //replace value in brackets (cron = "0 0 10 1 * ?")
     // to execute in 10:00 at first day every month host`s timezone
-    public  BotApiMethod<?> sheduledMessages() throws IOException {
+    public  BotApiMethod<?> sheduledMessages() throws IOException, ParseException {
         return getDebts(Constants.PUBLIC_CHAT_ID);
     }
 
-    public BotApiMethod<?> answerMessage(Message message) throws GeneralSecurityException, IOException {
+    public BotApiMethod<?> answerMessage(Message message) throws GeneralSecurityException, IOException, ParseException {
         String chatId = message.getChatId().toString();
         String tgId = message.getChat().getUserName();
         log.info(tgId);
@@ -85,7 +90,7 @@ public class MessageHandler {
     }
 
     private BotApiMethod<?> getDucklist(String chatId) throws IOException {
-        ArrayList<Partner> elitePartners = service.getDuckList();
+        ArrayList<Partner> elitePartners = repository.getDuckList();
         StringBuffer result = new StringBuffer();
         if (elitePartners.size() == 0) {
             return new SendMessage(chatId, Constants.NO_DEBTS);
