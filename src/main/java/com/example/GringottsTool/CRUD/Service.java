@@ -58,20 +58,32 @@ public class Service {
         if (values == null || values.isEmpty()) {
             logger.info("No data found.");
         } else {
+            List<List<String>> lists = new ArrayList<>();
+            int i = -1;
             for (List row : values){
-                if (row.size() < 2){
+                if (row.size() > 1 && !row.get(1).toString().equals("")) {
+                    i++;
+                    lists.add(new ArrayList<>());
+                    lists.get(i).add(row.get(0).toString());
+                    lists.get(i).add(row.get(1).toString());
                     continue;
                 }
-                String str = row.get(1).toString();
-                if (!row.get(1).toString().equals("")){
-                    String card = row.get(0).toString();
-                    Double sum = Double.parseDouble(row.get(1).toString().replace(",", "."));
-                    result.add(new Cards(card, sum));
+                if (row.size() != 0 && !row.get(0).toString().equals("")){
+                   lists.get(i).add(row.get(0).toString());
                 }
+
             }
-            return result;
+            for (List<String> list : lists){
+                if (list.size() < 6){
+                    list.add(null);
+                }
+                if (list.size() < 7){
+                    list.add(null);
+                }
+                result.add(new Cards(list.get(0), Double.parseDouble(list.get(1).replace(",", ".")), list.get(2), list.get(3), list.get(4), list.get(5), list.get(6)));
+            }
         }
-        return null;
+        return result;
     }
 
     public Info findInfo() throws IOException {

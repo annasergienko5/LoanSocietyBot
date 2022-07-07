@@ -34,5 +34,6 @@
 * APPLICATION_NAME - имя приложения (пример: Google Sheet Service)
 * CREDENTIALS_FILE_PATH - путь к файлу json для подключения к google api (файл должен лежать в resource)
 * SHEET_ID - id таблички из url 
+* RULE - ссылка на правила
 (пример: https://docs.google.com/spreadsheets/d/1234abcd/edit#gid=1825291932
   1234abcd - это id)

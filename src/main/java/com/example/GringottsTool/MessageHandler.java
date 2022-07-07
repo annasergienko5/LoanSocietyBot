@@ -29,7 +29,6 @@ public class MessageHandler {
         String tgId = message.getChat().getUserName();
         log.info(tgId);
         String[] inputText = message.getText().split(" ", 2);
-        log.info(inputText);
 
         switch (inputText[0]){
             case "/start":

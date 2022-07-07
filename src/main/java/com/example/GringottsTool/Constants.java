@@ -7,10 +7,11 @@ public interface Constants {
     String APPLICATION_NAME=System.getenv("APPLICATION_NAME");
     String CREDENTIALS_FILE_PATH=System.getenv("CREDENTIALS_FILE_PATH");
     String SHEET_ID=System.getenv("SHEET_ID");
+    String RULE = System.getenv("RULE");
     String FIND_MORE_RESULT = "Много таких, уточни:";
     String UKNOWN_COMMAND = "Не выдумывай, нет таких команд";
     String NOT_FOUND_DATA = "Данные не найдены";
     String NOT_PARAMETERS = "Нет параметров поиска. Укажи через пробел после /search";
     String NO_DEBTS = "Должников нет";
-    String RULE = "https://docs.google.com/document/d/1u_evBnYo7TzMIhOuwN9YZzKkYu0uPQPft0OxtZapp-Y/edit";
+
 }
