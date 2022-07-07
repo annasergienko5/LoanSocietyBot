@@ -7,6 +7,7 @@ import com.example.GringottsTool.Enteties.Partner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
@@ -25,8 +26,15 @@ public class MessageHandler {
     @Autowired
     Service service;
 
+    @Scheduled(cron = "1 * * * * ?") //replace value in brackets (cron = "0 0 10 1 * ?")
+    // to execute in 10:00 at first day every month host`s timezone
+    public  BotApiMethod<?> sheduledMessages() throws IOException {
+        return getDebts(Constants.PUBLIC_CHAT_ID);
+    }
+
     public BotApiMethod<?> answerMessage(Message message) throws GeneralSecurityException, IOException {
         String chatId = message.getChatId().toString();
+        log.info(chatId);
         String tgId = message.getChat().getUserName();
         log.info(tgId);
         String[] inputText = message.getText().split(" ", 2);
@@ -71,7 +79,7 @@ public class MessageHandler {
         if (elitePartners.size() == 0) {
             return new SendMessage(chatId, Constants.NO_DEBTS);
         }
-        result.append("Эти уважаемые люди делали взносы последние 3 месяца:\n");
+        result.append("Уважаемые люди, которые делали взносы за последние 3 месяца:\n");
         for (Partner partner : elitePartners) {
             result.append("<strong>" + partner.getName() + "</strong>\n");
         }
@@ -122,6 +130,7 @@ public class MessageHandler {
         if (debts.size() == 0) {
             return new SendMessage(chatId, Constants.NO_DEBTS);
         }
+        result.append("<strong>Список должников:</strong> \n\n");
         for (Partner partner : debts) {
             result.append("Участник:\t<strong>" + partner.getName() + "</strong>\n")
                     .append("Текущий долг:\t<strong>" + partner.getDebt() + "</strong>₽\n")
