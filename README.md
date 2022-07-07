@@ -24,11 +24,6 @@
 
 Регистрируйте вебхук в Telegram, формируя в строке браузера запрос вида:
 
-https://api.telegram.org/bot<токен бота>/setWebhook?url=<URL, полученный от ngrok>
-… видим ответ:
-
-{"ok":true,"result":true,"description":"Webhook was set"}
-
 … и запускаем приложение в своей IDE!
 
 Переменные окружения при запуске:
@@ -38,6 +33,6 @@ https://api.telegram.org/bot<токен бота>/setWebhook?url=<URL, полу�
 * PORT - порт, который вы задали при запуске ngrok
 * APPLICATION_NAME - имя приложения (пример: Google Sheet Service)
 * CREDENTIALS_FILE_PATH - путь к файлу json для подключения к google api (файл должен лежать в resource)
-* SHEET_ID - id таблички из url 
-(пример: https://docs.google.com/spreadsheets/d/1234abcd/edit#gid=1825291932
-  1234abcd - это id)
+* SHEET_ID - id таблички из url (пример: https://docs.google.com/spreadsheets/d/1234abcd/edit#gid=1825291932 "1234abcd" - это id)
+* RULE - ссылка на правила
+
