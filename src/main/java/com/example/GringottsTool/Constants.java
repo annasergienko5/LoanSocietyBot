@@ -15,4 +15,5 @@ public interface Constants {
     String RULE = System.getenv("RULE");
     String PROXY=System.getenv("PROXY");
     String PUBLIC_CHAT_ID = System.getenv("PUBLIC_CHAT_ID");
+    String DEBT_REMINDER_TIME = System.getenv("DEBT_REMINDER_TIME");
 }
