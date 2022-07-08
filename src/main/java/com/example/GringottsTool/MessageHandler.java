@@ -7,7 +7,6 @@ import com.example.GringottsTool.Repository.Repository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
@@ -25,23 +24,17 @@ import java.util.List;
 @Component
 public class MessageHandler {
 
-    Logger log =  LogManager.getLogger();
+    Logger log = LogManager.getLogger();
     @Autowired
     Repository repository;
-
-    @Scheduled(cron = "1 * * * * ?") //replace value in brackets (cron = "0 0 10 1 * ?")
-    // to execute in 10:00 at first day every month host`s timezone
-    public  BotApiMethod<?> sheduledMessages() throws IOException, ParseException {
-        return getDebts(Constants.PUBLIC_CHAT_ID);
-    }
 
     public BotApiMethod<?> answerMessage(Message message) throws GeneralSecurityException, IOException, ParseException {
         String chatId = message.getChatId().toString();
         String tgId = message.getChat().getUserName();
         log.info(tgId);
-        if (tgId == null){
+        if (tgId == null) {
             String[] inputText = message.getText().split("@", 2);
-            switch (inputText[0]){
+            switch (inputText[0]) {
                 case "/status":
                     return getStatus(chatId);
                 case "/debts":
@@ -53,13 +46,13 @@ public class MessageHandler {
                 default:
                     return new SendMessage(chatId, Constants.UKNOWN_COMMAND);
             }
-        }else {
+        } else {
             String[] inputText = message.getText().split(" ", 2);
-            switch (inputText[0]){
+            switch (inputText[0]) {
                 case "/start":
                     return getStartMessage(chatId);
                 case "/search":
-                    if (inputText.length < 2){
+                    if (inputText.length < 2) {
                         return new SendMessage(chatId, Constants.NOT_PARAMETERS);
                     }
                     return getSearch(chatId, inputText[1]);
@@ -140,12 +133,13 @@ public class MessageHandler {
         return new SendMessage(chatId, res.toString());
     }
 
-    private BotApiMethod<?> getDebts(String chatId) throws IOException, ParseException {
+    public BotApiMethod<?> getDebts(String chatId) throws IOException, ParseException {
         StringBuffer result = new StringBuffer();
         HashMap<Boolean, List<Partner>> debts = repository.findDebt();
         if (debts.size() == 0) {
             return new SendMessage(chatId, Constants.NO_DEBTS);
         }
+        result.append("<strong>Список должников:</strong> \n\n");
         for (Partner partner : debts.get(true)) {
             result.append("Участник:\t<strong>" + partner.getName() + "</strong>\n")
                     .append("Текущий долг:\t<strong>" + partner.getDebt() + "</strong>₽\n")
@@ -172,13 +166,13 @@ public class MessageHandler {
     private BotApiMethod<?> getSearch(String chatId, String expected) throws IOException {
         ArrayList<Partner> resultList = repository.findPartner(expected);
         SendMessage sendMessage;
-        if (resultList.size() == 0){
+        if (resultList.size() == 0) {
             return new SendMessage(chatId, Constants.NOT_FOUND_DATA);
         }
-        if (resultList.size()>1){
+        if (resultList.size() > 1) {
             StringBuffer res = new StringBuffer();
             res.append(Constants.FIND_MORE_RESULT);
-            for (Partner partner : resultList){
+            for (Partner partner : resultList) {
                 res.append("\n" + partner.getTgId());
             }
             sendMessage = new SendMessage(chatId, res.toString());
