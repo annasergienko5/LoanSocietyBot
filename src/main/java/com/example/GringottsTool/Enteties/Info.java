@@ -18,7 +18,7 @@ public class Info {
     @Override
     public String toString() {
         StringBuffer result = new StringBuffer();
-        result.append("\nКапитал " + this.capital);
+        result.append("\nКапитал " + this.capital.replace("[]", ""));
         result.append("\nЗанято " + this.borrowedMoney);
         result.append("\nПросрочено " + this.overdue);
         result.append("\nЗапас " + this.reserve);

@@ -34,7 +34,6 @@ public class Repository {
         String range = "Взносы!A:AD";
         ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
         List<List<Object>> values = response.getValues();
-        ArrayList<Cards> result = new ArrayList<>();
         if (values == null || values.isEmpty()) {
             logger.info("No data found.");
         } else {
