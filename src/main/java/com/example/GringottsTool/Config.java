@@ -1,5 +1,6 @@
 package com.example.GringottsTool;
 
+import com.example.GringottsTool.Exeptions.EnvironmentNullExeption;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Bean;
@@ -16,6 +17,43 @@ import java.net.URL;
 public class Config {
 
     Logger log =  LogManager.getLogger();
+
+    @Bean
+    public void checkENV() throws EnvironmentNullExeption {
+        String BOT_TOKEN=System.getenv("TOKEN_BOT");
+        String BOT_USERNAME=System.getenv("BOT_USERNAME");
+        String WEBHOOK_PATH=System.getenv("WEBHOOK_PATH");
+        String APPLICATION_NAME=System.getenv("APPLICATION_NAME");
+        String CREDENTIALS_FILE_PATH=System.getenv("CREDENTIALS_FILE_PATH");
+        String SHEET_ID=System.getenv("SHEET_ID");
+        String RULE = System.getenv("RULE");
+        String PROXY=System.getenv("PROXY");
+
+        if (Constants.BOT_TOKEN == null){
+            throw new EnvironmentNullExeption("BOT_TOKEN = null");
+        }
+        if (Constants.BOT_USERNAME == null){
+            throw new EnvironmentNullExeption("BOT_USERNAME = null");
+        }
+        if (Constants.WEBHOOK_PATH == null){
+            throw new EnvironmentNullExeption("WEBHOOK_PATH = null");
+        }
+        if (Constants.APPLICATION_NAME == null){
+            throw new EnvironmentNullExeption("APPLICATION_NAME = null");
+        }
+        if (Constants.CREDENTIALS_FILE_PATH == null){
+            throw new EnvironmentNullExeption("CREDENTIALS_FILE_PATH = null");
+        }
+        if (Constants.SHEET_ID == null){
+            throw new EnvironmentNullExeption("SHEET_ID = null");
+        }
+        if (Constants.RULE == null){
+            throw new EnvironmentNullExeption("RULE = null");
+        }
+        if (Constants.PROXY == null){
+            throw new EnvironmentNullExeption("PROXY = null");
+        }
+    }
 
     @Bean
     public  void registerTgBot() throws IOException {
