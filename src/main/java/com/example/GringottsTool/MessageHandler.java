@@ -32,6 +32,7 @@ public class MessageHandler {
         String chatId = message.getChatId().toString();
         String tgId = message.getChat().getUserName();
         log.info(tgId);
+        log.info(chatId);
         if (tgId == null) {
             String[] inputText = message.getText().split("@", 2);
             switch (inputText[0]) {

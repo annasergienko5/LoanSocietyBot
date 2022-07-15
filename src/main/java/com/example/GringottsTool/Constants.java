@@ -14,6 +14,12 @@ public interface Constants {
     String NO_DEBTS = "Должников нет";
     String RULE = System.getenv("RULE");
     String PROXY=System.getenv("PROXY");
+    String SCHEDULED_NO_DEBTS = System.getenv("SCHEDULED_NO_DEBTS");
     String PUBLIC_CHAT_ID = System.getenv("PUBLIC_CHAT_ID");
+
+    String ADMIN_CHAT_ID = System.getenv("ADMIN_CHAT_ID");
+    String CRON_TIMEZONE = System.getenv("CRON_TIMEZONE");
     String DEBT_REMINDER_TIME = System.getenv("DEBT_REMINDER_TIME");
+    String TODAY_PAYERS_REMINDER_TIME = System.getenv("TODAY_PAYERS_REMINDER_TIME");
+    String SCHEDULED_NO_TODAY_PAYS = System.getenv("SCHEDULED_NO_TODAY_PAYS");
 }
