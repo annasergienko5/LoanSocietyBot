@@ -28,6 +28,13 @@ public class Config {
         String SHEET_ID=System.getenv("SHEET_ID");
         String RULE = System.getenv("RULE");
         String PROXY=System.getenv("PROXY");
+        String SCHEDULED_NO_DEBTS = System.getenv("SCHEDULED_NO_DEBTS");
+        String PUBLIC_CHAT_ID = System.getenv("PUBLIC_CHAT_ID");
+        String ADMIN_CHAT_ID = System.getenv("ADMIN_CHAT_ID");
+        String CRON_TIMEZONE = System.getenv("CRON_TIMEZONE");
+        String DEBT_REMINDER_TIME = System.getenv("DEBT_REMINDER_TIME");
+        String TODAY_PAYERS_REMINDER_TIME = System.getenv("TODAY_PAYERS_REMINDER_TIME");
+        String SCHEDULED_NO_TODAY_PAYS = System.getenv("SCHEDULED_NO_TODAY_PAYS");
 
         if (Constants.BOT_TOKEN == null){
             throw new EnvironmentNullExeption("BOT_TOKEN = null");
@@ -53,6 +60,28 @@ public class Config {
         if (Constants.PROXY == null){
             throw new EnvironmentNullExeption("PROXY = null");
         }
+        if (Constants.SCHEDULED_NO_DEBTS == null){
+            throw new EnvironmentNullExeption("SCHEDULED_NO_DEBTS = null");
+        }
+        if (Constants.PUBLIC_CHAT_ID == null){
+            throw new EnvironmentNullExeption("PUBLIC_CHAT_ID = null");
+        }
+        if (Constants.ADMIN_CHAT_ID == null){
+            throw new EnvironmentNullExeption("ADMIN_CHAT_ID = null");
+        }
+        if (Constants.CRON_TIMEZONE == null){
+            throw new EnvironmentNullExeption("CRON_TIMEZONE = null");
+        }
+        if (Constants.DEBT_REMINDER_TIME == null){
+            throw new EnvironmentNullExeption("DEBT_REMINDER_TIME = null");
+        }
+        if (Constants.TODAY_PAYERS_REMINDER_TIME == null){
+            throw new EnvironmentNullExeption("CRON_TIMEZONE = null");
+        }
+        if (Constants.SCHEDULED_NO_TODAY_PAYS == null){
+            throw new EnvironmentNullExeption("SCHEDULED_NO_TODAY_PAYS = null");
+        }
+
     }
 
     @Bean

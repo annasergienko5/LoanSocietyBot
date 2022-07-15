@@ -3,6 +3,8 @@ package com.example.GringottsTool;
 
 import com.example.GringottsTool.Enteties.Partner;
 import com.example.GringottsTool.Repository.Repository;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
@@ -17,14 +19,46 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.text.ParseException;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Bot extends SpringWebhookBot {
+    private final MessageHandler messageHandler;
+    Logger log = LogManager.getLogger();
     private String botPath;
     private String botUserName;
     private String botToken;
+    private final String CRON_DEBT_SCHEDULE = "${cron.expression.debt}";
+    private final String CRON_TODAY_PAYERS = "${cron.expression.todayPayers}";
+    private final String CRON_ZONE = "${cron.expression.zone}";
 
-    private final MessageHandler messageHandler;
+    private final String ABOUT_DEBTS_MESSAGE = """
+                    <strong>Список участников с просроченной задолженностью:</strong>
+                                        
+                    %s
+                    <strong>Список участников с задолженностью:</strong>
+                                        
+                    %s
+                    """;
+    private final String TODAY_DEBTS_MESSAGE ="""
+                    <strong>Сегодня ожидаем погашения задолженности следующих Участников:</strong>
+                                        
+                    %s
+                                        
+                    """;
+    private final String ARREARS_DEBTS = """
+                    Участник:\t<strong>%s</strong>
+                    Текущий долг:\t<strong>%s</strong>₽
+                    Вернуть до:\t<strong>%s</strong>
+                    <strong>ВНИМАНИЕ:\tПРОСРОЧКА</strong>
+
+                    """;
+    private final String SIMPLE_DEBTS = """
+                    Участник:\t<strong>%s</strong>
+                    Текущий долг:\t<strong>%s</strong>₽
+                    Вернуть до:\t<strong>%s</strong>
+
+                    """;
 
 
     public Bot(SetWebhook setWebhook, MessageHandler messageHandler) {
@@ -75,40 +109,77 @@ public class Bot extends SpringWebhookBot {
         this.botUserName = botUserName;
     }
 
-    @Scheduled(cron = "${my.cron.expression}")
+    @Scheduled(cron = CRON_DEBT_SCHEDULE, zone = CRON_ZONE)
     public void reportAboutDebts() {
+        log.info("Отправляется запрос о должниках в таблицу.");
+        HashMap<Boolean, List<Partner>> debts = getResponseAboutDebts();
+        String text;
+        if (debts.size() != 0) {
+            text = String.format(ABOUT_DEBTS_MESSAGE, getStringAboutArrearsDebts(debts), getStringAboutSimpleDebts(debts));
+        } else {
+            text = Constants.SCHEDULED_NO_DEBTS;
+        }
+        executeMessage(text, Constants.PUBLIC_CHAT_ID);
+        executeMessage(text, Constants.ADMIN_CHAT_ID);
+    }
+
+    @Scheduled(cron = CRON_TODAY_PAYERS, zone = CRON_ZONE)
+    public void reportAboutTodayDebts() throws GeneralSecurityException, IOException {
+        log.info("Отправляется запрос о Сегодняшних должниках в таблицу.");
+        LinkedList<Partner> persons = new Repository().getTodayPayPersons();
+        String text;
+        if (persons.size() != 0) {
+            text = String.format(TODAY_DEBTS_MESSAGE, getStringAboutTodayDebts(persons));
+        } else {
+            text = Constants.SCHEDULED_NO_TODAY_PAYS;
+        }
+        executeMessage(text, Constants.PUBLIC_CHAT_ID);
+        executeMessage(text, Constants.ADMIN_CHAT_ID);
+    }
+
+    private HashMap<Boolean, List<Partner>> getResponseAboutDebts() {
         HashMap<Boolean, List<Partner>> debts = null;
-        String chatId = Constants.PUBLIC_CHAT_ID;
-        StringBuilder result = new StringBuilder();
         try {
             debts = new Repository().findDebt();
         } catch (IOException | GeneralSecurityException | ParseException e) {
             e.printStackTrace();
         }
-        if (debts.size() == 0) {
-            try {
-                execute(new SendMessage(chatId, Constants.NO_DEBTS));
-            } catch (TelegramApiException e) {
-                e.printStackTrace();
-            }
-        }
-        result.append("<strong>Список должников:</strong> \n\n");
+        return debts;
+    }
+
+    private String getStringAboutArrearsDebts(HashMap<Boolean, List<Partner>> debts) {
+        StringBuilder result = new StringBuilder();
         for (Partner partner : debts.get(true)) {
-            result.append("Участник:\t<strong>" + partner.getName() + "</strong>\n")
-                    .append("Текущий долг:\t<strong>" + partner.getDebt() + "</strong>₽\n")
-                    .append("Вернуть до:\t<strong>" + partner.getReturnDate() + "</strong>")
-                    .append(" - просрочил\n\n");
+            String text = String.format(ARREARS_DEBTS, partner.getName(), partner.getDebt(), partner.getReturnDate());
+            result.append(text);
         }
+        return result.toString();
+    }
+
+    private String getStringAboutSimpleDebts(HashMap<Boolean, List<Partner>> debts) {
+        StringBuilder result = new StringBuilder();
         for (Partner partner : debts.get(false)) {
-            result.append("Участник:\t<strong>" + partner.getName() + "</strong>\n")
-                    .append("Текущий долг:\t<strong>" + partner.getDebt() + "</strong>₽\n")
-                    .append("Вернуть до:\t<strong>" + partner.getReturnDate() + "</strong>\n\n");
+            String text = String.format(SIMPLE_DEBTS, partner.getName(), partner.getDebt(), partner.getReturnDate());
+            result.append(text);
         }
+        return result.toString();
+    }
+
+    private String getStringAboutTodayDebts(LinkedList<Partner> debts) {
+        StringBuilder result = new StringBuilder();
+        for (Partner partner : debts) {
+            String text = String.format(SIMPLE_DEBTS, partner.getName(), partner.getDebt(), partner.getReturnDate());
+            result.append(text);
+        }
+        return result.toString();
+    }
+
+    private void executeMessage(String text, String chatID) {
         try {
             SendMessage message = new SendMessage();
-            message.setChatId(Constants.PUBLIC_CHAT_ID);
+            message.setChatId(chatID);
             message.setParseMode(ParseMode.HTML);
-            message.setText(result.toString());
+            message.setText(text);
             execute(message);
         } catch (TelegramApiException e) {
             e.printStackTrace();
