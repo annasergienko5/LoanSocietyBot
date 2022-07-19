@@ -2,6 +2,7 @@ package com.example.GringottsTool;
 
 
 import com.example.GringottsTool.Enteties.Partner;
+import com.example.GringottsTool.Exeptions.NoDataFound;
 import com.example.GringottsTool.Repository.Repository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -88,7 +89,7 @@ public class Bot extends SpringWebhookBot {
             if (message.getText() != null) {
                 try {
                     return messageHandler.answerMessage(update.getMessage());
-                } catch (GeneralSecurityException | IOException | ParseException e) {
+                } catch (GeneralSecurityException | IOException | ParseException | NoDataFound e) {
                     throw new RuntimeException(e);
                 }
             }
@@ -112,7 +113,7 @@ public class Bot extends SpringWebhookBot {
     @Scheduled(cron = CRON_DEBT_SCHEDULE, zone = CRON_ZONE)
     public void reportAboutDebts() {
         log.info("Отправляется запрос о должниках в таблицу.");
-        HashMap<Boolean, List<Partner>> debts = getResponseAboutDebts();
+        List<List<Partner>> debts = getResponseAboutDebts();
         String text;
         if (debts.size() != 0) {
             text = String.format(ABOUT_DEBTS_MESSAGE, getStringAboutArrearsDebts(debts), getStringAboutSimpleDebts(debts));
@@ -124,7 +125,7 @@ public class Bot extends SpringWebhookBot {
     }
 
     @Scheduled(cron = CRON_TODAY_PAYERS, zone = CRON_ZONE)
-    public void reportAboutTodayDebts() throws GeneralSecurityException, IOException {
+    public void reportAboutTodayDebts() throws GeneralSecurityException, IOException, NoDataFound {
         log.info("Отправляется запрос о Сегодняшних должниках в таблицу.");
         LinkedList<Partner> persons = new Repository().getTodayPayPersons();
         String text;
@@ -137,28 +138,30 @@ public class Bot extends SpringWebhookBot {
         executeMessage(text, Constants.ADMIN_CHAT_ID);
     }
 
-    private HashMap<Boolean, List<Partner>> getResponseAboutDebts() {
-        HashMap<Boolean, List<Partner>> debts = null;
+    private List<List<Partner>> getResponseAboutDebts() {
+        List<List<Partner>> debts = null;
+        String chatId = Constants.PUBLIC_CHAT_ID;
+        StringBuilder result = new StringBuilder();
         try {
             debts = new Repository().findDebt();
-        } catch (IOException | GeneralSecurityException | ParseException e) {
+        } catch (IOException | GeneralSecurityException | ParseException | NoDataFound e) {
             e.printStackTrace();
         }
         return debts;
     }
 
-    private String getStringAboutArrearsDebts(HashMap<Boolean, List<Partner>> debts) {
+    private String getStringAboutArrearsDebts(List<List<Partner>> debts) {
         StringBuilder result = new StringBuilder();
-        for (Partner partner : debts.get(true)) {
+        for (Partner partner : debts.get(0)) {
             String text = String.format(ARREARS_DEBTS, partner.getName(), partner.getDebt(), partner.getReturnDate());
             result.append(text);
         }
         return result.toString();
     }
 
-    private String getStringAboutSimpleDebts(HashMap<Boolean, List<Partner>> debts) {
+    private String getStringAboutSimpleDebts(List<List<Partner>> debts) {
         StringBuilder result = new StringBuilder();
-        for (Partner partner : debts.get(false)) {
+        for (Partner partner : debts.get(1)) {
             String text = String.format(SIMPLE_DEBTS, partner.getName(), partner.getDebt(), partner.getReturnDate());
             result.append(text);
         }

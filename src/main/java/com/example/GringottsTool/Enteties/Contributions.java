@@ -1,14 +1,13 @@
 package com.example.GringottsTool.Enteties;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
 
 public class Contributions {
     String name;
-    HashMap<String, String> pays;
+    ArrayList<Contribution> pays;
     String also;
 
-    public Contributions(String name, HashMap<String, String> pay, String also) {
+    public Contributions(String name, ArrayList<Contribution> pay, String also) {
         this.name = name;
         this.pays = pay;
         this.also = also;
@@ -18,10 +17,36 @@ public class Contributions {
     public String toString() {
         StringBuffer res = new StringBuffer();
         res.append("Статистика по платежам");
-        for (Map.Entry<String,String> pay : pays.entrySet()){
-            res.append("\n").append(pay.getKey()).append(" - ").append(pay.getValue()).append(" рублей");
+        for (Contribution pay : pays){
+            res.append(pay.toString());
         }
-        res.append("\nРанее - ").append(also).append(" рублей");
+        if (also.equals("не было")){
+            res.append("\nРанее - ").append(also);
+        }else res.append("\nРанее - ").append(also).append(" рублей");
         return res.toString();
+    }
+
+    public static class Contribution{
+        private String date;
+        private String sum;
+
+        public Contribution(String date, String sum) {
+            this.date = date;
+            this.sum = sum;
+        }
+
+        public String getDate() {
+            return date;
+        }
+
+        public String getSum() {
+            return sum;
+        }
+
+        @Override
+        public String toString() {
+            String result = String.format("\n%s - %s рублей", this.date, this.sum);
+            return result;
+        }
     }
 }
