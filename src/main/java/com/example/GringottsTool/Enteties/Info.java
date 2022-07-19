@@ -14,15 +14,14 @@ public class Info {
         this.reserve = reserve;
         this.active = active;
     }
-
     @Override
     public String toString() {
-        StringBuffer result = new StringBuffer();
-        result.append("\nКапитал " + this.capital.replace("[]", ""));
-        result.append("\nЗанято " + this.borrowedMoney);
-        result.append("\nПросрочено " + this.overdue);
-        result.append("\nЗапас " + this.reserve);
-        result.append("\nАктив " + this.active);
-        return result.toString();
+        String result = String.format("\n`%-12s%12s\n%-12s%12s\n%-12s%12s\n%-12s%12s\n%-12s%12s`",
+                "Капитал", this.capital,
+                "Занято", this.borrowedMoney,
+                "Просрочено", this.overdue,
+                "Запас", this.reserve,
+                "Актив", this.active);
+        return result;
     }
 }

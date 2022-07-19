@@ -50,8 +50,9 @@ public class Partner {
         return name;
     }
 
-    public int getDebt() {
-        return debt;
+    public String getDebt() {
+        String result = String.format("%,d", debt).replace(",", " ");
+        return result;
     }
 
     public String getReturnDate() {
@@ -64,10 +65,10 @@ public class Partner {
         sb.append(this.name);
         sb.append("\nВсего взносов: " + this.contributions);
         sb.append("\nНа сумму: " + this.sumContributions);
-        sb.append("\nx5: " + this.sumContributions * 5);
+        sb.append("\nМаксимальная сумма займа: " + (this.sumContributions * (5 - this.prosrochka * 0.5)));
         sb.append("\nx0.6: " + (this.sumContributions * 0.6));
         sb.append("\nВсего займов: " + this.loan);
-        if (this.returnDate != null) {
+        if (this.returnDate != null && !this.returnDate.equals("")) {
             sb.append("\nСейчас должен: " + this.debt);
             sb.append("\nДата возврата: " + this.returnDate);
         }
