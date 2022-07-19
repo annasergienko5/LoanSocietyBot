@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Default ignored files
 /shelf/
 .idea
@@ -7,7 +6,6 @@ target
 devGringottsTool_bot
 devGringottsTool_bot.wal.0
 src/main/resources/token/client_secret_266641561922_5llknmfdn3oam08tgf3vbjunjg87t8qk_apps.json
-=======
 *.iws
 *.iml
 *.ipr
@@ -15,4 +13,3 @@ logs
 Auth.env
 src/main/resources/token
 tokens
->>>>>>> GT_GoogleSheetService
