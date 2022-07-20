@@ -24,24 +24,23 @@ import java.util.*;
 @Component
 public class Repository {
     private static final Logger logger = LogManager.getLogger();
-    private final String RANGE_GET_TODAY_PAY_PERSONS = "Участники!A2:I";
     Sheets sheets = GoogleSheets.getSheetsService();
 
     public Repository() throws GeneralSecurityException, IOException {
     }
 
-    private void dataIsFound(List<List<Object>> values) throws NoDataFound {
+    private List<List<Object>> getDataFromTable(String range) throws IOException, NoDataFound {
+        ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
+        List<List<Object>> values = response.getValues();
         if (values == null || values.isEmpty()) {
             logger.info("No data found.");
             throw new NoDataFound("No data found");
         }
+        return values;
     }
 
     public Contributions findContribution(String expend) throws IOException, NoDataFound {
-        String range = "Взносы!A:AD";
-        ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
-        List<List<Object>> values = response.getValues();
-        dataIsFound(values);
+        List<List<Object>> values = getDataFromTable("Взносы!A:AD");
         for (List row : values) {
             String name = row.get(0).toString();
             if (name.equals(expend)) {
@@ -65,14 +64,10 @@ public class Repository {
     }
 
     public Contributions.Contribution findLastContribution(String expend) throws IOException, NoDataFound {
-        String range = "Взносы!A:AD";
-        ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
-        List<List<Object>> values = response.getValues();
-        dataIsFound(values);
+        List<List<Object>> values = getDataFromTable("Взносы!A:AD");
         for (List row : values) {
             String name = row.get(0).toString();
             if (name.equals(expend)) {
-
                 for (int i = 3; i < 29; i++) {
                     if (!row.get(i).toString().equals("!") && !row.get(i).toString().isEmpty()) {
                         return new Contributions.Contribution(values.get(0).get(i).toString(), row.get(i).toString());
@@ -84,11 +79,8 @@ public class Repository {
     }
 
     public ArrayList<Cards> findCards() throws IOException, NoDataFound {
-        String range = "Держатели!A2:B";
-        ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
-        List<List<Object>> values = response.getValues();
+        List<List<Object>> values = getDataFromTable("Держатели!A2:B");
         ArrayList<Cards> result = new ArrayList<>();
-        dataIsFound(values);
         List<List<String>> lists = new ArrayList<>();
         int i = -1;
         for (List row : values) {
@@ -116,67 +108,83 @@ public class Repository {
     }
 
     public Info findInfo() throws IOException, NoDataFound {
-        String range = "Сводка!B7:B11";
-        ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
-        List<List<Object>> values = response.getValues();
-        dataIsFound(values);
-        String capital = removeSquareBrackets(values.get(0).toString());
-        String borrowedMoney = removeSquareBrackets(values.get(1).toString());
-        String overdue = removeSquareBrackets(values.get(2).toString());
-        String reserve = removeSquareBrackets(values.get(3).toString());
-        String active = removeSquareBrackets(values.get(4).toString());
+        List<List<Object>> values = getDataFromTable("Сводка!B7:B11");
+        int capital = makeInt(values.get(0).toString());
+        int borrowedMoney = makeInt(values.get(1).toString());
+        int overdue = makeInt(values.get(2).toString());
+        int reserve = makeInt(values.get(3).toString());
+        int active = makeInt(values.get(4).toString());
         return new Info(capital, borrowedMoney, overdue, reserve, active);
     }
 
-    private String removeSquareBrackets(String str) {
-        return str.replaceAll("[\\[\\]]", "");
+    private int makeInt(String str) {
+        return Integer.parseInt(str.replaceAll("[\\D]", ""));
     }
 
     public ArrayList<Partner> findPartners(String expend) throws IOException, NoDataFound {
-        String range = "Участники!A2:M";
-        ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
-        List<List<Object>> values = response.getValues();
+        List<List<Object>> values = getDataFromTable("Участники!A2:M");
         ArrayList<Partner> result = new ArrayList<>();
-        dataIsFound(values);
-        for (List row : values) {
+        for (List<Object> row : values) {
             String name = row.get(0).toString();
             String tgId = row.get(1).toString();
             String city = row.get(3).toString();
             String searchStr = (name + " " + city).toLowerCase();
-            if (isContains(searchStr, expend) || tgId.equals(expend)) {
-                String vk = row.get(2).toString();
-                int contributions = Integer.parseInt(row.get(4).toString());
-                double sumContributions = Double.parseDouble(row.get(5).toString().replace(",", "."));
-                int loan = 0;
-                int debt = 0;
-                int dosrochka = 0;
-                int prosrochka = 0;
-                if (row.get(6).toString() != "") {
-                    loan = Integer.parseInt(row.get(6).toString());
-                }
-                if (row.get(7).toString() != "") {
-                    debt = Integer.parseInt(row.get(7).toString());
-                }
-                String returnDate = row.get(8).toString();
-                if (!row.get(9).toString().equals("")) {
-                    dosrochka = Integer.parseInt(row.get(9).toString());
-                }
-                if (!row.get(10).toString().equals("")) {
-                    prosrochka = Integer.parseInt(row.get(10).toString());
-                }
-
-                boolean elite = false;
-                boolean vznosZaMesac = false;
-                if (row.get(11).toString().equals("1")) {
-                    elite = true;
-                }
-                if (row.get(12).toString().equals("1")) {
-                    vznosZaMesac = true;
-                }
-                result.add(new Partner(name, tgId, vk, city, contributions, sumContributions, loan, debt, returnDate, dosrochka, prosrochka, elite, vznosZaMesac));
+            if (isContains(searchStr, expend.toLowerCase()) || tgId.equals(expend)) {
+                Partner partner = getNewPartner(row);
+                result.add(partner);
             }
         }
         return result;
+    }
+
+    private Partner getNewPartner(List<Object> row) throws NoDataFound, IOException {
+        int maxLoan = findInfo().getMaxLoan();
+        String name = row.get(0).toString();
+        String tgId = row.get(1).toString();
+        String city = row.get(3).toString();
+        String vk = row.get(2).toString();
+        int contributions = Integer.parseInt(row.get(4).toString());
+        double sumContributions = Double.parseDouble(row.get(5).toString().replace(",", "."));
+        int loan = 0;
+        int debt = 0;
+        int dosrochka = 0;
+        int prosrochka = 0;
+
+        if (row.get(6).toString().equals("")) {
+            loan = Integer.parseInt(row.get(6).toString());
+        }
+        if (row.get(7).toString().equals("")) {
+            debt = Integer.parseInt(row.get(7).toString());
+        }
+        String returnDate = row.get(8).toString();
+        if (!row.get(9).toString().equals("")) {
+            dosrochka = Integer.parseInt(row.get(9).toString());
+        }
+        if (!row.get(10).toString().equals("")) {
+            prosrochka = Integer.parseInt(row.get(10).toString());
+        }
+        int maxMyLoan = getMaxMyLoan(sumContributions, prosrochka, maxLoan);
+
+        boolean elite = false;
+        boolean vznosZaMesac = false;
+        if (row.get(11).toString().equals("1")) {
+            elite = true;
+        }
+        if (row.get(12).toString().equals("1")) {
+            vznosZaMesac = true;
+        }
+        return new Partner(name, tgId, vk, city, maxMyLoan, contributions, sumContributions, loan, debt, returnDate, dosrochka, prosrochka, elite, vznosZaMesac);
+    }
+
+    private int getMaxMyLoan(double sumContributions,int prosrochka, int maxLoan){
+        int maxMyLoan;
+        if (prosrochka < 6){
+            maxMyLoan = (int) (sumContributions * (5 - 0.5 * prosrochka));
+        }else maxMyLoan = (int) sumContributions * 2;
+        if (maxMyLoan > maxLoan){
+            maxMyLoan = maxLoan;
+        }
+        return maxMyLoan;
     }
 
     public static boolean isContains(String str, String expend) {
@@ -192,31 +200,22 @@ public class Repository {
         } else return false;
     }
 
-    public boolean isPartner(String expend) throws IOException {
-        String range = "Участники!B2:B";
-        ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
-        List<List<Object>> values = response.getValues();
-        if (values == null || values.isEmpty()) {
-            logger.info("No data found.");
-        } else {
-            for (List row : values) {
-                String tgId = row.get(0).toString();
-                if (tgId.equals(expend)) {
-                    return true;
-                }
+    public boolean isPartner(String expend) throws IOException, NoDataFound {
+        List<List<Object>> values = getDataFromTable("Участники!B2:B");
+        for (List row : values) {
+            String tgId = row.get(0).toString();
+            if (tgId.equals(expend)) {
+                return true;
             }
         }
         return false;
     }
 
     public List<List<Partner>> findDebt() throws IOException, ParseException, NoDataFound {
-        String range = "Участники!A2:M";
-        ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
-        List<List<Object>> values = response.getValues();
+        List<List<Object>> values = getDataFromTable("Участники!A2:M");
         List<List<Partner>> result = new ArrayList<>();
         result.add(new ArrayList<>());
         result.add(new ArrayList<>());
-        dataIsFound(values);
         Date dateNow = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
         for (List row : values) {
@@ -234,10 +233,8 @@ public class Repository {
     }
 
     public ArrayList<Partner> getDuckList() throws IOException, NoDataFound {
-        ValueRange resNames = sheets.spreadsheets().values().get(Constants.SHEET_ID, "Участники!A2:L").execute();
-        List<List<Object>> names = resNames.getValues();
+        List<List<Object>> names = getDataFromTable("Участники!A2:L");
         ArrayList<Partner> partners = new ArrayList<>();
-        dataIsFound(names);
         for (List row : names) {
             String name = row.get(0).toString();
             int elite = Integer.parseInt(row.get(11).toString());
@@ -249,11 +246,8 @@ public class Repository {
     }
 
     public LinkedList<Partner> getTodayPayPersons() throws IOException, NoDataFound {
-        ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, RANGE_GET_TODAY_PAY_PERSONS).execute();
-        List<List<Object>> values = response.getValues();
+        List<List<Object>> values = getDataFromTable("Участники!A2:I");
         LinkedList<Partner> partners = new LinkedList<>();
-        dataIsFound(values);
-        Date dateNow = new Date();
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         LocalDate nowDate = LocalDate.now(ZoneId.of(Constants.CRON_TIMEZONE));
         nowDate.format(dateTimeFormatter);
@@ -274,10 +268,8 @@ public class Repository {
 
 
     public StringBuilder readAllFromSheet(String range) throws GeneralSecurityException, IOException, NoDataFound {
-        ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
-        List<List<Object>> values = response.getValues();
+        List<List<Object>> values = getDataFromTable(range);
         StringBuilder result = new StringBuilder();
-        dataIsFound(values);
         for (List row : values) {
             result.append(row).append("\n");
             logger.info(row);
