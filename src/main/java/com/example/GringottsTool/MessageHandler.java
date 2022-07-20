@@ -203,7 +203,8 @@ public class MessageHandler {
         return sendMessage;
     }
 
-    private BotApiMethod<?> getProxy(String chatId) {
-        return new SendMessage(chatId, "Наш прокси-сервер:\n" + Constants.PROXY);
+    private BotApiMethod<?> getProxy(String chatId) throws NoDataFound, IOException {
+        StringBuilder proxies = repository.findProxy();
+        return new SendMessage(chatId, "Наши прокси-серверы:\n" + proxies);
     }
 }

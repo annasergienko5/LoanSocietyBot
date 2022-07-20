@@ -272,6 +272,17 @@ public class Repository {
         return partners;
     }
 
+    public StringBuilder findProxy() throws IOException, NoDataFound {
+        String range = "Прокси!A2:A";
+        ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
+        List<List<Object>> values = response.getValues();
+        dataIsFound(values);
+        StringBuilder result = new StringBuilder();
+        for (List row : values){
+            result.append(row.get(0)).append("\n");
+        }
+        return result;
+    }
 
     public StringBuilder readAllFromSheet(String range) throws GeneralSecurityException, IOException, NoDataFound {
         ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
