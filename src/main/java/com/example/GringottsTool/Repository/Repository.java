@@ -23,6 +23,16 @@ import java.util.*;
 
 @Component
 public class Repository {
+    private static final String CONTRIBUTION_RANGE = "Взносы!A:AD";
+    private static final String LAST_CONTRIBUTION_RANGE = "Взносы!A:AD";
+    private static final String CARDS_RANGE = "Держатели!A2:B";
+    private static final String INFO_RANGE = "Сводка!B7:B11";
+    private static final String PARTNERS_RANGE = "Участники!A2:M";
+    private static final String IS_PARTNER_RANGE = "Участники!B2:B";
+    private static final String DEBT_RANGE = "Участники!A2:M";
+    private static final String DUCK_LIST_RANGE = "Участники!A2:L";
+    private static final String TODAY_PAY_PERSONS_RANGE = "Участники!A2:I";
+    private static final String PROXY_RANGE = "Прокси!A2:A";
     private static final Logger logger = LogManager.getLogger();
     Sheets sheets = GoogleSheets.getSheetsService();
 
@@ -40,7 +50,7 @@ public class Repository {
     }
 
     public Contributions findContribution(String expend) throws IOException, NoDataFound {
-        List<List<Object>> values = getDataFromTable("Взносы!A:AD");
+        List<List<Object>> values = getDataFromTable(CONTRIBUTION_RANGE);
         for (List row : values) {
             String name = row.get(0).toString();
             if (name.equals(expend)) {
@@ -64,7 +74,7 @@ public class Repository {
     }
 
     public Contributions.Contribution findLastContribution(String expend) throws IOException, NoDataFound {
-        List<List<Object>> values = getDataFromTable("Взносы!A:AD");
+        List<List<Object>> values = getDataFromTable(LAST_CONTRIBUTION_RANGE);
         for (List row : values) {
             String name = row.get(0).toString();
             if (name.equals(expend)) {
@@ -79,7 +89,7 @@ public class Repository {
     }
 
     public ArrayList<Cards> findCards() throws IOException, NoDataFound {
-        List<List<Object>> values = getDataFromTable("Держатели!A2:B");
+        List<List<Object>> values = getDataFromTable(CARDS_RANGE);
         ArrayList<Cards> result = new ArrayList<>();
         List<List<String>> lists = new ArrayList<>();
         int i = -1;
@@ -108,7 +118,7 @@ public class Repository {
     }
 
     public Info findInfo() throws IOException, NoDataFound {
-        List<List<Object>> values = getDataFromTable("Сводка!B7:B11");
+        List<List<Object>> values = getDataFromTable(INFO_RANGE);
         int capital = makeInt(values.get(0).toString());
         int borrowedMoney = makeInt(values.get(1).toString());
         int overdue = makeInt(values.get(2).toString());
@@ -122,7 +132,7 @@ public class Repository {
     }
 
     public ArrayList<Partner> findPartners(String expend) throws IOException, NoDataFound {
-        List<List<Object>> values = getDataFromTable("Участники!A2:M");
+        List<List<Object>> values = getDataFromTable(PARTNERS_RANGE);
         ArrayList<Partner> result = new ArrayList<>();
         for (List<Object> row : values) {
             String name = row.get(0).toString();
@@ -201,7 +211,7 @@ public class Repository {
     }
 
     public boolean isPartner(String expend) throws IOException, NoDataFound {
-        List<List<Object>> values = getDataFromTable("Участники!B2:B");
+        List<List<Object>> values = getDataFromTable(IS_PARTNER_RANGE);
         for (List row : values) {
             String tgId = row.get(0).toString();
             if (tgId.equals(expend)) {
@@ -212,7 +222,7 @@ public class Repository {
     }
 
     public List<List<Partner>> findDebt() throws IOException, ParseException, NoDataFound {
-        List<List<Object>> values = getDataFromTable("Участники!A2:M");
+        List<List<Object>> values = getDataFromTable(DEBT_RANGE);
         List<List<Partner>> result = new ArrayList<>();
         result.add(new ArrayList<>());
         result.add(new ArrayList<>());
@@ -233,7 +243,7 @@ public class Repository {
     }
 
     public ArrayList<Partner> getDuckList() throws IOException, NoDataFound {
-        List<List<Object>> names = getDataFromTable("Участники!A2:L");
+        List<List<Object>> names = getDataFromTable(DUCK_LIST_RANGE);
         ArrayList<Partner> partners = new ArrayList<>();
         for (List row : names) {
             String name = row.get(0).toString();
@@ -246,7 +256,7 @@ public class Repository {
     }
 
     public LinkedList<Partner> getTodayPayPersons() throws IOException, NoDataFound {
-        List<List<Object>> values = getDataFromTable("Участники!A2:I");
+        List<List<Object>> values = getDataFromTable(TODAY_PAY_PERSONS_RANGE);
         LinkedList<Partner> partners = new LinkedList<>();
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         LocalDate nowDate = LocalDate.now(ZoneId.of(Constants.CRON_TIMEZONE));
@@ -267,10 +277,7 @@ public class Repository {
     }
 
     public StringBuilder findProxy() throws IOException, NoDataFound {
-        String range = "Прокси!A2:A";
-        ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
-        List<List<Object>> values = response.getValues();
-        dataIsFound(values);
+        List<List<Object>> values = getDataFromTable(PROXY_RANGE);
         StringBuilder result = new StringBuilder();
         for (List row : values){
             result.append(row.get(0)).append("\n");
