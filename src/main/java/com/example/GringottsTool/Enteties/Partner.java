@@ -5,6 +5,7 @@ public class Partner {
     private String tgId;
     private String vk;
     private String city;
+    private int maxMyLoan;
     private int contributions;
     private double sumContributions;
     private int loan;
@@ -15,11 +16,12 @@ public class Partner {
     private boolean elite;
     private boolean vznosZaMesac;
 
-    public Partner(String name, String tgId, String vk, String city, int contributions, double sumContributions, int loan, int debt, String returnDate, int dosrochka, int prosrochka, boolean elite, boolean vznosZaMesac) {
+    public Partner(String name, String tgId, String vk, String city, int maxMyLoan, int contributions, double sumContributions, int loan, int debt, String returnDate, int dosrochka, int prosrochka, boolean elite, boolean vznosZaMesac) {
         this.name = name;
         this.tgId = tgId;
         this.vk = vk;
         this.city = city;
+        this.maxMyLoan = maxMyLoan;
         this.contributions = contributions;
         this.sumContributions = sumContributions;
         this.loan = loan;
@@ -65,7 +67,7 @@ public class Partner {
         sb.append(this.name);
         sb.append("\nВсего взносов: " + this.contributions);
         sb.append("\nНа сумму: " + this.sumContributions);
-        sb.append("\nМаксимальная сумма займа: " + (this.sumContributions * (5 - this.prosrochka * 0.5)));
+        sb.append("\nМакс. займ: " + maxMyLoan);
         sb.append("\nx0.6: " + (this.sumContributions * 0.6));
         sb.append("\nВсего займов: " + this.loan);
         if (this.returnDate != null && !this.returnDate.equals("")) {

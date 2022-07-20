@@ -127,12 +127,7 @@ public class MessageHandler {
 
     private BotApiMethod<?> getAboutme(String chatId) throws IOException, NoDataFound {
         ArrayList<Partner> resultList = repository.findPartners(chatId);
-        SendMessage sendMessage;
-        if (resultList.size() == 0) {
-            return new SendMessage(chatId, Constants.NOT_FOUND_DATA);
-        }
-        sendMessage = new SendMessage(chatId, resultList.get(0).toString());
-        return sendMessage;
+        return new SendMessage(chatId, resultList.get(0).toString());
     }
 
     private BotApiMethod<?> getCards(String chatId) throws IOException, NoDataFound {

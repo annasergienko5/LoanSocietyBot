@@ -60,9 +60,6 @@ public class Config {
         if (Constants.PROXY == null){
             throw new EnvironmentNullExeption("PROXY = null");
         }
-        if (Constants.SCHEDULED_NO_DEBTS == null){
-            throw new EnvironmentNullExeption("SCHEDULED_NO_DEBTS = null");
-        }
         if (Constants.PUBLIC_CHAT_ID == null){
             throw new EnvironmentNullExeption("PUBLIC_CHAT_ID = null");
         }
@@ -77,9 +74,6 @@ public class Config {
         }
         if (Constants.TODAY_PAYERS_REMINDER_TIME == null){
             throw new EnvironmentNullExeption("CRON_TIMEZONE = null");
-        }
-        if (Constants.SCHEDULED_NO_TODAY_PAYS == null){
-            throw new EnvironmentNullExeption("SCHEDULED_NO_TODAY_PAYS = null");
         }
 
     }
