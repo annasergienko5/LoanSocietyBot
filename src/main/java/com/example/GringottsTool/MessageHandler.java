@@ -51,7 +51,8 @@ public class MessageHandler {
                     return getRules(chatId);
             }
         } else if (chatId.equals(Constants.ADMIN_CHAT_ID) || repository.isPartner(chatId)) {
-            String[] inputText = message.getText().split(" ", 2);
+            String[] inputTextWithoutName = message.getText().split("@", 2);
+            String[] inputText = inputTextWithoutName[0].split(" ", 2);
             switch (inputText[0]) {
                 case "/start":
                     return getStartMessage(chatId);
