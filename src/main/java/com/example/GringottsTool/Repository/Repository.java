@@ -276,13 +276,13 @@ public class Repository {
         return partners;
     }
 
-    public StringBuilder findProxy() throws IOException, NoDataFound {
+    public List<String> findProxy() throws IOException, NoDataFound {
         List<List<Object>> values = getDataFromTable(PROXY_RANGE);
-        StringBuilder result = new StringBuilder();
+        List<String> proxyList = new ArrayList<>();
         for (List row : values){
-            result.append(row.get(0)).append("\n");
+            proxyList.add(row.get(0).toString());
         }
-        return result;
+        return proxyList;
     }
 
     public StringBuilder readAllFromSheet(String range) throws GeneralSecurityException, IOException, NoDataFound {

@@ -200,7 +200,18 @@ public class MessageHandler {
     }
 
     private BotApiMethod<?> getProxy(String chatId) throws NoDataFound, IOException {
-        StringBuilder proxies = repository.findProxy();
-        return new SendMessage(chatId, "Наши прокси-серверы:\n" + proxies);
+        List<String> proxyList = repository.findProxy();
+        StringBuilder result = new StringBuilder("Наши прокси-серверы:");
+        int i = 1;
+        for (String proxy : proxyList){
+            String inlineUrl = String.format("\n[сервер %d](%s)", i, proxy);
+            result.append(inlineUrl);
+            i++;
+        }
+        SendMessage message = new SendMessage();
+        message.setChatId(chatId);
+        message.enableMarkdown(true);
+        message.setText(result.toString());
+        return message;
     }
 }
