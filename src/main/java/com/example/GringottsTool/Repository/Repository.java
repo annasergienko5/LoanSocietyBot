@@ -1,13 +1,10 @@
 package com.example.GringottsTool.Repository;
 
 import com.example.GringottsTool.Constants;
-import com.example.GringottsTool.Enteties.Cards;
-import com.example.GringottsTool.Enteties.Contributions;
-import com.example.GringottsTool.Enteties.Info;
-import com.example.GringottsTool.Enteties.Partner;
+import com.example.GringottsTool.Enteties.*;
 import com.example.GringottsTool.Exeptions.NoDataFound;
 import com.google.api.services.sheets.v4.Sheets;
-import com.google.api.services.sheets.v4.model.*;
+import com.google.api.services.sheets.v4.model.ValueRange;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -19,7 +16,10 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
 
 @Component
 public class Repository {
@@ -284,49 +284,66 @@ public class Repository {
         }
         return proxyList;
     }
-
-    public StringBuilder readAllFromSheet(String range) throws GeneralSecurityException, IOException, NoDataFound {
-        List<List<Object>> values = getDataFromTable(range);
-        StringBuilder result = new StringBuilder();
-        for (List row : values) {
-            result.append(row).append("\n");
-            logger.info(row);
+    
+    public List<Transaction> getTransactions(Partner partner)  {
+        String personRequestRange = "Займы!%s:%s".formatted(partner.getRowNumber(), partner.getRowNumber());
+        ValueRange datesResponse = null;
+        try {
+            datesResponse = sheets.spreadsheets().values().get(Constants.SHEET_ID, "Займы!1:1").execute();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return result;
+        ValueRange personResponse = null;
+        try {
+            personResponse = sheets.spreadsheets().values().get(Constants.SHEET_ID, personRequestRange).execute();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        List<List<Object>> dates = null;
+        List<List<Object>> values = null;
+        if (datesResponse != null) {
+            dates = datesResponse.getValues();
+        }
+        if (personResponse != null) {
+            values = personResponse.getValues();
+        }
+        List<Transaction> transactions = new LinkedList<>();
+        if (values != null) {
+            for (List row : values) {
+                for (int i = row.size() - 1; i >= 5; i--) {
+                    String cellValue = row.get(i).toString();
+                    if (cellValue.isBlank()) {
+                    } else {
+                        String date = ((dates.get(0)).get(i)).toString();
+                        Transaction transaction = new Transaction(date, Integer.parseInt(cellValue));
+                        transactions.add(transaction);
+                    }
+                }
+            }
+        }
+        return transactions;
     }
 
-    public void addRowToSheet() throws GeneralSecurityException, IOException {
-        ValueRange appendBody = new ValueRange()
-                .setValues(Arrays.asList(Arrays.asList("3", "Stepan", "4000")));
-        AppendValuesResponse appendResult = sheets.spreadsheets().values()
-                .append(Constants.SHEET_ID, "Лист1", appendBody)
-                .setValueInputOption("USER_ENTERED")
-                .setIncludeValuesInResponse(true)
-                .execute();
-        logger.info("Row added.");
-    }
-
-    public void updateValue() throws GeneralSecurityException, IOException {
-        ValueRange body = new ValueRange()
-                .setValues(Arrays.asList(Arrays.asList(500.545)));
-        UpdateValuesResponse result = sheets.spreadsheets().values()
-                .update(Constants.SHEET_ID, "C3", body)
-                .setValueInputOption("RAW")
-                .execute();
-        logger.info("Value updated.");
-    }
-
-    public void deleteRow() throws GeneralSecurityException, IOException {
-        DeleteDimensionRequest deleteDimensionRequest = new DeleteDimensionRequest()
-                .setRange(new DimensionRange()
-                        .setSheetId(0)
-                        .setDimension("Rows")
-                        .setStartIndex(10));
-        List<Request> requests = new ArrayList<>();
-        requests.add(new Request().setDeleteDimension(deleteDimensionRequest));
-        BatchUpdateSpreadsheetRequest body = new BatchUpdateSpreadsheetRequest().setRequests(requests);
-        sheets.spreadsheets().batchUpdate(Constants.SHEET_ID, body).execute();
-        logger.info("Rows deleted.");
+    public Partner getPersonRowNumber(String tgId) {
+        ValueRange resNames = null;
+        try {
+            resNames = sheets.spreadsheets().values().get(Constants.SHEET_ID, "Участники!A2:B").execute();
+        } catch (IOException e) {
+            e.printStackTrace();;
+        }
+        assert resNames != null;
+        List<List<Object>> names = resNames.getValues();
+        Partner partner = new Partner();
+        partner.setTgId(tgId);
+        for (List row : names) {
+            String name = row.get(0).toString();
+            String thisTgId = row.get(1).toString();
+            if (tgId.equals(thisTgId)) {
+                partner.setName(name);
+                partner.setRowNumber(names.indexOf(row) + 2);
+            }
+        }
+        return partner;
     }
 }
 

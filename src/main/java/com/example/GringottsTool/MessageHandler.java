@@ -1,8 +1,6 @@
 package com.example.GringottsTool;
 
-import com.example.GringottsTool.Enteties.Cards;
-import com.example.GringottsTool.Enteties.Contributions;
-import com.example.GringottsTool.Enteties.Partner;
+import com.example.GringottsTool.Enteties.*;
 import com.example.GringottsTool.Exeptions.NoDataFound;
 import com.example.GringottsTool.Repository.Repository;
 import org.apache.logging.log4j.LogManager;
@@ -30,10 +28,8 @@ public class MessageHandler {
 
     public BotApiMethod<?> answerMessage(Message message) throws GeneralSecurityException, IOException, ParseException, NoDataFound {
         String chatId = message.getChatId().toString();
-        String userName = message.getChat().getUserName();
-        long tgId = message.getChat().getId();
-        log.info(userName);
-        log.info(tgId);
+        long userTgId = message.getFrom().getId();
+        log.info("\nReceived message. Chat ID: " + chatId +"\nTelegramm-user ID: " + userTgId );
         if (chatId.equals(Constants.PUBLIC_CHAT_ID)) {
             String[] inputText = message.getText().split("@", 2);
             switch (inputText[0]) {
@@ -81,7 +77,10 @@ public class MessageHandler {
                     return getDucklist(chatId);
                 case "/proxy":
                     return getProxy(chatId);
-
+                case "/credithistory":
+                    return getCreditHistory(chatId, userTgId, false);
+                case "/credithistoryfull":
+                    return getCreditHistory(chatId, userTgId, true);
             }
         }
         return null;
@@ -213,5 +212,27 @@ public class MessageHandler {
         message.enableMarkdown(true);
         message.setText(result.toString());
         return message;
+    }
+
+    private BotApiMethod<?> getCreditHistory(String chatId, long tgId, boolean full)  {
+        log.info("\n getCreditHistory STARTED from chatId: " + chatId + "\n From user with tgId: " + tgId + "\n Is full CreditHistory?: " + full);
+        Partner partner = repository.getPersonRowNumber(String.valueOf(tgId));
+        List<Transaction> transactions = repository.getTransactions(partner);
+        if (transactions.size() == 0) {
+            return new SendMessage(chatId, Constants.NOT_FOUND_DATA);
+        }
+        CreditHistory creditHistory = new CreditHistory(transactions);
+        String creditString;
+        if (full) {
+            creditString = creditHistory.fullString();
+        } else {
+            creditString = creditHistory.partialString();
+        }
+        String message = String.format(Constants.ABOUT_CREDIT_HISTORY_MESSAGE, partner.getName(), creditString);
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setParseMode(ParseMode.HTML);
+        sendMessage.setChatId(chatId);
+        sendMessage.setText(message);
+        return sendMessage;
     }
 }
