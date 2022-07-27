@@ -19,7 +19,6 @@ import org.telegram.telegrambots.starter.SpringWebhookBot;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.text.ParseException;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 

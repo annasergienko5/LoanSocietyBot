@@ -15,6 +15,7 @@ public class Partner {
     private int prosrochka;
     private boolean elite;
     private boolean vznosZaMesac;
+    private int rowNumber;
 
     public Partner(String name, String tgId, String vk, String city, int maxMyLoan, int contributions, double sumContributions, int loan, int debt, String returnDate, int dosrochka, int prosrochka, boolean elite, boolean vznosZaMesac) {
         this.name = name;
@@ -33,6 +34,10 @@ public class Partner {
         this.vznosZaMesac = vznosZaMesac;
     }
 
+    public Partner() {
+
+    }
+
     public Partner(String name){
         this.name = name;
     }
@@ -47,9 +52,15 @@ public class Partner {
     public String getTgId() {
         return tgId;
     }
+    public void setTgId(String tgId) {
+        this.tgId = tgId;
+    }
 
     public String getName() {
         return name;
+    }
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getDebt() {
@@ -87,5 +98,13 @@ public class Partner {
             sb.append("\nВзносы за текущий месяц: уплачено");
         }else sb.append("\nВзносы за текущий месяц: не уплачено");
         return sb.toString();
+    }
+
+    public int getRowNumber() {
+        return rowNumber;
+    }
+
+    public void setRowNumber(int rowNumber) {
+        this.rowNumber = rowNumber;
     }
 }
