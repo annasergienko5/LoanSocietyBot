@@ -27,7 +27,6 @@ public class Config {
         String CREDENTIALS_FILE_PATH=System.getenv("CREDENTIALS_FILE_PATH");
         String SHEET_ID=System.getenv("SHEET_ID");
         String RULE = System.getenv("RULE");
-        String PROXY=System.getenv("PROXY");
         String SCHEDULED_NO_DEBTS = System.getenv("SCHEDULED_NO_DEBTS");
         String PUBLIC_CHAT_ID = System.getenv("PUBLIC_CHAT_ID");
         String ADMIN_CHAT_ID = System.getenv("ADMIN_CHAT_ID");
@@ -56,9 +55,6 @@ public class Config {
         }
         if (Constants.RULE == null){
             throw new EnvironmentNullExeption("RULE = null");
-        }
-        if (Constants.PROXY == null){
-            throw new EnvironmentNullExeption("PROXY = null");
         }
         if (Constants.PUBLIC_CHAT_ID == null){
             throw new EnvironmentNullExeption("PUBLIC_CHAT_ID = null");
