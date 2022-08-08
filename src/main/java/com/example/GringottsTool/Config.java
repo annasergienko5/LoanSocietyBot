@@ -86,7 +86,7 @@ public class Config {
             }
             log.info(content);
         } catch (final Exception ex) {
-            ex.printStackTrace();
+            log.error(ex);
         }
     }
 
@@ -102,6 +102,7 @@ public class Config {
         bot.setBotPath(Constants.WEBHOOK_PATH);
         bot.setBotUserName(Constants.BOT_USERNAME);
         bot.setBotToken(Constants.BOT_TOKEN);
+        bot.reportStartMessage();
 
         return bot;
     }

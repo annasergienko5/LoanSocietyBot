@@ -70,9 +70,9 @@ public class MessageHandler {
                 case "/rules":
                     return getRules(chatId);
                 case "/aboutme":
-                    return getAboutme(chatId);
+                    return getAboutme(chatId, userTgId);
                 case "/aboutmypayment":
-                    return getAboutMyPayment(chatId);
+                    return getAboutMyPayment(chatId, userTgId);
                 case "/ducklist":
                     return getDucklist(chatId);
                 case "/proxy":
@@ -119,15 +119,27 @@ public class MessageHandler {
         return sendMessage;
     }
 
-    private BotApiMethod<?> getAboutMyPayment(String chatId) throws IOException, NoDataFound {
-        String expected = repository.findPartners(chatId).get(0).getName();
-        Contributions contributions = repository.findContribution(expected);
-        return new SendMessage(chatId, contributions.toString());
+    private BotApiMethod<?> getAboutMyPayment(String chatId, long userTgId) throws IOException, NoDataFound {
+        ArrayList<Partner> partners = repository.findPartners(String.valueOf(userTgId));
+        if (partners.isEmpty()) {
+            return new SendMessage(chatId, Constants.NOT_FOUND_DATA);
+        } else {
+            String expected = partners.get(0).getName();
+            Contributions contributions = repository.findContribution(expected);
+            if (contributions != null) {
+                return new SendMessage(chatId, contributions.toString());
+            }
+            return new SendMessage(chatId, Constants.NOT_FOUND_DATA);
+        }
     }
 
-    private BotApiMethod<?> getAboutme(String chatId) throws IOException, NoDataFound {
-        ArrayList<Partner> resultList = repository.findPartners(chatId);
-        return new SendMessage(chatId, resultList.get(0).toString());
+    private BotApiMethod<?> getAboutme(String chatId, long userTgId) throws IOException, NoDataFound {
+        ArrayList<Partner> resultList = repository.findPartners(String.valueOf(userTgId));
+        if (resultList.isEmpty()) {
+            return new SendMessage(chatId, Constants.NOT_FOUND_DATA);
+        } else {
+            return new SendMessage(chatId, resultList.get(0).toString());
+        }
     }
 
     private BotApiMethod<?> getCards(String chatId) throws IOException, NoDataFound {
@@ -178,8 +190,8 @@ public class MessageHandler {
         return sendMessage;
     }
 
-    private BotApiMethod<?> getSearch(String chatId, String expected) throws IOException, NoDataFound {
-        ArrayList<Partner> resultList = repository.findPartners(expected);
+    private BotApiMethod<?> getSearch(String chatId, String lookingFor) throws IOException, NoDataFound {
+        ArrayList<Partner> resultList = repository.findPartners(lookingFor);
         SendMessage sendMessage;
         if (resultList.size() == 0) {
             return new SendMessage(chatId, Constants.NOT_FOUND_DATA);
@@ -214,12 +226,17 @@ public class MessageHandler {
         return message;
     }
 
-    private BotApiMethod<?> getCreditHistory(String chatId, long tgId, boolean full)  {
+    private BotApiMethod<?> getCreditHistory(String chatId, long tgId, boolean full) throws NoDataFound, IOException {
         log.info("\n getCreditHistory STARTED from chatId: " + chatId + "\n From user with tgId: " + tgId + "\n Is full CreditHistory?: " + full);
         Partner partner = repository.getPersonRowNumber(String.valueOf(tgId));
-        List<Transaction> transactions = repository.getTransactions(partner);
+        List<Transaction> transactions;
+        if (partner.getRowNumber() == 0) {
+            throw new NoDataFound("No data found");
+        } else {
+            transactions = repository.getTransactions(partner);
+        }
         if (transactions.size() == 0) {
-            return new SendMessage(chatId, Constants.NOT_FOUND_DATA);
+            throw new NoDataFound("No data found");
         }
         CreditHistory creditHistory = new CreditHistory(transactions);
         String creditString;
