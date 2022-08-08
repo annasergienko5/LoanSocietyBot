@@ -1,15 +1,24 @@
 package com.example.GringottsTool;
 
 public interface Constants {
+    String START_MESSAGE = "Добрый день! Бот работает и готов принимать запросы.";
     double MAXIMUM_LOAN_COEFFICIENT = 0.125;
-    String BOT_TOKEN=System.getenv("TOKEN_BOT");
-    String BOT_USERNAME=System.getenv("BOT_USERNAME");
-    String WEBHOOK_PATH=System.getenv("WEBHOOK_PATH");
-    String APPLICATION_NAME=System.getenv("APPLICATION_NAME");
-    String CREDENTIALS_FILE_PATH=System.getenv("CREDENTIALS_FILE_PATH");
-    String SHEET_ID=System.getenv("SHEET_ID");
+    String BOT_TOKEN = System.getenv("TOKEN_BOT");
+    String BOT_USERNAME = System.getenv("BOT_USERNAME");
+    String WEBHOOK_PATH = System.getenv("WEBHOOK_PATH");
+    String APPLICATION_NAME = System.getenv("APPLICATION_NAME");
+    String CREDENTIALS_FILE_PATH = System.getenv("CREDENTIALS_FILE_PATH");
+    String SHEET_ID = System.getenv("SHEET_ID");
     String FIND_MORE_RESULT = "Много таких, уточни";
     String NOT_FOUND_DATA = "Данные не найдены";
+    String ERROR_NOTIFICATION = "ВНИМАНИЕ: Ошибка в работе программы при вызове напоминаний о должниках.\nАдминистратор, обратитесь к разработчику.";
+    String ERROR_IN_SOME_FUNCTION = """
+            ВНИМАНИЕ: Ошибка в работе программы в команде: %s.
+            Обратитесь к разработчику.
+            Фунция вызвана из чата chatID:\t%s,
+            Участником с userIgId:\t%s
+                        
+            """;
     String NOT_PARAMETERS = "Нет параметров поиска. Укажи через пробел после /search";
     String NO_DEBTS = "Должников нет";
     String HELP_OUR = """
@@ -32,15 +41,12 @@ public interface Constants {
             /credithistory - история займов краткая
             /credithistoryfull - история займов с транзакциями""";
     String RULE = System.getenv("RULE");
-    String PROXY=System.getenv("PROXY");
-    String SCHEDULED_NO_DEBTS = "На сегодня должников нет";
     String PUBLIC_CHAT_ID = System.getenv("PUBLIC_CHAT_ID");
 
     String ADMIN_CHAT_ID = System.getenv("ADMIN_CHAT_ID");
     String CRON_TIMEZONE = System.getenv("CRON_TIMEZONE");
     String DEBT_REMINDER_TIME = System.getenv("DEBT_REMINDER_TIME");
     String TODAY_PAYERS_REMINDER_TIME = System.getenv("TODAY_PAYERS_REMINDER_TIME");
-    String SCHEDULED_NO_TODAY_PAYS ="Сегодня платежей в срочном порядке не ожидается.";
     String ABOUT_CREDIT_HISTORY_MESSAGE = """
             История займов Участника -
             <strong>%s</strong>:
@@ -68,5 +74,32 @@ public interface Constants {
             Дата закрытия:\t<strong>%s</strong>
             Сумма займа:\t<strong>%,+d</strong> ₽
             <strong>___</strong>
+            """;
+    String ABOUT_DEBTS_MESSAGE = """
+            <strong>Список участников с просроченной задолженностью:</strong>
+                                
+            %s
+            <strong>Список участников с задолженностью:</strong>
+                                
+            %s
+            """;
+    String TODAY_DEBTS_MESSAGE = """
+            <strong>Сегодня ожидаем погашения задолженности следующих Участников:</strong>
+                                
+            %s
+                                
+            """;
+    String ARREARS_DEBTS = """
+            Участник:\t<strong>%s</strong>
+            Текущий долг:\t<strong>%s</strong>₽
+            Вернуть до:\t<strong>%s</strong>
+            <strong>ВНИМАНИЕ:\tПРОСРОЧКА</strong>
+
+            """;
+    String SIMPLE_DEBTS = """
+            Участник:\t<strong>%s</strong>
+            Текущий долг:\t<strong>%s</strong>₽
+            Вернуть до:\t<strong>%s</strong>
+
             """;
 }

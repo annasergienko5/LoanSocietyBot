@@ -31,39 +31,12 @@ public class Bot extends SpringWebhookBot {
     private final String CRON_DEBT_SCHEDULE = "${cron.expression.debt}";
     private final String CRON_TODAY_PAYERS = "${cron.expression.todayPayers}";
     private final String CRON_ZONE = "${cron.expression.zone}";
-
-    private final String ABOUT_DEBTS_MESSAGE = """
-                    <strong>Список участников с просроченной задолженностью:</strong>
-                                        
-                    %s
-                    <strong>Список участников с задолженностью:</strong>
-                                        
-                    %s
-                    """;
-    private final String TODAY_DEBTS_MESSAGE ="""
-                    <strong>Сегодня ожидаем погашения задолженности следующих Участников:</strong>
-                                        
-                    %s
-                                        
-                    """;
-    private final String ARREARS_DEBTS = """
-                    Участник:\t<strong>%s</strong>
-                    Текущий долг:\t<strong>%s</strong>₽
-                    Вернуть до:\t<strong>%s</strong>
-                    <strong>ВНИМАНИЕ:\tПРОСРОЧКА</strong>
-
-                    """;
-    private final String SIMPLE_DEBTS = """
-                    Участник:\t<strong>%s</strong>
-                    Текущий долг:\t<strong>%s</strong>₽
-                    Вернуть до:\t<strong>%s</strong>
-
-                    """;
-
-
     public Bot(SetWebhook setWebhook, MessageHandler messageHandler) {
         super(setWebhook);
         this.messageHandler = messageHandler;
+    }
+    public void reportStartMessage() {
+        executeMessage(Constants.START_MESSAGE, Constants.ADMIN_CHAT_ID);
     }
 
 
@@ -85,14 +58,22 @@ public class Bot extends SpringWebhookBot {
     public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
         if (update.hasMessage()) {
             Message message = update.getMessage();
+            String chatId = message.getChatId().toString();
+            long userTgId = message.getFrom().getId();
+            String[] inputText = message.getText().split("@", 2);
+            String usedFunction = inputText[0];
             if (message.getText() != null) {
-                try {
-                    return messageHandler.answerMessage(update.getMessage());
-                } catch (GeneralSecurityException | IOException | ParseException | NoDataFound e) {
-                    throw new RuntimeException(e);
+                    try {
+                        return messageHandler.answerMessage(update.getMessage());
+                    } catch (GeneralSecurityException | IOException | ParseException e) {
+                        log.error(("\nError in function:" + usedFunction + "\nchatId:" + chatId + "\nby userTgId:" + userTgId), e);
+                        executeMessage(String.format(Constants.ERROR_IN_SOME_FUNCTION, usedFunction, chatId, userTgId), Constants.ADMIN_CHAT_ID);
+                    } catch (NoDataFound e) {
+                        log.info("error: ", e);
+                        executeMessage(Constants.NOT_FOUND_DATA, chatId);
+                    }
                 }
             }
-        }
         return null;
     }
 
@@ -111,48 +92,48 @@ public class Bot extends SpringWebhookBot {
 
     @Scheduled(cron = CRON_DEBT_SCHEDULE, zone = CRON_ZONE)
     public void reportAboutDebts() {
-        log.info("Отправляется запрос о должниках в таблицу.");
-        List<List<Partner>> debts = getResponseAboutDebts();
-        String text;
-        if (debts.size() != 0) {
-            text = String.format(ABOUT_DEBTS_MESSAGE, getStringAboutArrearsDebts(debts), getStringAboutSimpleDebts(debts));
-        } else {
-            text = Constants.SCHEDULED_NO_DEBTS;
+        log.info("Making everyMonth request about Debts...");
+        try {
+            List<List<Partner>> debts = getResponseAboutDebts();
+            if (debts.size() != 0) {
+                String text = String.format(Constants.ABOUT_DEBTS_MESSAGE, getStringAboutArrearsDebts(debts), getStringAboutSimpleDebts(debts));
+                executeMessage(text, Constants.PUBLIC_CHAT_ID);
+                executeMessage(text, Constants.ADMIN_CHAT_ID);
+            }
+        } catch (GeneralSecurityException | IOException | ParseException e) {
+            log.error("error: ", e);
+            executeMessage(Constants.ERROR_NOTIFICATION, Constants.ADMIN_CHAT_ID);
+        } catch (NoDataFound e) {
+            log.info("error: ", e);
         }
-        executeMessage(text, Constants.PUBLIC_CHAT_ID);
-        executeMessage(text, Constants.ADMIN_CHAT_ID);
     }
 
     @Scheduled(cron = CRON_TODAY_PAYERS, zone = CRON_ZONE)
-    public void reportAboutTodayDebts() throws GeneralSecurityException, IOException, NoDataFound {
-        log.info("Отправляется запрос о Сегодняшних должниках в таблицу.");
-        LinkedList<Partner> persons = new Repository().getTodayPayPersons();
-        String text;
-        if (persons.size() != 0) {
-            text = String.format(TODAY_DEBTS_MESSAGE, getStringAboutTodayDebts(persons));
-        } else {
-            text = Constants.SCHEDULED_NO_TODAY_PAYS;
+    public void reportAboutTodayDebts()  {
+        log.info("Making everyDay request about Debts...");
+        try {
+            LinkedList<Partner> persons = new Repository().getTodayPayPersons();
+            if (persons.size() != 0) {
+                String text = String.format(Constants.TODAY_DEBTS_MESSAGE, getStringAboutTodayDebts(persons));
+                executeMessage(text, Constants.PUBLIC_CHAT_ID);
+                executeMessage(text, Constants.ADMIN_CHAT_ID);
+            }
+        } catch (IOException | GeneralSecurityException e) {
+            log.error("error: ", e);
+            executeMessage(Constants.ERROR_NOTIFICATION, Constants.ADMIN_CHAT_ID);
+        } catch (NoDataFound e) {
+            log.info("error: ", e);
         }
-        executeMessage(text, Constants.PUBLIC_CHAT_ID);
-        executeMessage(text, Constants.ADMIN_CHAT_ID);
     }
 
-    private List<List<Partner>> getResponseAboutDebts() {
-        List<List<Partner>> debts = null;
-        String chatId = Constants.PUBLIC_CHAT_ID;
-        StringBuilder result = new StringBuilder();
-        try {
-            debts = new Repository().findDebt();
-        } catch (IOException | GeneralSecurityException | ParseException | NoDataFound e) {
-            e.printStackTrace();
-        }
-        return debts;
+    private List<List<Partner>> getResponseAboutDebts() throws GeneralSecurityException, IOException, NoDataFound, ParseException {
+        return new Repository().findDebt();
     }
 
     private String getStringAboutArrearsDebts(List<List<Partner>> debts) {
         StringBuilder result = new StringBuilder();
         for (Partner partner : debts.get(0)) {
-            String text = String.format(ARREARS_DEBTS, partner.getName(), partner.getDebt(), partner.getReturnDate());
+            String text = String.format(Constants.ARREARS_DEBTS, partner.getName(), partner.getDebt(), partner.getReturnDate());
             result.append(text);
         }
         return result.toString();
@@ -161,7 +142,7 @@ public class Bot extends SpringWebhookBot {
     private String getStringAboutSimpleDebts(List<List<Partner>> debts) {
         StringBuilder result = new StringBuilder();
         for (Partner partner : debts.get(1)) {
-            String text = String.format(SIMPLE_DEBTS, partner.getName(), partner.getDebt(), partner.getReturnDate());
+            String text = String.format(Constants.SIMPLE_DEBTS, partner.getName(), partner.getDebt(), partner.getReturnDate());
             result.append(text);
         }
         return result.toString();
@@ -170,7 +151,7 @@ public class Bot extends SpringWebhookBot {
     private String getStringAboutTodayDebts(LinkedList<Partner> debts) {
         StringBuilder result = new StringBuilder();
         for (Partner partner : debts) {
-            String text = String.format(SIMPLE_DEBTS, partner.getName(), partner.getDebt(), partner.getReturnDate());
+            String text = String.format(Constants.SIMPLE_DEBTS, partner.getName(), partner.getDebt(), partner.getReturnDate());
             result.append(text);
         }
         return result.toString();
@@ -184,7 +165,7 @@ public class Bot extends SpringWebhookBot {
             message.setText(text);
             execute(message);
         } catch (TelegramApiException e) {
-            e.printStackTrace();
+            log.error("error: ", e);
         }
     }
 }

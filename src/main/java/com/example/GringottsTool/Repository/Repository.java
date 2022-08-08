@@ -131,7 +131,7 @@ public class Repository {
         return Integer.parseInt(str.replaceAll("[\\D]", ""));
     }
 
-    public ArrayList<Partner> findPartners(String expend) throws IOException, NoDataFound {
+    public ArrayList<Partner> findPartners(String lookingFor) throws IOException, NoDataFound {
         List<List<Object>> values = getDataFromTable(PARTNERS_RANGE);
         ArrayList<Partner> result = new ArrayList<>();
         for (List<Object> row : values) {
@@ -139,7 +139,7 @@ public class Repository {
             String tgId = row.get(1).toString();
             String city = row.get(3).toString();
             String searchStr = (name + " " + city).toLowerCase();
-            if (isContains(searchStr, expend.toLowerCase()) || tgId.equals(expend)) {
+            if (isContains(searchStr, lookingFor.toLowerCase()) || tgId.equals(lookingFor)) {
                 Partner partner = getNewPartner(row);
                 result.add(partner);
             }
@@ -285,20 +285,10 @@ public class Repository {
         return proxyList;
     }
     
-    public List<Transaction> getTransactions(Partner partner)  {
+    public List<Transaction> getTransactions(Partner partner) throws IOException {
         String personRequestRange = "Займы!%s:%s".formatted(partner.getRowNumber(), partner.getRowNumber());
-        ValueRange datesResponse = null;
-        try {
-            datesResponse = sheets.spreadsheets().values().get(Constants.SHEET_ID, "Займы!1:1").execute();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        ValueRange personResponse = null;
-        try {
-            personResponse = sheets.spreadsheets().values().get(Constants.SHEET_ID, personRequestRange).execute();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ValueRange datesResponse = sheets.spreadsheets().values().get(Constants.SHEET_ID, "Займы!1:1").execute();
+        ValueRange personResponse = sheets.spreadsheets().values().get(Constants.SHEET_ID, personRequestRange).execute();
         List<List<Object>> dates = null;
         List<List<Object>> values = null;
         if (datesResponse != null) {
@@ -324,13 +314,8 @@ public class Repository {
         return transactions;
     }
 
-    public Partner getPersonRowNumber(String tgId) {
-        ValueRange resNames = null;
-        try {
-            resNames = sheets.spreadsheets().values().get(Constants.SHEET_ID, "Участники!A2:B").execute();
-        } catch (IOException e) {
-            e.printStackTrace();;
-        }
+    public Partner getPersonRowNumber(String tgId) throws IOException {
+        ValueRange resNames = sheets.spreadsheets().values().get(Constants.SHEET_ID, "Участники!A2:B").execute();
         assert resNames != null;
         List<List<Object>> names = resNames.getValues();
         Partner partner = new Partner();
