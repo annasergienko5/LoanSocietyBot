@@ -20,6 +20,11 @@ public interface Constants {
                         
             """;
     String NOT_PARAMETERS = "Нет параметров поиска. Укажи через пробел после /search";
+    String NO_AMOUNT_OF_MONEY = "Нет запрашиваемой суммы. Укажи через пробел после /fast";
+    String LOAN_DENIED = "В займе отказано: сумма превышает доступные тебе 0.6";
+    String LOAN_APPROVED = "Одобрен займ в пределах 0.6 на сумму ";
+    String INCORRECT_AMOUNT_OF_MONEY = "Неверная запрашиваемая сумма";
+    String INCORRECT_MONEY_TYPE = "Неверная запрашиваемая сумма. Укажи целое число";
     String NO_DEBTS = "Должников нет";
     String HELP_OUR = """
             /id - получить id текущего чата

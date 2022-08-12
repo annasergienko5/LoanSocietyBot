@@ -72,6 +72,10 @@ public class Partner {
         return returnDate;
     }
 
+    public double getSumContributions() {
+        return sumContributions;
+    }
+
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();

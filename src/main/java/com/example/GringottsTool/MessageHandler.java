@@ -30,8 +30,9 @@ public class MessageHandler {
         String chatId = message.getChatId().toString();
         long userTgId = message.getFrom().getId();
         log.info("\nReceived message. Chat ID: " + chatId +"\nTelegramm-user ID: " + userTgId );
+        String[] inputTextWithoutName = message.getText().split("@", 2);
+        String[] inputText = inputTextWithoutName[0].split(" ", 2);
         if (chatId.equals(Constants.PUBLIC_CHAT_ID)) {
-            String[] inputText = message.getText().split("@", 2);
             switch (inputText[0]) {
                 case "/id":
                     return getId(chatId);
@@ -45,10 +46,13 @@ public class MessageHandler {
                     return getCards(chatId);
                 case "/rules":
                     return getRules(chatId);
+                case "/fast":
+                    if (inputText.length < 2) {
+                        return new SendMessage(chatId, Constants.NO_AMOUNT_OF_MONEY);
+                    }
+                    return getFast(chatId, userTgId, inputText[1]);
             }
         } else if (chatId.equals(Constants.ADMIN_CHAT_ID) || repository.isPartner(chatId)) {
-            String[] inputTextWithoutName = message.getText().split("@", 2);
-            String[] inputText = inputTextWithoutName[0].split(" ", 2);
             switch (inputText[0]) {
                 case "/start":
                     return getStartMessage(chatId);
@@ -206,6 +210,35 @@ public class MessageHandler {
 
     private SendMessage getStartMessage(String chatId) {
         SendMessage sendMessage = new SendMessage(chatId, "Привет");
+        sendMessage.enableMarkdown(true);
+        return sendMessage;
+    }
+
+    private BotApiMethod<?> getFast(String chatId, long userTgId, String inputText) throws NoDataFound, IOException {
+        int sum;
+        try {
+            sum = Integer.parseInt(inputText);
+        } catch (NumberFormatException e){
+            return new SendMessage(chatId, Constants.INCORRECT_MONEY_TYPE);
+        }
+        if (sum <= 0){
+            return new SendMessage(chatId, Constants.INCORRECT_AMOUNT_OF_MONEY);
+        }
+        ArrayList<Partner> resultList = repository.findPartners(String.valueOf(userTgId));
+        if (resultList.isEmpty()) {
+            return new SendMessage(chatId, Constants.NOT_FOUND_DATA);
+        }
+        String decision;
+        if ((double) sum > resultList.get(0).getSumContributions()){
+            decision = Constants.LOAN_DENIED;
+        } else {
+            decision = Constants.LOAN_APPROVED + inputText;
+        }
+        String info = repository.findInfo().toString();
+        StringBuilder answer = new StringBuilder(decision);
+        answer.append("\n\n" + resultList.get(0).toString());
+        answer.append("\n" + info);
+        SendMessage sendMessage = new SendMessage(chatId, answer.toString());
         sendMessage.enableMarkdown(true);
         return sendMessage;
     }
