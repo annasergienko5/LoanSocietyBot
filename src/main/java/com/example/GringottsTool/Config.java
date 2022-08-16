@@ -1,6 +1,7 @@
 package com.example.GringottsTool;
 
 import com.example.GringottsTool.Exeptions.EnvironmentNullExeption;
+import com.example.GringottsTool.Repository.A1NotationParser;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.context.annotation.Bean;
@@ -98,12 +99,10 @@ public class Config {
     @Bean
     public Bot springWebhookBot(SetWebhook setWebhook, MessageHandler messageHandler) {
         Bot bot = new Bot(setWebhook, messageHandler);
-
         bot.setBotPath(Constants.WEBHOOK_PATH);
         bot.setBotUserName(Constants.BOT_USERNAME);
         bot.setBotToken(Constants.BOT_TOKEN);
         bot.reportStartMessage();
-
         return bot;
     }
 }

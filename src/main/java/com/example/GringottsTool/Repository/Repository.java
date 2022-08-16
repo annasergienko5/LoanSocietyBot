@@ -2,11 +2,10 @@ package com.example.GringottsTool.Repository;
 
 import com.example.GringottsTool.Constants;
 import com.example.GringottsTool.Enteties.*;
+import com.example.GringottsTool.Exeptions.InvalidDataException;
 import com.example.GringottsTool.Exeptions.NoDataFound;
 import com.google.api.services.sheets.v4.Sheets;
-import com.google.api.services.sheets.v4.model.ValueRange;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import com.google.api.services.sheets.v4.model.*;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -16,15 +15,11 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class Repository {
-    private static final String CONTRIBUTION_RANGE = "Взносы!A:AD";
-    private static final String LAST_CONTRIBUTION_RANGE = "Взносы!A:AD";
+    private static final String QUEUE_LOAN = "Очередь!A2:C";
     private static final String CARDS_RANGE = "Держатели!A2:B";
     private static final String INFO_RANGE = "Сводка!B7:B11";
     private static final String PARTNERS_RANGE = "Участники!A2:M";
@@ -33,57 +28,53 @@ public class Repository {
     private static final String DUCK_LIST_RANGE = "Участники!A2:L";
     private static final String TODAY_PAY_PERSONS_RANGE = "Участники!A2:I";
     private static final String PROXY_RANGE = "Прокси!A2:A";
-    private static final Logger logger = LogManager.getLogger();
     Sheets sheets = GoogleSheets.getSheetsService();
 
     public Repository() throws GeneralSecurityException, IOException {
     }
 
-    private List<List<Object>> getDataFromTable(String range) throws IOException, NoDataFound {
+    private List<List<Object>> getDataFromTable(String range) throws NoDataFound, IOException {
         ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
         List<List<Object>> values = response.getValues();
         if (values == null || values.isEmpty()) {
-            logger.info("No data found.");
-            throw new NoDataFound("No data found");
+            throw new NoDataFound(Constants.NOT_FOUND_DATA);
         }
         return values;
     }
 
-    public Contributions findContribution(String expend) throws IOException, NoDataFound {
-        List<List<Object>> values = getDataFromTable(CONTRIBUTION_RANGE);
+    public Contributions findContribution(int tableId) throws IOException, NoDataFound {
+        List<List<Object>> date = getDataFromTable("Взносы!1:1");
+        String range = String.format("Взносы!%d:%d", tableId, tableId);
+        List<List<Object>> values = getDataFromTable(range);
         for (List row : values) {
             String name = row.get(0).toString();
-            if (name.equals(expend)) {
-                ArrayList<Contributions.Contribution> pay = new ArrayList<>();
-                String also;
-                try {
-                    also = row.get(29).toString();
-                } catch (IndexOutOfBoundsException e) {
-                    also = "не было";
-                }
-
-                for (int i = 3; i < 29; i++) {
-                    if (!row.get(i).toString().equals("!") && !row.get(i).toString().isEmpty()) {
-                        pay.add(new Contributions.Contribution(values.get(0).get(i).toString(), row.get(i).toString()));
-                    }
-                }
-                return new Contributions(name, pay, also);
+            ArrayList<Contributions.Contribution> pay = new ArrayList<>();
+            String also;
+            try {
+                also = row.get(row.size()-1).toString();
+            } catch (IndexOutOfBoundsException e) {
+                also = "не было";
             }
+            for (int i = 3; i < (row.size()-1); i++) {
+                if (!row.get(i).toString().equals("!") && !row.get(i).toString().isEmpty()) {
+                    pay.add(new Contributions.Contribution(date.get(0).get(i).toString(), row.get(i).toString()));
+                }
+            }
+            return new Contributions(name, pay, also);
         }
         return null;
     }
 
-    public Contributions.Contribution findLastContribution(String expend) throws IOException, NoDataFound {
-        List<List<Object>> values = getDataFromTable(LAST_CONTRIBUTION_RANGE);
+    public Contributions.Contribution findLastContribution(int tableId) throws IOException, NoDataFound {
+        List<List<Object>> date = getDataFromTable("Взносы!1:1");
+        String range = String.format("Взносы!%d:%d", tableId, tableId);
+        List<List<Object>> values = getDataFromTable(range);
         for (List row : values) {
-            String name = row.get(0).toString();
-            if (name.equals(expend)) {
-                for (int i = 3; i < 29; i++) {
+                for (int i = 3; i < (row.size()-1); i++) {
                     if (!row.get(i).toString().equals("!") && !row.get(i).toString().isEmpty()) {
                         return new Contributions.Contribution(values.get(0).get(i).toString(), row.get(i).toString());
                     }
                 }
-            }
         }
         return null;
     }
@@ -135,19 +126,28 @@ public class Repository {
         List<List<Object>> values = getDataFromTable(PARTNERS_RANGE);
         ArrayList<Partner> result = new ArrayList<>();
         for (List<Object> row : values) {
+            int tableID = 2 + values.indexOf(row);
             String name = row.get(0).toString();
             String tgId = row.get(1).toString();
             String city = row.get(3).toString();
             String searchStr = (name + " " + city).toLowerCase();
             if (isContains(searchStr, lookingFor.toLowerCase()) || tgId.equals(lookingFor)) {
-                Partner partner = getNewPartner(row);
+                Partner partner = getNewPartner(row, tableID);
                 result.add(partner);
             }
         }
         return result;
     }
+    private Partner findPartner(int tableId) throws NoDataFound, IOException {
+        List<List<Object>> values = getDataFromTable(String.format("Участники!A%d:M%d", tableId, tableId));
+        List<Object> row = values.get(0);
+        int tableID = 2 + values.indexOf(row);
+        if (values.size() != 0) {
+            return getNewPartner(row, tableID);
+        }else return null;
+    }
 
-    private Partner getNewPartner(List<Object> row) throws NoDataFound, IOException {
+    private Partner getNewPartner(List<Object> row, int tableID) throws NoDataFound, IOException {
         int maxLoan = findInfo().getMaxLoan();
         String name = row.get(0).toString();
         String tgId = row.get(1).toString();
@@ -157,8 +157,8 @@ public class Repository {
         double sumContributions = Double.parseDouble(row.get(5).toString().replace(",", "."));
         int loan = 0;
         int debt = 0;
-        int dosrochka = 0;
-        int prosrochka = 0;
+        int earlyRepayment = 0;
+        int overdueRepayment = 0;
 
         if (row.get(6).toString().equals("")) {
             loan = Integer.parseInt(row.get(6).toString());
@@ -168,22 +168,22 @@ public class Repository {
         }
         String returnDate = row.get(8).toString();
         if (!row.get(9).toString().equals("")) {
-            dosrochka = Integer.parseInt(row.get(9).toString());
+            earlyRepayment = Integer.parseInt(row.get(9).toString());
         }
         if (!row.get(10).toString().equals("")) {
-            prosrochka = Integer.parseInt(row.get(10).toString());
+            overdueRepayment = Integer.parseInt(row.get(10).toString());
         }
-        int maxMyLoan = getMaxMyLoan(sumContributions, prosrochka, maxLoan);
+        int maxMyLoan = getMaxMyLoan(sumContributions, overdueRepayment, maxLoan);
 
         boolean elite = false;
-        boolean vznosZaMesac = false;
+        boolean isPayedThisMonth = false;
         if (row.get(11).toString().equals("1")) {
             elite = true;
         }
         if (row.get(12).toString().equals("1")) {
-            vznosZaMesac = true;
+            isPayedThisMonth = true;
         }
-        return new Partner(name, tgId, vk, city, maxMyLoan, contributions, sumContributions, loan, debt, returnDate, dosrochka, prosrochka, elite, vznosZaMesac);
+        return new Partner(tableID ,name, tgId, vk, city, maxMyLoan, contributions, sumContributions, loan, debt, returnDate, earlyRepayment, overdueRepayment, elite, isPayedThisMonth);
     }
 
     private int getMaxMyLoan(double sumContributions,int prosrochka, int maxLoan){
@@ -234,9 +234,12 @@ public class Repository {
                 Date date = dateFormat.parse(row.get(8).toString());
                 String name = row.get(0).toString();
                 String returnDate = row.get(8).toString();
+                int tableId = values.indexOf(row) + 2;
+                Partner partner = new Partner(name, debt, returnDate);
+                partner.setTableId(tableId);
                 if (date.getTime() <= dateNow.getTime()) {
-                    result.get(0).add(new Partner(name, debt, returnDate));
-                } else result.get(1).add(new Partner(name, debt, returnDate));
+                    result.get(0).add(partner);
+                } else result.get(1).add(partner);
             }
         }
         return result;
@@ -284,9 +287,9 @@ public class Repository {
         }
         return proxyList;
     }
-    
-    public List<Transaction> getTransactions(Partner partner) throws IOException {
-        String personRequestRange = "Займы!%s:%s".formatted(partner.getRowNumber(), partner.getRowNumber());
+
+    public List<Transaction> getTransactions(Partner partner) throws IOException, InvalidDataException {
+        String personRequestRange = "Займы!%s:%s".formatted(partner.getTableId(), partner.getTableId());
         ValueRange datesResponse = sheets.spreadsheets().values().get(Constants.SHEET_ID, "Займы!1:1").execute();
         ValueRange personResponse = sheets.spreadsheets().values().get(Constants.SHEET_ID, personRequestRange).execute();
         List<List<Object>> dates = null;
@@ -305,7 +308,13 @@ public class Repository {
                     if (cellValue.isBlank()) {
                     } else {
                         String date = ((dates.get(0)).get(i)).toString();
-                        Transaction transaction = new Transaction(date, Integer.parseInt(cellValue));
+                        int value;
+                        try {
+                            value = Integer.parseInt(cellValue);
+                        } catch (NumberFormatException ignored) {
+                            throw new InvalidDataException("Error in getTransactions",personRequestRange, i + 1, cellValue, Constants.NUMERIC_DECIMAL_EXPECTED_VALUE);
+                        }
+                        Transaction transaction = new Transaction(date, value);
                         transactions.add(transaction);
                     }
                 }
@@ -314,21 +323,89 @@ public class Repository {
         return transactions;
     }
 
-    public Partner getPersonRowNumber(String tgId) throws IOException {
+    public Partner getPersonRowNumber(String tgId) throws IOException, NoDataFound {
         ValueRange resNames = sheets.spreadsheets().values().get(Constants.SHEET_ID, "Участники!A2:B").execute();
-        assert resNames != null;
+        if (resNames == null) {
+            throw new NoDataFound("No data found in sheet: \"Участники\"!");
+        }
         List<List<Object>> names = resNames.getValues();
         Partner partner = new Partner();
         partner.setTgId(tgId);
         for (List row : names) {
             String name = row.get(0).toString();
             String thisTgId = row.get(1).toString();
-            if (tgId.equals(thisTgId)) {
-                partner.setName(name);
-                partner.setRowNumber(names.indexOf(row) + 2);
+                if (tgId.equals(thisTgId)) {
+                    partner.setName(name);
+                    partner.setTableId(names.indexOf(row) + 2);
             }
         }
         return partner;
+    }
+
+    public Queue<QueueItem> getQueue() throws NoDataFound, IOException, NumberFormatException, InvalidDataException {
+        List<List<Object>> values = getDataFromTable(QUEUE_LOAN);
+        Queue<QueueItem> result = new LinkedList<>();
+        for (List<Object> row : values){
+            String name = row.get(0).toString();
+            String tgId = row.get(1).toString();
+            int sum;
+            try {
+                sum = Integer.parseInt(row.get(2).toString());
+            } catch (NumberFormatException ignored) {
+                throw new InvalidDataException("Error in getQueue",QUEUE_LOAN, 3, row.get(2).toString(), Constants.NUMERIC_DECIMAL_EXPECTED_VALUE);
+            }
+            result.add(new QueueItem(name, tgId, sum));
+        }
+        return result;
+    }
+
+    public String addQueueItem(String tableIdString, int sum) throws NoDataFound, IOException, NumberFormatException, InvalidDataException {
+        int tableId;
+        try {
+            tableId = Integer.parseInt(tableIdString);
+            if (tableId < 2){
+                throw new NumberFormatException();
+            }
+        }catch (NumberFormatException e){
+            return Constants.NOT_PARTNER_FROM_ID;
+        }
+        int count = getNumberInQueue(tableId);
+        if (count == 0){
+            String name;
+            Partner partner = findPartner(tableId);
+            if (partner == null){
+                return Constants.NOT_PARTNERS;
+            }else name = partner.getName();
+            ValueRange appendBody = new ValueRange()
+                    .setValues(Arrays.asList(Arrays.asList(name, tableId, sum)));
+            sheets.spreadsheets().values()
+                    .append(Constants.SHEET_ID, "Очередь", appendBody)
+                    .setValueInputOption("USER_ENTERED")
+                    .setIncludeValuesInResponse(true)
+                    .execute();
+            return Constants.ADDED_IN_QUEUE;
+        }else {
+            ValueRange body = new ValueRange()
+                    .setValues(Arrays.asList(Arrays.asList(sum)));
+            sheets.spreadsheets().values()
+                    .update(Constants.SHEET_ID, String.format("Очередь!C%d", count), body)
+                    .setValueInputOption("RAW")
+                    .execute();
+            return Constants.ALREADY_ADDED_IN_QUEUE;
+        }
+
+    }
+
+    private int getNumberInQueue(int tableId) throws InvalidDataException, NoDataFound, IOException,  NumberFormatException {
+        Queue<QueueItem> queues = getQueue();
+        int count = 2;
+        for (QueueItem q : queues){
+            if (Integer.parseInt(q.getTgId()) == tableId){
+                return count;
+            }
+            count++;
+        }
+        return 0;
     }
 }
 
