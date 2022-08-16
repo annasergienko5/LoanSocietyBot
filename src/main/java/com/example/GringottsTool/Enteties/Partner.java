@@ -1,6 +1,7 @@
 package com.example.GringottsTool.Enteties;
 
 public class Partner {
+    private int tableId;
     private String name;
     private String tgId;
     private String vk;
@@ -11,13 +12,13 @@ public class Partner {
     private int loan;
     private int debt;
     private String returnDate;
-    private int dosrochka;
-    private int prosrochka;
+    private int amountOfEarlyRepayment;
+    private int amountOfOverdueRepayment;
     private boolean elite;
-    private boolean vznosZaMesac;
-    private int rowNumber;
+    private boolean payedInThisMonth;
 
-    public Partner(String name, String tgId, String vk, String city, int maxMyLoan, int contributions, double sumContributions, int loan, int debt, String returnDate, int dosrochka, int prosrochka, boolean elite, boolean vznosZaMesac) {
+    public Partner(int tableId, String name, String tgId, String vk, String city, int maxMyLoan, int contributions, double sumContributions, int loan, int debt, String returnDate, int amountOfEarlyRepayment, int amountOfOverdueRepayment, boolean elite, boolean payedInThisMonth) {
+        this.tableId = tableId;
         this.name = name;
         this.tgId = tgId;
         this.vk = vk;
@@ -28,10 +29,10 @@ public class Partner {
         this.loan = loan;
         this.debt = debt;
         this.returnDate = returnDate;
-        this.dosrochka = dosrochka;
-        this.prosrochka = prosrochka;
+        this.amountOfEarlyRepayment = amountOfEarlyRepayment;
+        this.amountOfOverdueRepayment = amountOfOverdueRepayment;
         this.elite = elite;
-        this.vznosZaMesac = vznosZaMesac;
+        this.payedInThisMonth = payedInThisMonth;
     }
 
     public Partner() {
@@ -47,6 +48,7 @@ public class Partner {
         this.debt = debt;
         this.returnDate = returnDate;
     }
+
 
 
     public String getTgId() {
@@ -89,26 +91,25 @@ public class Partner {
             sb.append("\nСейчас должен: " + this.debt);
             sb.append("\nДата возврата: " + this.returnDate);
         }
-        if (this.dosrochka != 0){
-            sb.append("\nДосрочных погашений: " + this.dosrochka);
+        if (this.amountOfEarlyRepayment != 0){
+            sb.append("\nДосрочных погашений: " + this.amountOfEarlyRepayment);
         }else sb.append("\nДосрочных погашений: нет");
-        if (this.prosrochka != 0){
-            sb.append("\nПросрочек: " + this.prosrochka);
+        if (this.amountOfOverdueRepayment != 0){
+            sb.append("\nПросрочек: " + this.amountOfOverdueRepayment);
         }else sb.append("\nПросрочек: нет");
         if (this.elite){
             sb.append("\nВзносы за прошедшие 3 месяца: уплачено");
         }else sb.append("\nВзносы за прошедшие 3 месяца: не уплачено");
-        if (this.vznosZaMesac){
+        if (this.payedInThisMonth){
             sb.append("\nВзносы за текущий месяц: уплачено");
         }else sb.append("\nВзносы за текущий месяц: не уплачено");
         return sb.toString();
     }
 
-    public int getRowNumber() {
-        return rowNumber;
+    public int getTableId() {
+        return tableId;
     }
-
-    public void setRowNumber(int rowNumber) {
-        this.rowNumber = rowNumber;
+    public void setTableId(int tableId) {
+        this.tableId = tableId;
     }
 }

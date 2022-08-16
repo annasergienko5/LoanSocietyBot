@@ -2,6 +2,7 @@ package com.example.GringottsTool;
 
 
 import com.example.GringottsTool.Enteties.Partner;
+import com.example.GringottsTool.Exeptions.InvalidDataException;
 import com.example.GringottsTool.Exeptions.NoDataFound;
 import com.example.GringottsTool.Repository.Repository;
 import org.apache.logging.log4j.LogManager;
@@ -60,19 +61,28 @@ public class Bot extends SpringWebhookBot {
             Message message = update.getMessage();
             String chatId = message.getChatId().toString();
             long userTgId = message.getFrom().getId();
+            String userName = message.getChat().getUserName();
             String[] inputText = message.getText().split("@", 2);
             String usedFunction = inputText[0];
+            String errorMessage = String.format(Constants.ERROR_IN_SOME_FUNCTION, usedFunction, chatId, userTgId, userName);
             if (message.getText() != null) {
                     try {
                         return messageHandler.answerMessage(update.getMessage());
-                    } catch (GeneralSecurityException | IOException | ParseException e) {
-                        log.error(("\nError in function:" + usedFunction + "\nchatId:" + chatId + "\nby userTgId:" + userTgId), e);
-                        executeMessage(String.format(Constants.ERROR_IN_SOME_FUNCTION, usedFunction, chatId, userTgId), Constants.ADMIN_CHAT_ID);
+                    } catch (GeneralSecurityException | IOException e) {
+                        log.error(errorMessage, e);
+                        executeMessage(errorMessage, Constants.ADMIN_CHAT_ID);
                     } catch (NoDataFound e) {
-                        log.info("error: ", e);
-                        executeMessage(Constants.NOT_FOUND_DATA, chatId);
+                        log.info(e.getMessage(), e);
+                        executeMessage(e.getMessage(), chatId);
+                    } catch (InvalidDataException e) {
+                        executeMessage(Constants.INVALID_DATA_IN_CELLS, chatId);
+                        executeMessage(errorMessage + Constants.INVALID_DATA_IN_CELLS_TO_ADMIN + e.toMessage(), Constants.ADMIN_CHAT_ID);
+                    } catch (NumberFormatException | ParseException e) {
+                        log.info(e.getMessage(), e);
+                        executeMessage(Constants.INVALID_DATA_IN_CELLS, chatId);
+                        executeMessage(errorMessage + Constants.INVALID_DATA_IN_CELLS_TO_ADMIN, Constants.ADMIN_CHAT_ID);
                     }
-                }
+            }
             }
         return null;
     }

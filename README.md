@@ -27,12 +27,13 @@
 … и запускаем приложение в своей IDE!
 
 Переменные окружения при запуске:
-* WEBHOOK_PATH - url сгенерированный ngrok
+* WEBHOOK_PATH - url сгенерированный ngrok или другой адрес сервера который будет ловить обновления
 * TOKEN_BOT - токен бота
 * BOT_USERNAME - имя бота
-* PORT - порт, который вы задали при запуске ngrok
+* PORT - порт, который вы задали при запуске ngrok или другой локальный порт на который будут приходить обновления с сервера
 * APPLICATION_NAME - имя приложения (пример: Google Sheet Service)
-* CREDENTIALS_FILE_PATH - путь к файлу json для подключения к google api (файл должен лежать в resource)
+* CREDENTIALS_FILE_PATH - путь к файлу  json для подключения к google api (файл должен лежать в resource) 
+Пример: "CREDENTIALS_FILE_PATH=/token/Web Client 4.json"
 * SHEET_ID - id таблички из url (пример: https://docs.google.com/spreadsheets/d/1234abcd/edit#gid=1825291932 "1234abcd" - это id)
 * RULE - ссылка на правила
 * PUBLIC_CHAT_ID - идентификационный номер телеграмм общего чата ПОЛЬЗОВАТЕЛЕЙ приложения. Например:"PUBLIC_CHAT_ID=-730818881"
