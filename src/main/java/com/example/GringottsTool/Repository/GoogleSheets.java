@@ -1,4 +1,4 @@
-package com.example.GringottsTool.CRUD;
+package com.example.GringottsTool.Repository;
 import com.example.GringottsTool.Constants;
 import com.google.api.client.auth.oauth2.Credential;
 import com.google.api.client.extensions.java6.auth.oauth2.AuthorizationCodeInstalledApp;
