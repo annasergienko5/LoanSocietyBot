@@ -8,6 +8,7 @@ import com.example.GringottsTool.Enteties.*;
 import com.example.GringottsTool.Exeptions.InvalidDataException;
 import com.example.GringottsTool.Exeptions.NoDataFound;
 import com.example.GringottsTool.Repository.Repository;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 
@@ -64,7 +66,7 @@ public class MessageHandler {
             case "/status":
                 return getStatus(chatId);
             case "/debts":
-                return getDebts(chatId);
+                return getDebtors(chatId);
             case "/cards":
                 return getCards(chatId);
             case "/rules":
@@ -103,7 +105,7 @@ public class MessageHandler {
             case "/status":
                 return getStatus(chatId);
             case "/debts":
-                return getDebts(chatId);
+                return getDebtors(chatId);
             case "/cards":
                 return getCards(chatId);
             case "/rules":
@@ -132,7 +134,7 @@ public class MessageHandler {
             case "/id" -> getId(chatId);
             case "/help" -> getHelp(chatId, Constants.HELP_PUBLIC_CHAT);
             case "/status" -> getStatus(chatId);
-            case "/debts" -> getDebts(chatId);
+            case "/debts" -> getDebtors(chatId);
             case "/cards" -> getCards(chatId);
             case "/rules" -> getRules(chatId);
             case "/fast" -> getFast(chatId, userTgId, inputText);
@@ -169,7 +171,7 @@ public class MessageHandler {
     }
 
     private BotApiMethod<?> getDucklist(String chatId) throws IOException, NoDataFound {
-        ArrayList<Partner> elitePartners = repository.getDuckList();
+        List<Partner> elitePartners = repository.getDuckList();
         StringBuffer result = new StringBuffer();
         if (elitePartners.size() == 0) {
             throw new NoDataFound(Constants.NOT_FOUND_DATA);
@@ -186,8 +188,8 @@ public class MessageHandler {
     }
 
     private BotApiMethod<?> getAboutMyPayment(String chatId, long userTgId) throws IOException, NoDataFound {
-        Partner partner = repository.getPersonRowNumber(String.valueOf(userTgId));
-        Contributions contributions = repository.findContribution(partner.getTableId());
+        Partner partner = repository.getPartnerByTgId(String.valueOf(userTgId));
+        Contributions contributions = repository.getContribution(partner);
         if (contributions != null) {
                 return new SendMessage(chatId, contributions.toString());
             }
@@ -195,7 +197,7 @@ public class MessageHandler {
     }
 
     private BotApiMethod<?> getAboutme(String chatId, long userTgId) throws IOException, NoDataFound {
-        ArrayList<Partner> resultList = repository.findPartners(String.valueOf(userTgId));
+        List<Partner> resultList = repository.getPartners(String.valueOf(userTgId));
         if (resultList.isEmpty()) {
             throw new NoDataFound(Constants.NOT_FOUND_DATA);
         } else {
@@ -205,7 +207,7 @@ public class MessageHandler {
 
     private BotApiMethod<?> getCards(String chatId) throws IOException, NoDataFound {
         StringBuffer res = new StringBuffer();
-        ArrayList<Cards> cards = repository.findCards();
+        List<Cards> cards = repository.getCards();
         if (cards.isEmpty()){
             throw new NoDataFound(Constants.NOT_FOUND_DATA);
         }
@@ -215,9 +217,9 @@ public class MessageHandler {
         return new SendMessage(chatId, res.toString());
     }
 
-    public BotApiMethod<?> getDebts(String chatId) throws IOException, ParseException, NoDataFound {
+    public BotApiMethod<?> getDebtors(String chatId) throws IOException, ParseException, NoDataFound {
         StringBuffer result = new StringBuffer();
-        List<List<Partner>> debts = repository.findDebt();
+        List<List<Partner>> debts = repository.getDebtors();
         if (debts.size() == 0) {
             throw new NoDataFound(Constants.NOT_FOUND_DATA);
         }
@@ -230,7 +232,7 @@ public class MessageHandler {
         result.append("----------\n\n")
                 .append("*Должники:*\n\n");
         for (Partner partner : debts.get(1)) {
-            Contributions.Contribution lastContr = repository.findLastContribution(partner.getTableId());
+            Contributions.Contribution lastContr = repository.getLastContribution(partner);
             result.append("*" + partner.getName() + "*\n")
                     .append(partner.getDebt() + "₽\n")
                     .append("до: " + partner.getReturnDate() + "\n")
@@ -245,7 +247,7 @@ public class MessageHandler {
     }
 
     private BotApiMethod<?> getStatus(String chatId) throws IOException, NoDataFound {
-        String result = repository.findInfo().toString();
+        String result = repository.getInfo().toString();
         SendMessage sendMessage = new SendMessage();
         sendMessage.enableMarkdown(true);
         sendMessage.setChatId(chatId);
@@ -253,8 +255,8 @@ public class MessageHandler {
         return sendMessage;
     }
 
-    private BotApiMethod<?> getSearch(String chatId, String lookingFor) throws IOException, NoDataFound {
-        ArrayList<Partner> resultList = repository.findPartners(lookingFor);
+    private BotApiMethod<?> getSearch(String chatId, String nameOrTgId) throws IOException, NoDataFound {
+        List<Partner> resultList = repository.getPartners(nameOrTgId);
         SendMessage sendMessage;
         if (resultList.size() == 0) {
             throw new NoDataFound(Constants.NOT_FOUND_DATA);
@@ -287,7 +289,7 @@ public class MessageHandler {
         if (sum <= 0){
             return new SendMessage(chatId, Constants.INCORRECT_AMOUNT_OF_MONEY);
         }
-        ArrayList<Partner> resultList = repository.findPartners(String.valueOf(userTgId));
+        List<Partner> resultList = repository.getPartners(String.valueOf(userTgId));
         if (resultList.isEmpty()) {
             return new SendMessage(chatId, Constants.NOT_FOUND_DATA);
         }
@@ -297,7 +299,7 @@ public class MessageHandler {
         } else {
             decision = Constants.LOAN_APPROVED + inputText;
         }
-        String info = repository.findInfo().toString();
+        String info = repository.getInfo().toString();
         StringBuilder answer = new StringBuilder(decision);
         answer.append("\n\n" + resultList.get(0).toString());
         answer.append("\n" + info);
@@ -307,7 +309,7 @@ public class MessageHandler {
     }
 
     private BotApiMethod<?> getProxy(String chatId) throws NoDataFound, IOException {
-        List<String> proxyList = repository.findProxy();
+        List<String> proxyList = repository.getProxy();
         StringBuilder result = new StringBuilder("Наши прокси-серверы:");
         int i = 1;
         for (String proxy : proxyList){
@@ -324,7 +326,7 @@ public class MessageHandler {
 
     private BotApiMethod<?> getCreditHistory(String chatId, long tgId, boolean full) throws NoDataFound, IOException, NumberFormatException, InvalidDataException {
         log.info("\n getCreditHistory STARTED from chatId: " + chatId + "\n From user with tgId: " + tgId + "\n Is full CreditHistory?: " + full);
-        Partner partner = repository.getPersonRowNumber(String.valueOf(tgId));
+        Partner partner = repository.getPartnerByTgId(String.valueOf(tgId));
         List<Transaction> transactions;
         if (partner.getTableId() == 0) {
             throw new NoDataFound(Constants.NOT_FOUND_DATA);
@@ -347,5 +349,49 @@ public class MessageHandler {
         sendMessage.setChatId(chatId);
         sendMessage.setText(message);
         return sendMessage;
+    }
+    public String getTodayDebtors() throws NoDataFound, IOException {
+        List<Partner> persons =  repository.getTodayDebtors();
+        String text;
+        if (persons.size() != 0) {
+            text = String.format(Constants.TODAY_DEBTS_MESSAGE, getStringAboutTodayDebts(persons));
+        } else {
+            throw new NoDataFound("No information about debtors.");
+        }
+        return text;
+    }
+    private String getStringAboutTodayDebts(List<Partner> debts) {
+        StringBuilder result = new StringBuilder();
+        for (Partner partner : debts) {
+            String text = String.format(Constants.SIMPLE_DEBTS, partner.getName(), partner.getDebt(), partner.getReturnDate());
+            result.append(text);
+        }
+        return result.toString();
+    }
+    public String getDebtors() throws GeneralSecurityException, IOException, NoDataFound, ParseException {
+        List<List<Partner>> debtors = repository.getDebtors();
+        String text = null;
+        if (debtors.size() != 0) {
+            text = String.format(Constants.ABOUT_DEBTS_MESSAGE, getStringAboutArrearsDebts(debtors), getStringAboutSimpleDebts(debtors));
+        } else {
+            throw new NoDataFound("No debtors found.");
+        }
+        return text;
+    }
+    private String getStringAboutArrearsDebts(List<List<Partner>> debts) {
+        StringBuilder result = new StringBuilder();
+        for (Partner partner : debts.get(0)) {
+            String text = String.format(Constants.ARREARS_DEBTS, partner.getName(), partner.getDebt(), partner.getReturnDate());
+            result.append(text);
+        }
+        return result.toString();
+    }
+        private String getStringAboutSimpleDebts(List<List<Partner>> debts) {
+        StringBuilder result = new StringBuilder();
+        for (Partner partner : debts.get(1)) {
+            String text = String.format(Constants.SIMPLE_DEBTS, partner.getName(), partner.getDebt(), partner.getReturnDate());
+            result.append(text);
+        }
+        return result.toString();
     }
 }
