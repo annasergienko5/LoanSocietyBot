@@ -4,6 +4,7 @@ package com.example.GringottsTool;
 import com.example.GringottsTool.Enteties.Partner;
 import com.example.GringottsTool.Exeptions.InvalidDataException;
 import com.example.GringottsTool.Exeptions.NoDataFound;
+import com.example.GringottsTool.Repository.GoogleSheetRepository;
 import com.example.GringottsTool.Repository.Repository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -62,10 +63,10 @@ public class Bot extends SpringWebhookBot {
             String chatId = message.getChatId().toString();
             long userTgId = message.getFrom().getId();
             String userName = message.getChat().getUserName();
-            String[] inputText = message.getText().split("@", 2);
-            String usedFunction = inputText[0];
-            String errorMessage = String.format(Constants.ERROR_IN_SOME_FUNCTION, usedFunction, chatId, userTgId, userName);
             if (message.getText() != null) {
+                String[] inputText = message.getText().split("@", 2);
+                String usedFunction = inputText[0];
+                String errorMessage = String.format(Constants.ERROR_IN_SOME_FUNCTION, usedFunction, chatId, userTgId, userName);
                     try {
                         return messageHandler.answerMessage(update.getMessage());
                     } catch (GeneralSecurityException | IOException e) {
@@ -83,7 +84,7 @@ public class Bot extends SpringWebhookBot {
                         executeMessage(errorMessage + Constants.INVALID_DATA_IN_CELLS_TO_ADMIN, Constants.ADMIN_CHAT_ID);
                     }
             }
-            }
+        }
         return null;
     }
 
@@ -104,9 +105,8 @@ public class Bot extends SpringWebhookBot {
     public void reportAboutDebts() {
         log.info("Making everyMonth request about Debts...");
         try {
-            List<List<Partner>> debts = getResponseAboutDebts();
-            if (debts.size() != 0) {
-                String text = String.format(Constants.ABOUT_DEBTS_MESSAGE, getStringAboutArrearsDebts(debts), getStringAboutSimpleDebts(debts));
+            String text = messageHandler.getDebtors();
+            if (text != null) {
                 executeMessage(text, Constants.PUBLIC_CHAT_ID);
                 executeMessage(text, Constants.ADMIN_CHAT_ID);
             }
@@ -122,13 +122,12 @@ public class Bot extends SpringWebhookBot {
     public void reportAboutTodayDebts()  {
         log.info("Making everyDay request about Debts...");
         try {
-            LinkedList<Partner> persons = new Repository().getTodayPayPersons();
-            if (persons.size() != 0) {
-                String text = String.format(Constants.TODAY_DEBTS_MESSAGE, getStringAboutTodayDebts(persons));
+            String text = messageHandler.getTodayDebtors();
+            if (text != null) {
                 executeMessage(text, Constants.PUBLIC_CHAT_ID);
                 executeMessage(text, Constants.ADMIN_CHAT_ID);
             }
-        } catch (IOException | GeneralSecurityException e) {
+        } catch (IOException e) {
             log.error("error: ", e);
             executeMessage(Constants.ERROR_NOTIFICATION, Constants.ADMIN_CHAT_ID);
         } catch (NoDataFound e) {
@@ -136,36 +135,6 @@ public class Bot extends SpringWebhookBot {
         }
     }
 
-    private List<List<Partner>> getResponseAboutDebts() throws GeneralSecurityException, IOException, NoDataFound, ParseException {
-        return new Repository().findDebt();
-    }
-
-    private String getStringAboutArrearsDebts(List<List<Partner>> debts) {
-        StringBuilder result = new StringBuilder();
-        for (Partner partner : debts.get(0)) {
-            String text = String.format(Constants.ARREARS_DEBTS, partner.getName(), partner.getDebt(), partner.getReturnDate());
-            result.append(text);
-        }
-        return result.toString();
-    }
-
-    private String getStringAboutSimpleDebts(List<List<Partner>> debts) {
-        StringBuilder result = new StringBuilder();
-        for (Partner partner : debts.get(1)) {
-            String text = String.format(Constants.SIMPLE_DEBTS, partner.getName(), partner.getDebt(), partner.getReturnDate());
-            result.append(text);
-        }
-        return result.toString();
-    }
-
-    private String getStringAboutTodayDebts(LinkedList<Partner> debts) {
-        StringBuilder result = new StringBuilder();
-        for (Partner partner : debts) {
-            String text = String.format(Constants.SIMPLE_DEBTS, partner.getName(), partner.getDebt(), partner.getReturnDate());
-            result.append(text);
-        }
-        return result.toString();
-    }
 
     private void executeMessage(String text, String chatID) {
         try {
