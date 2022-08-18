@@ -2,6 +2,11 @@ package com.example.GringottsTool;
 
 public interface Constants {
     String START_MESSAGE = "Добрый день! Бот работает и готов принимать запросы.";
+    String TOKEN_RESPONSE_EXCEPTION =  """
+            "ВНИМАНИЕ: Токен доступа к базе данных заблокирован или отозван.
+            Обратитесь к разработчику.
+            Обычно достаточно получить новый файл \\"StoredCredential\\", просто удалив старый.
+            """;
     double MAXIMUM_LOAN_COEFFICIENT = 0.125;
     String BOT_TOKEN = System.getenv("TOKEN_BOT");
     String BOT_USERNAME = System.getenv("BOT_USERNAME");
