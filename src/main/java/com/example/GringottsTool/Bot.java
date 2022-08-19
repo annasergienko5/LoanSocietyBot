@@ -1,14 +1,6 @@
 package com.example.GringottsTool;
 
 
-import com.example.GringottsTool.Enteties.Partner;
-import com.example.GringottsTool.Exeptions.InvalidDataException;
-import com.example.GringottsTool.Exeptions.NoDataFound;
-import com.example.GringottsTool.Repository.GoogleSheetRepository;
-import com.example.GringottsTool.Repository.Repository;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -21,8 +13,6 @@ import org.telegram.telegrambots.starter.SpringWebhookBot;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.text.ParseException;
-import java.util.LinkedList;
-import java.util.List;
 
 public class Bot extends SpringWebhookBot {
     private final MessageHandler messageHandler;
@@ -69,6 +59,10 @@ public class Bot extends SpringWebhookBot {
                 String errorMessage = String.format(Constants.ERROR_IN_SOME_FUNCTION, usedFunction, chatId, userTgId, userName);
                     try {
                         return messageHandler.answerMessage(update.getMessage());
+                    } catch (TokenResponseException e) {
+                        log.error(errorMessage, e);
+                        executeMessage(Constants.TOKEN_RESPONSE_EXCEPTION, Constants.ADMIN_CHAT_ID);
+                        System.exit(-1);
                     } catch (GeneralSecurityException | IOException e) {
                         log.error(errorMessage, e);
                         executeMessage(errorMessage, Constants.ADMIN_CHAT_ID);
