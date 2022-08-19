@@ -54,7 +54,7 @@ deploy-with-art-branch:
     FIRST_NAME: $CI_COMMIT_BRANCH
     COPY_TO: branches
   except:
-    - master
+    - main
     - dev
     - tags
   when: manual
