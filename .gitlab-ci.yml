@@ -2,6 +2,8 @@ variables:
   DOCKER_HOST: tcp://docker:2375
   DOCKER_TLS_CERTDIR: ""
   MAVEN_IMAGE: maven:3.8.5-openjdk-17-slim
+  COPY_TO: ''
+  FIRST_NAME: ''
 
 services:
   - docker:20.10.16-dind
@@ -9,13 +11,77 @@ services:
 stages:
   - build
   - deploy
+  - notification
 
-build-jar:
+build-jar-with-art:
   stage: build
   image: "$MAVEN_IMAGE"
-  when: manual
   script:
-    - mvn clean package -DskipTests
+    - mvn clean package -DskipTests=true
+    - ls ./target
+  artifacts:
+    paths:
+      - ./target/GringottsTool.jar
+    expire_in: 1h
+    when: on_success
+
+before_script:
+  # the following script is taken from https://docs.gitlab.com/ee/ci/ssh_keys/README.html
+  - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
+  - eval $(ssh-agent -s)
+  - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
+  - mkdir -p ~/.ssh
+  - chmod 700 ~/.ssh
+
+.deploy-with-art:
+  stage: deploy
+  image: ubuntu:latest
+  variables:
+    FIRST_NAME:$CI_COMMIT_BRANCH
+  script:
+    - ls ./target # артефакт из build-jar
+    - mv ./target/GringottsTool.jar ./GringottsTool-$FIRST_NAME-$CI_COMMIT_SHA.jar
+    - ls 
+    - apt-get install -y openssh-client
+    - /usr/bin/scp -P 6022 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null GringottsTool-$FIRST_NAME-$CI_COMMIT_SHA.jar depl0y@dev.staff4.me:/home/depl0y/$COPY_TO
+  dependencies:
+    - build-jar-with-art
+  needs: ["build-jar-with-art"]
+
+deploy-with-art-branch:
+  extends: .deploy-with-art
+  variables:
+    FIRST_NAME: $CI_COMMIT_BRANCH
+    COPY_TO: branches
+  except:
+    - master
+    - dev
+    - tags
+  when: manual
+
+deploy-with-art-dev:
+  extends: .deploy-with-art
+  variables:
+    FIRST_NAME: $CI_COMMIT_BRANCH
+    COPY_TO: dev
+  only:
+    - dev
+
+deploy-with-art-tag:
+  extends: .deploy-with-art
+  variables:
+    FIRST_NAME: $CI_COMMIT_TAG
+    COPY_TO: prod
+  only:
+    - tags
+
+
+# notificate-dev:
+#   stage: notification
+#   image: ellerbrock/alpine-bash-curl-ssl
+#   script:
+#     - /bin/bash ops/notificate.sh $BOT_KEY $CHAT_ADMIN_ID
+#   needs: ["deploy-with-art-branch"]
 
 unit-test:
   stage: build
@@ -27,16 +93,9 @@ unit-test:
 
 build-docker:
   stage: build
-  when: manual
+  needs: ["build-jar-with-art"]
   script:
-    - echo "$D_PASSWORD" | docker login -u "$D_USER" --password-stdin registry-1.docker.io
-    - docker build -t tut0r/gringottstool:latest .
-    # - docker build -t tut0r/gringottstool:"$CI_COMMIT_SHORT_SHA" .
-    # - docker push tut0r/gringottstool:"$CI_COMMIT_SHORT_SHA"
-    - docker push tut0r/gringottstool:latest
-
-deploy:
-  stage: deploy
-  script:
-    - echo "Deploying application..."
-    - echo "Application successfully deployed."
+    - mv target/GringottsTool.jar ./
+    - docker login registry.gitlab.com -u gitlab+deploy-token-test -p $DOCKER_REGISTRY_TOKEN
+    - docker build -t registry.gitlab.com/goblin_dev_inc/gringottstool .
+    - docker push registry.gitlab.com/goblin_dev_inc/gringottstool
