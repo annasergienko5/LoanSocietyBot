@@ -113,8 +113,7 @@ public class Bot extends SpringWebhookBot {
         } catch (GeneralSecurityException | IOException | ParseException e) {
             log.error("error: ", e);
             executeMessage(Constants.ERROR_NOTIFICATION, Constants.ADMIN_CHAT_ID);
-        } catch (NoDataFound e) {
-            log.info("error: ", e);
+        } catch (NoDataFound ignored) {
         }
     }
 
@@ -130,8 +129,7 @@ public class Bot extends SpringWebhookBot {
         } catch (IOException e) {
             log.error("error: ", e);
             executeMessage(Constants.ERROR_NOTIFICATION, Constants.ADMIN_CHAT_ID);
-        } catch (NoDataFound e) {
-            log.info("error: ", e);
+        } catch (NoDataFound ignored) {
         }
     }
 

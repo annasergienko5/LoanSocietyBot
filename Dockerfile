@@ -6,6 +6,6 @@ RUN ls -al
 RUN mvn clean package -DskipTests
 
 FROM gcr.io/distroless/java17
-COPY --from=build /home/app/target/GringottsTool-0.0.1-SNAPSHOT.jar /usr/local/lib/app.jar
+COPY GringottsTool.jar /usr/local/lib/app.jar
 EXPOSE 8080
 ENTRYPOINT ["java","-Xmx128m","-Xms64m","-jar","/usr/local/lib/app.jar"]
