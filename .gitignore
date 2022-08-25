@@ -14,3 +14,4 @@ logs
 Auth.env
 src/main/resources/token
 tokens
+token

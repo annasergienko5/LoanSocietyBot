@@ -352,12 +352,10 @@ public class MessageHandler {
     }
     public String getTodayDebtors() throws NoDataFound, IOException {
         List<Partner> persons =  repository.getTodayDebtors();
-        String text;
+        String text = null;
         if (persons.size() != 0) {
             text = String.format(Constants.TODAY_DEBTS_MESSAGE, getStringAboutTodayDebts(persons));
-        } else {
-            throw new NoDataFound("No information about debtors.");
-        }
+        } 
         return text;
     }
     private String getStringAboutTodayDebts(List<Partner> debts) {
