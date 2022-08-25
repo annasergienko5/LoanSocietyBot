@@ -2,6 +2,7 @@ package com.example.GringottsTool.Repository;
 
 import com.example.GringottsTool.Constants;
 import com.example.GringottsTool.Enteties.*;
+import com.example.GringottsTool.Exeptions.GoogleTokenException;
 import com.example.GringottsTool.Exeptions.InvalidDataException;
 import com.example.GringottsTool.Exeptions.NoDataFound;
 import com.google.api.services.sheets.v4.Sheets;
@@ -30,7 +31,7 @@ public class GoogleSheetRepository implements Repository {
     private static final String PROXY_RANGE = "Прокси!A2:A";
     Sheets sheets = GoogleSheets.getSheetsService();
 
-    public GoogleSheetRepository() throws GeneralSecurityException, IOException {
+    public GoogleSheetRepository() throws GeneralSecurityException, IOException, GoogleTokenException {
     }
 
     private  List<List<Object>> getDataFromTable(String range) throws IOException, NoDataFound {
