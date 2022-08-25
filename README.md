@@ -32,8 +32,8 @@
 * BOT_USERNAME - имя бота
 * PORT - порт, который вы задали при запуске ngrok или другой локальный порт на который будут приходить обновления с сервера
 * APPLICATION_NAME - имя приложения (пример: Google Sheet Service)
-* CREDENTIALS_FILE_PATH - путь к файлу  json для подключения к google api (файл должен лежать в resource) 
-Пример: "CREDENTIALS_FILE_PATH=/token/Web Client 4.json"
+* CREDENTIALS_FILE_PATH - полный путь к файлу  json для подключения к google api (файл может лежать в любой директории) 
+Пример: "CREDENTIALS_FILE_PATH=/home/user/Projects/gringottstool/token/Web Client 4.json"
 * SHEET_ID - id таблички из url (пример: https://docs.google.com/spreadsheets/d/1234abcd/edit#gid=1825291932 "1234abcd" - это id)
 * RULE - ссылка на правила
 * PUBLIC_CHAT_ID - идентификационный номер телеграмм общего чата ПОЛЬЗОВАТЕЛЕЙ приложения. Например:"PUBLIC_CHAT_ID=-730818881"
@@ -49,3 +49,7 @@
 у которых сегодня - последний день до фиксации просрочки. в общий чат и чат админов. Выражение использует формат cron.
 Пример раз в минуту:"TODAY_PAYERS_REMINDER_TIME=0 * * ? * *"
 Пример раз в день в 9 утра:"TODAY_PAYERS_REMINDER_TIME=0 0 6 * * ?"
+* TOKENS_DIRECTORY_PATH=tokens - директория, куда сохраняется StoredCredential - 
+это файл постоянного доступа к google-api - с ограниченным сроком действия.
+Пример: "TOKENS_DIRECTORY_PATH=tokens" или полный путь к директории
+Пример: "TOKENS_DIRECTORY_PATH=/home/user/IdeaProjects/gringottstool/token/"

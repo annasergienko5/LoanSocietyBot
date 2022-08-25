@@ -21,8 +21,6 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 

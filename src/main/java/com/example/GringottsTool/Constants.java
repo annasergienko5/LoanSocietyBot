@@ -16,6 +16,7 @@ public interface Constants {
     String SHEET_ID = System.getenv("SHEET_ID");
     String FIND_MORE_RESULT = "Много таких, уточни";
     String NOT_FOUND_DATA = "Данные не найдены";
+    String TOKEN_STORED_DIRECTORY_PATH = System.getenv("TOKENS_DIRECTORY_PATH");
     String INVALID_DATA_IN_CELLS = "В базе данных сохранены неверные данные.\n Обратитесь к Администратору.";
     String INVALID_DATA_IN_CELLS_TO_ADMIN = "В базе данных сохранены неверные данные.\n";
     String ERROR_NOTIFICATION = "ВНИМАНИЕ: Ошибка в работе программы при вызове напоминаний о должниках.\nАдминистратор, обратитесь к разработчику.";

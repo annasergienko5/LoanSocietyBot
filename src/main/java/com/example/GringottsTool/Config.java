@@ -35,6 +35,7 @@ public class Config {
         String DEBT_REMINDER_TIME = System.getenv("DEBT_REMINDER_TIME");
         String TODAY_PAYERS_REMINDER_TIME = System.getenv("TODAY_PAYERS_REMINDER_TIME");
         String SCHEDULED_NO_TODAY_PAYS = System.getenv("SCHEDULED_NO_TODAY_PAYS");
+        String TOKEN_STORED_DIRECTORY_PATH = System.getenv("TOKENS_DIRECTORY_PATH");
 
         if (Constants.BOT_TOKEN == null){
             throw new EnvironmentNullExeption("BOT_TOKEN = null");
@@ -71,6 +72,9 @@ public class Config {
         }
         if (Constants.TODAY_PAYERS_REMINDER_TIME == null){
             throw new EnvironmentNullExeption("CRON_TIMEZONE = null");
+        }
+        if (Constants.TOKEN_STORED_DIRECTORY_PATH == null) {
+            throw new EnvironmentNullExeption("TOKEN_STORED_DIRECTORY_PATH = null");
         }
 
     }
