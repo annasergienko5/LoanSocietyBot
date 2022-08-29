@@ -1,17 +1,15 @@
 package com.example.GringottsTool.Enteties;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+
 import java.util.ArrayList;
 
+@AllArgsConstructor
 public class Contributions {
     String name;
     ArrayList<Contribution> pays;
     String also;
-
-    public Contributions(String name, ArrayList<Contribution> pay, String also) {
-        this.name = name;
-        this.pays = pay;
-        this.also = also;
-    }
 
     @Override
     public String toString() {
@@ -25,23 +23,11 @@ public class Contributions {
         }else res.append("\nРанее - ").append(also).append(" рублей");
         return res.toString();
     }
-
+@AllArgsConstructor
+@Getter
     public static class Contribution{
         private String date;
         private String sum;
-
-        public Contribution(String date, String sum) {
-            this.date = date;
-            this.sum = sum;
-        }
-
-        public String getDate() {
-            return date;
-        }
-
-        public String getSum() {
-            return sum;
-        }
 
         @Override
         public String toString() {
