@@ -1,9 +1,11 @@
 package com.example.GringottsTool;
 
 
-import com.example.GringottsTool.Exeptions.InvalidDataException;
+import com.example.GringottsTool.DTO.IncomingMessage;
+import com.example.GringottsTool.DTO.OutgoingMessage;
+import com.example.GringottsTool.Enteties.Partner;
 import com.example.GringottsTool.Exeptions.NoDataFound;
-import com.google.api.client.auth.oauth2.TokenResponseException;
+import com.example.GringottsTool.Repository.Repository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,9 +21,15 @@ import org.telegram.telegrambots.starter.SpringWebhookBot;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.text.ParseException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
-public class Bot extends SpringWebhookBot {
-    private final MessageHandler messageHandler;
+public class Bot extends SpringWebhookBot implements Runnable {
+    private final BlockingQueue<IncomingMessage> inQueue;
+    private final BlockingQueue<OutgoingMessage> outQueue;
     Logger log = LogManager.getLogger();
     private String botPath;
     private String botUserName;
@@ -29,14 +37,14 @@ public class Bot extends SpringWebhookBot {
     private final String CRON_DEBT_SCHEDULE = "${cron.expression.debt}";
     private final String CRON_TODAY_PAYERS = "${cron.expression.todayPayers}";
     private final String CRON_ZONE = "${cron.expression.zone}";
-    public Bot(SetWebhook setWebhook, MessageHandler messageHandler) {
+    public Bot(SetWebhook setWebhook, BlockingQueue<IncomingMessage> inQueue, BlockingQueue<OutgoingMessage> outQueue) {
         super(setWebhook);
-        this.messageHandler = messageHandler;
+        this.inQueue = inQueue;
+        this.outQueue = outQueue;
     }
     public void reportStartMessage() {
         executeMessage(Constants.START_MESSAGE, Constants.ADMIN_CHAT_ID);
     }
-
 
     @Override
     public String getBotUsername() {
@@ -53,37 +61,41 @@ public class Bot extends SpringWebhookBot {
     }
 
     @Override
-    public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
-        if (update.hasMessage()) {
-            Message message = update.getMessage();
-            String chatId = message.getChatId().toString();
-            long userTgId = message.getFrom().getId();
-            String userName = message.getChat().getUserName();
-            if (message.getText() != null) {
-                String[] inputText = message.getText().split("@", 2);
-                String usedFunction = inputText[0];
-                String errorMessage = String.format(Constants.ERROR_IN_SOME_FUNCTION, usedFunction, chatId, userTgId, userName);
-                    try {
-                        return messageHandler.answerMessage(update.getMessage());
-                    } catch (TokenResponseException e) {
-                        log.error(errorMessage, e);
-                        executeMessage(Constants.TOKEN_RESPONSE_EXCEPTION, Constants.ADMIN_CHAT_ID);
-                        System.exit(-1);
-                    } catch (GeneralSecurityException | IOException e) {
-                        log.error(errorMessage, e);
-                        executeMessage(errorMessage, Constants.ADMIN_CHAT_ID);
-                    } catch (NoDataFound e) {
-                        log.info(e.getMessage(), e);
-                        executeMessage(e.getMessage(), chatId);
-                    } catch (InvalidDataException e) {
-                        executeMessage(Constants.INVALID_DATA_IN_CELLS, chatId);
-                        executeMessage(errorMessage + Constants.INVALID_DATA_IN_CELLS_TO_ADMIN + e.toMessage(), Constants.ADMIN_CHAT_ID);
-                    } catch (NumberFormatException | ParseException e) {
-                        log.info(e.getMessage(), e);
-                        executeMessage(Constants.INVALID_DATA_IN_CELLS, chatId);
-                        executeMessage(errorMessage + Constants.INVALID_DATA_IN_CELLS_TO_ADMIN, Constants.ADMIN_CHAT_ID);
-                    }
+    public void run() {
+        while(true){
+            try {
+                OutgoingMessage outgoingMessage = outQueue.take();
+                SendMessage sendMessage = new SendMessage();
+                sendMessage.setChatId(outgoingMessage.getChatId());
+                sendMessage.setText(outgoingMessage.getText());
+                if (outgoingMessage.isEnableMarkdown()){
+                    sendMessage.enableMarkdown(true);
+                }else sendMessage.setParseMode(outgoingMessage.getParseMode());
+                execute(sendMessage);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            } catch (TelegramApiException e) {
+                log.info(Constants.ERROR_SEND_MESSAGE_TG);
             }
+        }
+    }
+
+    @Override
+    public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
+        if (!update.hasMessage()) {
+            return null;
+        }
+        Message message = update.getMessage();
+        String chatId = message.getChatId().toString();
+        long userTgId = message.getFrom().getId();
+        if (message.getText() == null) {
+            return null;
+        }
+        try {
+            IncomingMessage incomingMessage = new IncomingMessage(chatId, userTgId, message.getText());
+            inQueue.put(incomingMessage);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
         return null;
     }
@@ -105,15 +117,12 @@ public class Bot extends SpringWebhookBot {
     public void reportAboutDebts() {
         log.info("Making everyMonth request about Debts...");
         try {
-            String text = messageHandler.getDebtors();
-            if (text != null) {
-                executeMessage(text, Constants.PUBLIC_CHAT_ID);
-                executeMessage(text, Constants.ADMIN_CHAT_ID);
-            }
-        } catch (GeneralSecurityException | IOException | ParseException e) {
-            log.error("error: ", e);
-            executeMessage(Constants.ERROR_NOTIFICATION, Constants.ADMIN_CHAT_ID);
-        } catch (NoDataFound ignored) {
+            IncomingMessage incomingMessagePublic = new IncomingMessage(Constants.PUBLIC_CHAT_ID, "getDebtors");
+            IncomingMessage incomingMessageAdmin = new IncomingMessage(Constants.ADMIN_CHAT_ID, "getDebtors");
+            inQueue.put(incomingMessageAdmin);
+            inQueue.put(incomingMessagePublic);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -121,18 +130,14 @@ public class Bot extends SpringWebhookBot {
     public void reportAboutTodayDebts()  {
         log.info("Making everyDay request about Debts...");
         try {
-            String text = messageHandler.getTodayDebtors();
-            if (text != null) {
-                executeMessage(text, Constants.PUBLIC_CHAT_ID);
-                executeMessage(text, Constants.ADMIN_CHAT_ID);
-            }
-        } catch (IOException e) {
-            log.error("error: ", e);
-            executeMessage(Constants.ERROR_NOTIFICATION, Constants.ADMIN_CHAT_ID);
-        } catch (NoDataFound ignored) {
+            IncomingMessage incomingMessagePublic = new IncomingMessage(Constants.PUBLIC_CHAT_ID, "getTodayDebtors");
+            IncomingMessage incomingMessageAdmin = new IncomingMessage(Constants.ADMIN_CHAT_ID, "getTodayDebtors");
+            inQueue.put(incomingMessageAdmin);
+            inQueue.put(incomingMessagePublic);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
-
 
     private void executeMessage(String text, String chatID) {
         try {

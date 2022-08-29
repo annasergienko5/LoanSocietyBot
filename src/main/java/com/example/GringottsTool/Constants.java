@@ -8,7 +8,7 @@ public interface Constants {
             Обычно достаточно получить новый файл \\"StoredCredential\\", просто удалив старый.
             """;
     double MAXIMUM_LOAN_COEFFICIENT = 0.125;
-    String BOT_TOKEN = System.getenv("TOKEN_BOT");
+    String TOKEN_BOT = System.getenv("TOKEN_BOT");
     String BOT_USERNAME = System.getenv("BOT_USERNAME");
     String WEBHOOK_PATH = System.getenv("WEBHOOK_PATH");
     String APPLICATION_NAME = System.getenv("APPLICATION_NAME");
@@ -24,8 +24,7 @@ public interface Constants {
             ВНИМАНИЕ: Ошибка в работе программы в команде: %s.
             Обратитесь к разработчику.
             Функция вызвана из чата chatID:\t%s,
-            Участником с userTgId:\t%s
-            UserName Участника: \t%s    
+            Участником с userTgId:\t%s    
             """;
     String INVALID_DATA_EXCEPTION =  """
             Ошибка в диапазоне таблицы:\t%s
@@ -47,7 +46,8 @@ public interface Constants {
             /status - баланс кассы
             /debts - список должников
             /cards - список держателей
-            /rules - правила кассы""";
+            /rules - правила кассы
+            /fast - попросить быстрый займ""";
     String HELP_ADMIN_CHAT = """
             /id - получить id текущего чата
             /search - поиск участника
@@ -87,7 +87,9 @@ public interface Constants {
     String ALREADY_ADDED_IN_QUEUE = "Кабанчик уже был добавлен в очередь. Теперь перезаписан";
     String NOT_PARTNERS = "Нет такого кабанчика в базе";
     String NOT_REAL_SUM = "Странная сумма. Не записываю";
+    String ERROR_SEND_MESSAGE_TG = "Ошибка отправки сообщения в тг";
     String NOT_PARTNER_FROM_ID = "Неправославный id. Не записываю";
+    String ERROR_OUT_WRITE = "Ошибка записи в очередь";
     String ABOUT_CREDIT_HISTORY_MESSAGE = """
             История займов Участника -
             <strong>%s</strong>:
