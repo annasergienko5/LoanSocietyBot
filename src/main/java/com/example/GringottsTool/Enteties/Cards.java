@@ -1,5 +1,8 @@
 package com.example.GringottsTool.Enteties;
 
+import lombok.AllArgsConstructor;
+
+@AllArgsConstructor
 public class Cards {
     private String card;
     private double sum;
@@ -8,16 +11,6 @@ public class Cards {
     private String bank;
     private String payWay;
     private String link;
-
-    public Cards(String card, double sum, String name, String city, String bank, String payWay, String link) {
-        this.card = card;
-        this.sum = sum;
-        this.name = name;
-        this.city = city;
-        this.bank = bank;
-        this.payWay = payWay;
-        this.link = link;
-    }
 
     @Override
     public String toString() {

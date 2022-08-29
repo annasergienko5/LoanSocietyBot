@@ -1,7 +1,9 @@
 package com.example.GringottsTool.Enteties;
 
 import com.example.GringottsTool.Constants;
+import lombok.Getter;
 
+@Getter
 public class Info {
     int capital;
     int maxLoan;
@@ -17,10 +19,6 @@ public class Info {
         this.reserve = reserve;
         this.active = active;
         this.maxLoan = (int) (capital * Constants.MAXIMUM_LOAN_COEFFICIENT);
-    }
-
-    public int getMaxLoan() {
-        return maxLoan;
     }
 
     @Override
