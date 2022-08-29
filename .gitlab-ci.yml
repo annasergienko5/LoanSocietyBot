@@ -26,7 +26,6 @@ build-jar-with-art:
     when: on_success
 
 before_script:
-  # the following script is taken from https://docs.gitlab.com/ee/ci/ssh_keys/README.html
   - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
   - eval $(ssh-agent -s)
   - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null
@@ -44,6 +43,9 @@ before_script:
     - ls 
     - apt-get install -y openssh-client
     - /usr/bin/scp -P 6022 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null GringottsTool-$FIRST_NAME-$CI_COMMIT_SHA.jar depl0y@dev.staff4.me:/home/depl0y/$COPY_TO
+    - /usr/bin/ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null depl0y@dev.staff4.me -p 6022 rm -f /home/depl0y/$COPY_TO/GringottsTool-dev-current.jar
+    - /usr/bin/ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null depl0y@dev.staff4.me -p 6022 ln -s /home/depl0y/$COPY_TO/GringottsTool-$FIRST_NAME-$CI_COMMIT_SHA.jar /home/depl0y/$COPY_TO/GringottsTool-dev-current.jar
+    - /usr/bin/ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null depl0y@dev.staff4.me -p 6022 sudo systemctl restart gringottstool-dev.service
   dependencies:
     - build-jar-with-art
   needs: ["build-jar-with-art"]
@@ -52,7 +54,7 @@ deploy-with-art-branch:
   extends: .deploy-with-art
   variables:
     FIRST_NAME: $CI_COMMIT_BRANCH
-    COPY_TO: branches
+    COPY_TO: dev
   except:
     - main
     - dev
@@ -75,7 +77,6 @@ deploy-with-art-tag:
   only:
     - tags
 
-
 # notificate-dev:
 #   stage: notification
 #   image: ellerbrock/alpine-bash-curl-ssl
@@ -91,7 +92,7 @@ unit-test:
   script:
     - mvn test
 
-build-docker:
+.build-docker:
   stage: build
   needs: ["build-jar-with-art"]
   script:
@@ -99,3 +100,26 @@ build-docker:
     - docker login registry.gitlab.com -u gitlab+deploy-token-test -p $DOCKER_REGISTRY_TOKEN
     - docker build -t registry.gitlab.com/goblin_dev_inc/gringottstool .
     - docker push registry.gitlab.com/goblin_dev_inc/gringottstool
+
+build-docker-branch:
+  extends: .build-docker
+  when: manual
+  except:
+    - main
+    - dev
+    - tags
+
+build-docker-tag:
+  extends: .build-docker
+  only:
+    - tags
+
+build-docker-dev:
+  extends: .build-docker
+  only:
+    - dev
+
+build-docker-main:
+  extends: .build-docker
+  only:
+    - main
