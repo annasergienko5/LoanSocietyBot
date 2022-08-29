@@ -43,11 +43,10 @@ public class GoogleSheetRepository implements Repository {
         return values;
     }
 
-    public Contributions getContribution(Partner partner) throws NoDataFound, IOException {
-        String tableId = String.valueOf(partner.getTableId());
+    public List<Contributions> getContributions() throws NoDataFound, IOException {
         List<List<Object>> date = getDataFromTable("Взносы!1:1");
-        String range = String.format("Взносы!%d:%d", tableId, tableId);
-        List<List<Object>> values = getDataFromTable(range);
+        List<List<Object>> values = getDataFromTable("Взносы!A2:AD");
+        List<Contributions> result = new ArrayList<>();
         for (List row : values) {
             String name = row.get(0).toString();
             ArrayList<Contributions.Contribution> pay = new ArrayList<>();
@@ -62,25 +61,11 @@ public class GoogleSheetRepository implements Repository {
                     pay.add(new Contributions.Contribution(date.get(0).get(i).toString(), row.get(i).toString()));
                 }
             }
-            return new Contributions(name, pay, also);
+            result.add(new Contributions(name, pay, also));
         }
-        return null;
+        return result;
     }
 
-    public Contributions.Contribution getLastContribution(Partner partner) throws NoDataFound, IOException {
-        long tableId = partner.getTableId();
-        List<List<Object>> date = getDataFromTable("Взносы!1:1");
-        String range = String.format("Взносы!%d:%d", tableId, tableId);
-        List<List<Object>> values = getDataFromTable(range);
-        for (List row : values) {
-                for (int i = 3; i < (row.size()-1); i++) {
-                    if (!row.get(i).toString().equals("!") && !row.get(i).toString().isEmpty()) {
-                        return new Contributions.Contribution(values.get(0).get(i).toString(), row.get(i).toString());
-                    }
-                }
-        }
-        return null;
-    }
 
     public List<Cards> getCards() throws NoDataFound, IOException {
         List<List<Object>> values = getDataFromTable(CARDS_RANGE);
@@ -224,25 +209,18 @@ public class GoogleSheetRepository implements Repository {
         return false;
     }
 
-    public List<List<Partner>> getDebtors() throws IOException, ParseException, NoDataFound {
+    public List<Partner> getDebtors() throws IOException, NoDataFound {
         List<List<Object>> values = getDataFromTable(DEBT_RANGE);
-        List<List<Partner>> result = new ArrayList<>();
-        result.add(new ArrayList<>());
-        result.add(new ArrayList<>());
-        Date dateNow = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        List<Partner> result = new ArrayList<>();
         for (List row : values) {
             int debt = Integer.parseInt(row.get(7).toString());
             if (debt != 0) {
-                Date date = dateFormat.parse(row.get(8).toString());
                 String name = row.get(0).toString();
                 String returnDate = row.get(8).toString();
                 int tableId = values.indexOf(row) + 2;
                 Partner partner = new Partner(name, debt, returnDate);
                 partner.setTableId(tableId);
-                if (date.getTime() <= dateNow.getTime()) {
-                    result.get(0).add(partner);
-                } else result.get(1).add(partner);
+                result.add(partner);
             }
         }
         return result;

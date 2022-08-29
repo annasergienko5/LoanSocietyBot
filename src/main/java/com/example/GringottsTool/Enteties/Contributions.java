@@ -6,6 +6,7 @@ import lombok.Getter;
 import java.util.ArrayList;
 
 @AllArgsConstructor
+@Getter
 public class Contributions {
     String name;
     ArrayList<Contribution> pays;

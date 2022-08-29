@@ -10,13 +10,12 @@ import java.util.List;
 import java.util.Queue;
 @org.springframework.stereotype.Repository
 public interface Repository {
-    Contributions getContribution(Partner partner) throws NoDataFound, IOException;
-    Contributions.Contribution getLastContribution(Partner partner) throws NoDataFound, IOException;
+    List<Contributions> getContributions() throws NoDataFound, IOException;
     List<Cards> getCards() throws NoDataFound, IOException;
     Info getInfo() throws IOException, NoDataFound;
     List<Partner> getPartners(String nameOrTgId) throws IOException, NoDataFound;
     boolean isPartner(String checkingTgId) throws IOException, NoDataFound;
-    List<List<Partner>> getDebtors() throws IOException, ParseException, NoDataFound;
+    List<Partner> getDebtors() throws IOException, ParseException, NoDataFound;
     List<Partner> getDuckList() throws IOException, NoDataFound;
     List<Partner> getTodayDebtors() throws IOException, NoDataFound;
     List<String> getProxy() throws IOException, NoDataFound;
