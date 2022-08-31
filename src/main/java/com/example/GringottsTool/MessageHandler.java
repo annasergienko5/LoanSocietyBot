@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 
-
 @Component
 public class MessageHandler implements Runnable{
 

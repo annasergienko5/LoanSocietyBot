@@ -3,23 +3,25 @@ package com.example.GringottsTool.Repository;
 import com.example.GringottsTool.Constants;
 import com.example.GringottsTool.Enteties.*;
 import com.example.GringottsTool.Exeptions.GoogleTokenException;
+import com.example.GringottsTool.Exeptions.HealthExeption;
 import com.example.GringottsTool.Exeptions.InvalidDataException;
 import com.example.GringottsTool.Exeptions.NoDataFound;
+import com.example.GringottsTool.Healthcheckable;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Component
-public class GoogleSheetRepository implements Repository {
+public class GoogleSheetRepository implements Repository, Healthcheckable {
     private static final String QUEUE_LOAN = "Очередь!A2:C";
     private static final String CARDS_RANGE = "Держатели!A2:B";
     private static final String INFO_RANGE = "Сводка!B7:B11";
@@ -30,6 +32,7 @@ public class GoogleSheetRepository implements Repository {
     private static final String TODAY_PAY_PERSONS_RANGE = "Участники!A2:I";
     private static final String PROXY_RANGE = "Прокси!A2:A";
     Sheets sheets = GoogleSheets.getSheetsService();
+    Logger log = LogManager.getLogger();
 
     public GoogleSheetRepository() throws GeneralSecurityException, IOException, GoogleTokenException {
     }
@@ -388,5 +391,14 @@ public class GoogleSheetRepository implements Repository {
         }
         return 0;
     }
-}
 
+    @Override
+    public void isAlive() throws HealthExeption {
+        try {
+            getInfo();
+            log.info("GoogleSheetRepository is healthy");
+        } catch (NoDataFound | IOException e){
+            throw new HealthExeption("There is a problem with GoogleSheetRepository");
+        }
+    }
+}
