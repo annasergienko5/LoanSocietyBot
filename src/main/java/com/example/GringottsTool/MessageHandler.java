@@ -2,10 +2,6 @@ package com.example.GringottsTool;
 
 import com.example.GringottsTool.DTO.IncomingMessage;
 import com.example.GringottsTool.DTO.OutgoingMessage;
-import com.example.GringottsTool.Enteties.Cards;
-import com.example.GringottsTool.Enteties.Contributions;
-import com.example.GringottsTool.Enteties.Partner;
-import com.example.GringottsTool.Enteties.QueueItem;
 import com.example.GringottsTool.Enteties.*;
 import com.example.GringottsTool.Exeptions.InvalidDataException;
 import com.example.GringottsTool.Exeptions.NoDataFound;
@@ -25,7 +21,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 
 @Component
@@ -48,13 +43,16 @@ public class MessageHandler implements Runnable{
         log.info("\nReceived message. Chat ID: " + chatId +"\nTelegramm-user ID: " + userTgId );
         String[] inputTextWithout = message.getMessageText().split("@", 2);
         String[] inputText = inputTextWithout[0].split(" ", 2);
+        if (inputText[0].equals("/id")){
+            return getId(chatId);
+        }
         if (userTgId == 0){
             return systemMessage(inputText[0], chatId);
         }else if (chatId.equals(Constants.PUBLIC_CHAT_ID)) {
             return publicChat(inputText[0], chatId, inputText,userTgId);
         } else if (chatId.equals(Constants.ADMIN_CHAT_ID)) {
             return adminChat(inputText, chatId, userTgId);
-        }else if (repository.isPartner(chatId)){
+        }else if (Long.parseLong(chatId) == userTgId && repository.isPartner(chatId)){
             return privateChat(inputText, chatId, userTgId);
         }
         return null;
@@ -74,8 +72,6 @@ public class MessageHandler implements Runnable{
         switch (inputText[0]) {
             case "/start":
                 return getStartMessage(chatId);
-            case "/id":
-                return getId(chatId);
             case "/help":
                 return getHelp(chatId,Constants.HELP_PRIVAT_CHAT);
             case "/search":
@@ -113,8 +109,6 @@ public class MessageHandler implements Runnable{
         switch (inputText[0]) {
             case "/start":
                 return getStartMessage(chatId);
-            case "/id":
-                return getId(chatId);
             case "/help":
                 return getHelp(chatId,Constants.HELP_ADMIN_CHAT);
             case "/search":
@@ -151,7 +145,6 @@ public class MessageHandler implements Runnable{
 
     private OutgoingMessage publicChat(String s, String chatId, String[] inputText, long userTgId) throws NoDataFound, IOException, ParseException {
         return switch (s) {
-            case "/id" -> getId(chatId);
             case "/help" -> getHelp(chatId, Constants.HELP_PUBLIC_CHAT);
             case "/status" -> getStatus(chatId);
             case "/debts" -> getDebtors(chatId);

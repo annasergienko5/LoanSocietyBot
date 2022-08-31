@@ -3,9 +3,6 @@ package com.example.GringottsTool;
 
 import com.example.GringottsTool.DTO.IncomingMessage;
 import com.example.GringottsTool.DTO.OutgoingMessage;
-import com.example.GringottsTool.Enteties.Partner;
-import com.example.GringottsTool.Exeptions.NoDataFound;
-import com.example.GringottsTool.Repository.Repository;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -18,14 +15,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.starter.SpringWebhookBot;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.text.ParseException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 public class Bot extends SpringWebhookBot implements Runnable {
     private final BlockingQueue<IncomingMessage> inQueue;
