@@ -5,8 +5,10 @@ import com.example.GringottsTool.DTO.OutgoingMessage;
 import com.example.GringottsTool.Exeptions.EnvironmentNullExeption;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -15,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -46,6 +49,14 @@ public class Config {
                 throw new EnvironmentNullExeption(env.getKey() + " = null or empty");
             }
         }
+    }
+
+    @Bean
+    @DependsOn({"checkENV", "registerTgBot", "setWebhookInstance", "springWebhookBot"})
+    public HealthChecker healthChecker(List<Healthcheckable> programEntitiesList){
+        HealthChecker healthChecker = new HealthChecker(programEntitiesList);
+        healthChecker.areAllAlive();
+        return healthChecker;
     }
 
     @Bean
@@ -85,7 +96,13 @@ public class Config {
         bot.setBotPath(Constants.WEBHOOK_PATH);
         bot.setBotUserName(Constants.BOT_USERNAME);
         bot.setBotToken(Constants.TOKEN_BOT);
-        bot.reportStartMessage();
         return bot;
+    }
+
+    @Bean
+    @DependsOn("healthChecker")
+    public int reportStartMessage(@Autowired Bot bot){
+        bot.reportStartMessage();
+        return 0;
     }
 }

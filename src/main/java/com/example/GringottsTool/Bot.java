@@ -3,6 +3,7 @@ package com.example.GringottsTool;
 
 import com.example.GringottsTool.DTO.IncomingMessage;
 import com.example.GringottsTool.DTO.OutgoingMessage;
+import com.example.GringottsTool.Exeptions.HealthExeption;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -10,6 +11,7 @@ import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -17,7 +19,7 @@ import org.telegram.telegrambots.starter.SpringWebhookBot;
 
 import java.util.concurrent.BlockingQueue;
 
-public class Bot extends SpringWebhookBot implements Runnable {
+public class Bot extends SpringWebhookBot implements Runnable, Healthcheckable {
     private final BlockingQueue<IncomingMessage> inQueue;
     private final BlockingQueue<OutgoingMessage> outQueue;
     Logger log = LogManager.getLogger();
@@ -138,6 +140,17 @@ public class Bot extends SpringWebhookBot implements Runnable {
             execute(message);
         } catch (TelegramApiException e) {
             log.error("error: ", e);
+        }
+    }
+
+    @Override
+    public void isAlive() throws HealthExeption {
+        try {
+            Message sendMessage = execute(new SendMessage(Constants.ADMIN_CHAT_ID, "Проверка"));
+            execute(new DeleteMessage(Constants.ADMIN_CHAT_ID, sendMessage.getMessageId()));
+            log.info("Bot is healthy");
+        } catch (TelegramApiException e) {
+            throw new HealthExeption("There is a problem with Bot");
         }
     }
 }
