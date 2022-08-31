@@ -202,7 +202,7 @@ public class GoogleSheetRepository implements Repository {
         List<List<Object>> values = getDataFromTable(IS_PARTNER_RANGE);
         for (List row : values) {
             String tgId = row.get(0).toString();
-            if (tgId.equals(tgId)) {
+            if (tgId.equals(checkingTgId)) {
                 return true;
             }
         }
