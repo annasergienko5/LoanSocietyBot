@@ -1,0 +1,43 @@
+.check-style:
+  stage: test
+  image: "$MAVEN_IMAGE"
+  allow_failure: true
+  script:
+    - mvn -q checkstyle:check
+
+check-style-manual:
+  stage: test
+  extends: .check-style
+  when: manual
+  only:
+    - branch
+    - pushes
+
+check-style-auto:
+  stage: test
+  extends: .check-style
+  except:
+    - branch
+    - pushes
+
+.unit-test:
+  stage: build
+  image: "$MAVEN_IMAGE"
+  allow_failure: true
+  script:
+    - mvn test
+
+unit-test_manual:
+  stage: test
+  extends: .unit-test
+  when: manual
+  only:
+    - branch
+    - pushes
+
+unit-test_auto:
+  stage: test
+  extends: .unit-test
+  except:
+    - branch
+    - pushes

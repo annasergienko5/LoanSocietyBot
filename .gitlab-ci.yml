@@ -9,6 +9,7 @@ services:
   - docker:20.10.16-dind
 
 stages:
+  - test
   - build
   - deploy
   - notification
@@ -19,6 +20,7 @@ build-jar-with-art:
   script:
     - mvn clean package -DskipTests=true
     - ls ./target
+  when: manual
   artifacts:
     paths:
       - ./target/GringottsTool.jar
@@ -84,14 +86,6 @@ deploy-with-art-tag:
 #     - /bin/bash ops/notificate.sh $BOT_KEY $CHAT_ADMIN_ID
 #   needs: ["deploy-with-art-branch"]
 
-unit-test:
-  stage: build
-  image: "$MAVEN_IMAGE"
-  when: manual
-  allow_failure: true
-  script:
-    - mvn test
-
 .build-docker:
   stage: build
   needs: ["build-jar-with-art"]
@@ -123,3 +117,6 @@ build-docker-main:
   extends: .build-docker
   only:
     - main
+
+include:
+  local: /ops/test-ci.yml
