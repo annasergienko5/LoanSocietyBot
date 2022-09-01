@@ -80,6 +80,11 @@ public class Bot extends SpringWebhookBot implements Runnable, Healthcheckable {
         Message message = update.getMessage();
         String chatId = message.getChatId().toString();
         long userTgId = message.getFrom().getId();
+
+        if (message.getDate() < (System.currentTimeMillis() / 1000L)){
+            return null;
+        }
+
         if (message.getText() == null) {
             return null;
         }
