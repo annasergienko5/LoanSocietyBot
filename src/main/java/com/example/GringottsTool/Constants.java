@@ -2,11 +2,6 @@ package com.example.GringottsTool;
 
 public interface Constants {
     String START_MESSAGE = "Добрый день! Бот работает и готов принимать запросы.";
-    String TOKEN_RESPONSE_EXCEPTION =  """
-            "ВНИМАНИЕ: Токен доступа к базе данных заблокирован или отозван.
-            Обратитесь к разработчику.
-            Обычно достаточно получить новый файл \\"StoredCredential\\", просто удалив старый.
-            """;
     double MAXIMUM_LOAN_COEFFICIENT = 0.125;
     String TOKEN_BOT = System.getenv("TOKEN_BOT");
     String BOT_USERNAME = System.getenv("BOT_USERNAME");
@@ -16,10 +11,8 @@ public interface Constants {
     String SHEET_ID = System.getenv("SHEET_ID");
     String FIND_MORE_RESULT = "Много таких, уточни";
     String NOT_FOUND_DATA = "Данные не найдены";
-    String TOKEN_STORED_DIRECTORY_PATH = System.getenv("TOKENS_DIRECTORY_PATH");
     String INVALID_DATA_IN_CELLS = "В базе данных сохранены неверные данные.\n Обратитесь к Администратору.";
     String INVALID_DATA_IN_CELLS_TO_ADMIN = "В базе данных сохранены неверные данные.\n";
-    String ERROR_NOTIFICATION = "ВНИМАНИЕ: Ошибка в работе программы при вызове напоминаний о должниках.\nАдминистратор, обратитесь к разработчику.";
     String ERROR_IN_SOME_FUNCTION = """
             ВНИМАНИЕ: Ошибка в работе программы в команде: %s.
             Обратитесь к разработчику.
@@ -40,7 +33,6 @@ public interface Constants {
     String LOAN_APPROVED = "Одобрен займ в пределах 0.6 на сумму ";
     String INCORRECT_AMOUNT_OF_MONEY = "Неверная запрашиваемая сумма";
     String INCORRECT_MONEY_TYPE = "Неверная запрашиваемая сумма. Укажи целое число";
-    String NO_DEBTS = "Должников нет";
     String HELP_PUBLIC_CHAT = """
             /id - получить id текущего чата
             /status - баланс кассы
@@ -76,17 +68,11 @@ public interface Constants {
             /credithistoryfull - история займов с транзакциями""";
     String RULE = System.getenv("RULE");
     String PUBLIC_CHAT_ID = System.getenv("PUBLIC_CHAT_ID");
-
     String ADMIN_CHAT_ID = System.getenv("ADMIN_CHAT_ID");
     String CRON_TIMEZONE = System.getenv("CRON_TIMEZONE");
-    String DEBT_REMINDER_TIME = System.getenv("DEBT_REMINDER_TIME");
-    String TODAY_PAYERS_REMINDER_TIME = System.getenv("TODAY_PAYERS_REMINDER_TIME");
-
-    String QUEUE_IS_EMPTY = "Очередь пуста";
     String ADDED_IN_QUEUE = "Добавлен в очередь";
     String ALREADY_ADDED_IN_QUEUE = "Кабанчик уже был добавлен в очередь. Теперь перезаписан";
     String NOT_PARTNERS = "Нет такого кабанчика в базе";
-    String NOT_REAL_SUM = "Странная сумма. Не записываю";
     String ERROR_SEND_MESSAGE_TG = "Ошибка отправки сообщения в тг";
     String NOT_PARTNER_FROM_ID = "Неправославный id. Не записываю";
     String ERROR_OUT_WRITE_IN_BOT = "Ошибка записи в очередь со стороны бота";
@@ -121,26 +107,11 @@ public interface Constants {
             Сумма займа:\t<strong>%,+d</strong> ₽
             <strong>___</strong>
             """;
-    String ABOUT_DEBTS_MESSAGE = """
-            <strong>Список участников с просроченной задолженностью:</strong>
-                                
-            %s
-            <strong>Список участников с задолженностью:</strong>
-                                
-            %s
-            """;
     String TODAY_DEBTS_MESSAGE = """
             <strong>Сегодня ожидаем погашения задолженности следующих Участников:</strong>
                                 
             %s
                                 
-            """;
-    String ARREARS_DEBTS = """
-            Участник:\t<strong>%s</strong>
-            Текущий долг:\t<strong>%s</strong>₽
-            Вернуть до:\t<strong>%s</strong>
-            <strong>ВНИМАНИЕ:\tПРОСРОЧКА</strong>
-
             """;
     String SIMPLE_DEBTS = """
             Участник:\t<strong>%s</strong>
