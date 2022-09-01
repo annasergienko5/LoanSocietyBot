@@ -65,7 +65,7 @@ public class Bot extends SpringWebhookBot implements Runnable, Healthcheckable {
                 }else sendMessage.setParseMode(outgoingMessage.getParseMode());
                 execute(sendMessage);
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                executeMessage(Constants.ERROR_TAKING_IN_BOT, Constants.ADMIN_CHAT_ID);
             } catch (TelegramApiException e) {
                 log.info(Constants.ERROR_SEND_MESSAGE_TG);
             }
@@ -92,7 +92,7 @@ public class Bot extends SpringWebhookBot implements Runnable, Healthcheckable {
             IncomingMessage incomingMessage = new IncomingMessage(chatId, userTgId, message.getText());
             inQueue.put(incomingMessage);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            executeMessage(Constants.ERROR_OUT_WRITE_IN_BOT, Constants.ADMIN_CHAT_ID);
         }
         return null;
     }

@@ -89,7 +89,10 @@ public interface Constants {
     String NOT_REAL_SUM = "Странная сумма. Не записываю";
     String ERROR_SEND_MESSAGE_TG = "Ошибка отправки сообщения в тг";
     String NOT_PARTNER_FROM_ID = "Неправославный id. Не записываю";
-    String ERROR_OUT_WRITE = "Ошибка записи в очередь";
+    String ERROR_OUT_WRITE_IN_BOT = "Ошибка записи в очередь со стороны бота";
+    String ERROR_OUT_WRITE_IN_MESSAGEHANDLER = "Ошибка записи в очередь со стороны обработки сообщений";
+    String ERROR_TAKING_IN_BOT = "Ошибка чтения из очереди со стороны бота";
+    String ERROR_TAKING_IN_MESSAGEHANDLER = "Ошибка чтения из очереди со стороны обработки сообщений";
     String ABOUT_CREDIT_HISTORY_MESSAGE = """
             История займов Участника -
             <strong>%s</strong>:
