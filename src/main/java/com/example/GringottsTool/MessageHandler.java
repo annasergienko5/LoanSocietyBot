@@ -392,7 +392,7 @@ public class MessageHandler implements Runnable{
                 putToOutQueue(new OutgoingMessage(chatId,Constants.INVALID_DATA_IN_CELLS));
                 putToOutQueue(new OutgoingMessage(Constants.ADMIN_CHAT_ID,errorMessage + Constants.INVALID_DATA_IN_CELLS_TO_ADMIN ));
             } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                putToOutQueue(new OutgoingMessage(Constants.ADMIN_CHAT_ID, Constants.ERROR_TAKING_IN_MESSAGEHANDLER));
             }
         }
     }
@@ -400,7 +400,7 @@ public class MessageHandler implements Runnable{
         try {
             outQueue.put(outgoingMessage);
         } catch (InterruptedException e) {
-            log.info(Constants.ERROR_OUT_WRITE);
+            log.info(Constants.ERROR_OUT_WRITE_IN_MESSAGEHANDLER);
         }
 
     }
