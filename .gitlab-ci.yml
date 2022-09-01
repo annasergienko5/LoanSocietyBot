@@ -20,7 +20,7 @@ build-jar-with-art:
   script:
     - mvn clean package -DskipTests=true
     - ls ./target
-  when: manual
+  when: always
   artifacts:
     paths:
       - ./target/GringottsTool.jar
@@ -76,6 +76,13 @@ deploy-with-art-tag:
   variables:
     FIRST_NAME: $CI_COMMIT_TAG
     COPY_TO: prod
+  script:
+    - mv ./target/GringottsTool.jar ./GringottsTool-$FIRST_NAME-$CI_COMMIT_SHA.jar
+    - apt-get install -y openssh-client
+    - /usr/bin/scp -P 6022 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null GringottsTool-$FIRST_NAME-$CI_COMMIT_SHA.jar depl0y@prod.staff4.me:/home/depl0y/prod
+    - /usr/bin/ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null depl0y@prod.staff4.me -p 6022 rm -f /home/depl0y/prod/GringottsTool-prod-current.jar
+    - /usr/bin/ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null depl0y@prod.staff4.me -p 6022 ln -s /home/depl0y/prod/GringottsTool-$FIRST_NAME-$CI_COMMIT_SHA.jar /home/depl0y/prod/GringottsTool-prod-current.jar
+    - /usr/bin/ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null depl0y@prod.staff4.me -p 6022 sudo systemctl restart gringottstool-prod.service
   only:
     - tags
 
