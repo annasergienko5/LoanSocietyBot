@@ -3,10 +3,10 @@ package com.example.GringottsTool.Enteties;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CreditHistory {
+public final class CreditHistory {
     private ArrayList<Loan> loans;
 
-    public CreditHistory(List<Transaction> transactions) {
+    public CreditHistory(final List<Transaction> transactions) {
         this.loans = new ArrayList<>();
         int previousBalance = 0;
         int loanId = 1;

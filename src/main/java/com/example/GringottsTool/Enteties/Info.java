@@ -2,17 +2,23 @@ package com.example.GringottsTool.Enteties;
 
 import com.example.GringottsTool.Constants;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
+@RequiredArgsConstructor
 @Getter
-public class Info {
-    int capital;
-    int maxLoan;
-    int borrowedMoney;
-    int overdue;
-    int reserve;
-    int active;
+public final class Info {
+    private int capital;
+    private int maxLoan;
+    private int borrowedMoney;
+    private int overdue;
+    private int reserve;
+    private int active;
 
-    public Info(int capital, int borrowedMoney, int overdue, int reserve, int active) {
+    public Info(final int capital,
+                final int borrowedMoney,
+                final int overdue,
+                final int reserve,
+                final int active) {
         this.capital = capital;
         this.borrowedMoney = borrowedMoney;
         this.overdue = overdue;
@@ -23,13 +29,19 @@ public class Info {
 
     @Override
     public String toString() {
-        String result = String.format("\n`%-12s%,12d₽\n%-12s%,12d₽\n%-12s%,12d₽\n%-12s%,12d₽\n%-12s%,12d₽\n%-12s%,12d₽`",
+        return String.format("""
+
+                        `%-12s%,12d₽
+                        %-12s%,12d₽
+                        %-12s%,12d₽
+                        %-12s%,12d₽
+                        %-12s%,12d₽
+                        %-12s%,12d₽`""",
                 "Капитал", this.capital,
                 "Макс. займ", this.maxLoan,
                 "Занято", this.borrowedMoney,
                 "Просрочено", this.overdue,
                 "Запас", this.reserve,
                 "Актив", this.active);
-        return result;
     }
 }

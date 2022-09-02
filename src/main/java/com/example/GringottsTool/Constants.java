@@ -8,6 +8,7 @@ public interface Constants {
             Обычно достаточно получить новый файл \\"StoredCredential\\", просто удалив старый.
             """;
     double MAXIMUM_LOAN_COEFFICIENT = 0.125;
+    double MINIMUM_LOAN_COEFFICIENT = 0.6;
     String TOKEN_BOT = System.getenv("TOKEN_BOT");
     String BOT_USERNAME = System.getenv("BOT_USERNAME");
     String WEBHOOK_PATH = System.getenv("WEBHOOK_PATH");

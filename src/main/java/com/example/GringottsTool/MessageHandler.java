@@ -224,7 +224,9 @@ public class MessageHandler implements Runnable{
         for (Cards card : cards) {
             res.append("\n").append(card.toString());
         }
-        return new OutgoingMessage(chatId, res.toString());
+        OutgoingMessage outgoingMessage = new OutgoingMessage(chatId, res.toString());
+        outgoingMessage.setEnableMarkdown(true);
+        return outgoingMessage;
     }
 
     public OutgoingMessage getDebtors(String chatId) throws IOException, ParseException, NoDataFound {
