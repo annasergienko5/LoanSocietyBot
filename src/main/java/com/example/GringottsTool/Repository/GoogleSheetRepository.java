@@ -31,6 +31,7 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
     private static final String DUCK_LIST_RANGE = "Участники!A2:L";
     private static final String TODAY_PAY_PERSONS_RANGE = "Участники!A2:I";
     private static final String PROXY_RANGE = "Прокси!A2:A";
+    private final int FIRST = 0;
     Sheets sheets = GoogleSheets.getSheetsService();
     Logger log = LogManager.getLogger();
 
@@ -212,12 +213,26 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
     public boolean isPartner(String checkingTgId) throws IOException, NoDataFound {
         List<List<Object>> values = getDataFromTable(IS_PARTNER_RANGE);
         for (List row : values) {
-            String tgId = row.get(0).toString();
+            String tgId = getElement(row, FIRST).orElseThrow().toString();
             if (tgId.equals(checkingTgId)) {
                 return true;
             }
         }
         return false;
+    }
+
+    private <T> Optional<T> getElement(final List<T> list, final int index) {
+        if (isEmpty(list)) {
+            return Optional.empty();
+        }
+        if (index < 0 || index >= list.size()) {
+            return Optional.empty();
+        }
+        return Optional.of(list.get(index));
+    }
+
+    private boolean isEmpty(final Collection<?> c) {
+        return c == null || c.isEmpty();
     }
 
     public List<Partner> getDebtors() throws IOException, NoDataFound {

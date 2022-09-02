@@ -49,8 +49,7 @@ public final class Partner {
         sb.append("\nВсего взносов: " + this.contributions);
         sb.append("\nНа сумму: " + this.sumContributions);
         sb.append("\nМакс. займ: " + maxMyLoan);
-        sb.append("\nx0.6: " + (this.sumContributions
-                * Constants.MINIMUM_LOAN_COEFFICIENT));
+        sb.append("\nx0.6: " + (int) Math.floor(this.sumContributions * Constants.MINIMUM_LOAN_COEFFICIENT));
         sb.append("\nВсего займов: " + this.loan);
         if (this.returnDate != null && !this.returnDate.equals("")) {
             sb.append("\nСейчас должен: " + this.debt);
