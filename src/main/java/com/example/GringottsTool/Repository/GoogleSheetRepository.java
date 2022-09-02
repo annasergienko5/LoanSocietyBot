@@ -88,13 +88,21 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
             }
         }
         for (List<String> list : lists) {
-            if (list.size() < 6) {
-                list.add(null);
-            }
             if (list.size() < 7) {
                 list.add(null);
             }
-            result.add(new Cards(list.get(0), Double.parseDouble(list.get(1).replace(",", ".")), list.get(2), list.get(3), list.get(4), list.get(5), list.get(6)));
+            if (list.size() < 8) {
+                list.add(null);
+            }
+            String card = list.get(0);
+            double sum = Double.parseDouble(list.get(1).replace(",", "."));
+            String name = list.get(2);
+            long numberPhone = Long.parseLong(list.get(3));
+            String city = list.get(4);
+            String bank = list.get(5);
+            String payWay = list.get(6);
+            String link = list.get(7);
+            result.add(new Cards(card, sum, name, numberPhone, city, bank, payWay, link));
         }
         return result;
     }

@@ -7,12 +7,13 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public class Transaction {
+public final class Transaction {
     private final String date;
     private final int value;
 
     @Override
     public String toString() {
-        return String.format(Constants.TRANSACTION, date, value).replace(',', ' ');
+        return String.format(Constants.TRANSACTION, date, value)
+                .replace(',', ' ');
     }
 }

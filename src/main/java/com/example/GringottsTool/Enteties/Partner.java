@@ -1,12 +1,17 @@
 package com.example.GringottsTool.Enteties;
 
-import lombok.*;
+
+import com.example.GringottsTool.Constants;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Partner {
+public final class Partner {
     private int tableId;
     private String name;
     private String tgId;
@@ -23,14 +28,15 @@ public class Partner {
     private boolean elite;
     private boolean payedInThisMonth;
 
-    public Partner(String name) {
-        this.name = name;
+    public Partner(final String names) {
+        this.name = names;
     }
 
-    public Partner(String name, int debt, String returnDate) {
-        this.name = name;
-        this.debt = debt;
-        this.returnDate = returnDate;
+    public Partner(final String names, final int debts,
+                   final String returnDates) {
+        this.name = names;
+        this.debt = debts;
+        this.returnDate = returnDates;
     }
     public String getDebt() {
         String result = String.format("%,d", debt).replace(",", " ");
@@ -43,7 +49,8 @@ public class Partner {
         sb.append("\nВсего взносов: " + this.contributions);
         sb.append("\nНа сумму: " + this.sumContributions);
         sb.append("\nМакс. займ: " + maxMyLoan);
-        sb.append("\nx0.6: " + (this.sumContributions * 0.6));
+        sb.append("\nx0.6: " + (this.sumContributions
+                * Constants.MINIMUM_LOAN_COEFFICIENT));
         sb.append("\nВсего займов: " + this.loan);
         if (this.returnDate != null && !this.returnDate.equals("")) {
             sb.append("\nСейчас должен: " + this.debt);
@@ -51,16 +58,24 @@ public class Partner {
         }
         if (this.amountOfEarlyRepayment != 0) {
             sb.append("\nДосрочных погашений: " + this.amountOfEarlyRepayment);
-        } else sb.append("\nДосрочных погашений: нет");
+        } else {
+            sb.append("\nДосрочных погашений: нет");
+        }
         if (this.amountOfOverdueRepayment != 0) {
             sb.append("\nПросрочек: " + this.amountOfOverdueRepayment);
-        } else sb.append("\nПросрочек: нет");
+        } else {
+            sb.append("\nПросрочек: нет");
+        }
         if (this.elite) {
             sb.append("\nВзносы за прошедшие 3 месяца: уплачено");
-        } else sb.append("\nВзносы за прошедшие 3 месяца: не уплачено");
+        } else {
+            sb.append("\nВзносы за прошедшие 3 месяца: не уплачено");
+        }
         if (this.payedInThisMonth) {
             sb.append("\nВзносы за текущий месяц: уплачено");
-        } else sb.append("\nВзносы за текущий месяц: не уплачено");
+        } else {
+            sb.append("\nВзносы за текущий месяц: не уплачено");
+        }
         return sb.toString();
     }
 }

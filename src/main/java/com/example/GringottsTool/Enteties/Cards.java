@@ -3,10 +3,11 @@ package com.example.GringottsTool.Enteties;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
-public class Cards {
+public final class Cards {
     private String card;
     private double sum;
     private String name;
+    private long numberPhone;
     private String city;
     private String bank;
     private String payWay;
@@ -15,15 +16,15 @@ public class Cards {
     @Override
     public String toString() {
         StringBuffer res = new StringBuffer();
-        res.append("\nНомер карты: ").append(this.card)
-                .append("\nсумма на карте: ").append(this.sum)
-                .append("\nгород: ").append(this.city)
-                .append("\nкарта: ").append(this.bank);
-        if (payWay != null){
-            res.append(" ").append(this.payWay);
-        }
-        if (link != null){
-            res.append("\nПополнить без комиссии можно по ссылке:\n").append(this.link);
+        res.append("\n").append(name)
+                .append("\nбанк: ").append(bank)
+                .append(String.format("\nСБП: `%d`", numberPhone))
+                .append(String.format("\nномер карты: `%s`", card))
+                .append("\nсумма на карте: ").append(sum)
+                .append("\nгород: ").append(city);
+        if (link != null) {
+            res.append("\nпополнить без комиссии можно по ссылке:\n")
+                    .append(this.link);
         }
         return res.toString();
     }

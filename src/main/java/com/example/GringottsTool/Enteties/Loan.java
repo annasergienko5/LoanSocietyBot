@@ -9,7 +9,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class Loan {
+public final class Loan {
     private String dateStart;
     private String dateEnd;
     private int value;
@@ -28,7 +28,8 @@ public class Loan {
             String text = transaction.toString();
             transactionsString.append(text);
         }
-        return String.format(Constants.LOAN_WITH_TRANSACTIONS, loanId, dateStart,
+        return String.format(Constants.LOAN_WITH_TRANSACTIONS,
+                loanId, dateStart,
                 dateEnd, value, transactionsString).replace(',', ' ');
     }
 
@@ -36,11 +37,12 @@ public class Loan {
         if (dateEnd == null) {
             dateEnd = "Займ не закрыт";
         }
-        return String.format(Constants.LOAN_WITHOUT_TRANSACTIONS, loanId, dateStart,
+        return String.format(Constants.LOAN_WITHOUT_TRANSACTIONS,
+                loanId, dateStart,
                 dateEnd, value).replace(',', ' ');
     }
 
-    public void appendTransaction(Transaction transaction) {
+    public void appendTransaction(final Transaction transaction) {
         this.transactions.add(transaction);
     }
 }

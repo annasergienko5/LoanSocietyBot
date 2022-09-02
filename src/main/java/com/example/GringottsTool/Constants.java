@@ -3,6 +3,7 @@ package com.example.GringottsTool;
 public interface Constants {
     String START_MESSAGE = "Добрый день! Бот работает и готов принимать запросы.";
     double MAXIMUM_LOAN_COEFFICIENT = 0.125;
+    double MINIMUM_LOAN_COEFFICIENT = 0.6;
     String TOKEN_BOT = System.getenv("TOKEN_BOT");
     String BOT_USERNAME = System.getenv("BOT_USERNAME");
     String WEBHOOK_PATH = System.getenv("WEBHOOK_PATH");
