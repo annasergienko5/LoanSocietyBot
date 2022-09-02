@@ -2,7 +2,13 @@ package com.example.GringottsTool;
 
 import com.example.GringottsTool.DTO.IncomingMessage;
 import com.example.GringottsTool.DTO.OutgoingMessage;
-import com.example.GringottsTool.Enteties.*;
+
+import com.example.GringottsTool.Enteties.Cards;
+import com.example.GringottsTool.Enteties.Contributions;
+import com.example.GringottsTool.Enteties.CreditHistory;
+import com.example.GringottsTool.Enteties.Partner;
+import com.example.GringottsTool.Enteties.Transaction;
+import com.example.GringottsTool.Enteties.QueueItem;
 import com.example.GringottsTool.Exeptions.InvalidDataException;
 import com.example.GringottsTool.Exeptions.NoDataFound;
 import com.example.GringottsTool.Repository.Repository;
@@ -23,56 +29,59 @@ import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 
 @Component
-public class MessageHandler implements Runnable{
+public class MessageHandler implements Runnable {
 
-    Logger log = LogManager.getLogger();
+    private Logger log = LogManager.getLogger();
     @Autowired
-    Repository repository;
+    private Repository repository;
     private final BlockingQueue<IncomingMessage> inQueue;
     private final BlockingQueue<OutgoingMessage> outQueue;
+    private final int numberOfNewloanCommandParameters = 3;
 
-    public MessageHandler(BlockingQueue<IncomingMessage> inQueue, BlockingQueue<OutgoingMessage> outQueue) {
+    public MessageHandler(final BlockingQueue<IncomingMessage> inQueue, final BlockingQueue<OutgoingMessage> outQueue) {
         this.inQueue = inQueue;
         this.outQueue = outQueue;
     }
 
-    public OutgoingMessage answerMessage(IncomingMessage message) throws GeneralSecurityException, IOException, ParseException, NoDataFound, NumberFormatException, InvalidDataException {
+    private OutgoingMessage answerMessage(final IncomingMessage message)
+            throws GeneralSecurityException, IOException, ParseException, NoDataFound, NumberFormatException,
+            InvalidDataException {
         String chatId = message.getChatId();
         long userTgId = message.getUserTgId();
-        log.info("\nReceived message. Chat ID: " + chatId +"\nTelegramm-user ID: " + userTgId );
+        log.info("\nReceived message. Chat ID: " + chatId + "\nTelegramm-user ID: " + userTgId);
         String[] inputTextWithout = message.getMessageText().split("@", 2);
         String[] inputText = inputTextWithout[0].split(" ", 2);
-        if (inputText[0].equals("/id")){
+        if (inputText[0].equals("/id")) {
             return getId(chatId);
         }
-        if (userTgId == 0){
+        if (userTgId == 0) {
             return systemMessage(inputText[0], chatId);
-        }else if (chatId.equals(Constants.PUBLIC_CHAT_ID)) {
-            return publicChat(inputText[0], chatId, inputText,userTgId);
+        } else if (chatId.equals(Constants.PUBLIC_CHAT_ID)) {
+            return publicChat(inputText[0], chatId, inputText, userTgId);
         } else if (chatId.equals(Constants.ADMIN_CHAT_ID)) {
             return adminChat(inputText, chatId, userTgId);
-        }else if (Long.parseLong(chatId) == userTgId && repository.isPartner(chatId)){
+        } else if (Long.parseLong(chatId) == userTgId && repository.isPartner(chatId)) {
             return privateChat(inputText, chatId, userTgId);
         }
         return null;
     }
 
-    private OutgoingMessage systemMessage(String inputText, String chatId) throws NoDataFound, IOException, ParseException {
-        switch (inputText){
-            case "getTodayDebtors":
-                return getTodayDebtors(chatId);
-            case "getDebtors":
-                return getDebtors(chatId);
-        }
-        return null;
+    private OutgoingMessage systemMessage(final String inputText, final String chatId)
+            throws NoDataFound, IOException, ParseException {
+        return switch (inputText) {
+            case "getTodayDebtors" -> getTodayDebtors(chatId);
+            case "getDebtors" -> getDebtors(chatId);
+            default -> throw new RuntimeException();
+        };
     }
 
-    private OutgoingMessage privateChat(String[] inputText, String chatId, long userTgId) throws NoDataFound, IOException, ParseException, NumberFormatException, InvalidDataException {
+    private OutgoingMessage privateChat(final String[] inputText, final String chatId, final long userTgId)
+            throws NoDataFound, IOException, ParseException, NumberFormatException, InvalidDataException {
         switch (inputText[0]) {
             case "/start":
                 return getStartMessage(chatId);
             case "/help":
-                return getHelp(chatId,Constants.HELP_PRIVAT_CHAT);
+                return getHelp(chatId, Constants.HELP_PRIVAT_CHAT);
             case "/search":
                 if (inputText.length < 2) {
                     return new OutgoingMessage(chatId, Constants.NOT_PARAMETERS);
@@ -100,16 +109,18 @@ public class MessageHandler implements Runnable{
                 return getCreditHistory(chatId, userTgId, false);
             case "/credithistoryfull":
                 return getCreditHistory(chatId, userTgId, true);
+            default:
+                return null;
         }
-        return null;
     }
 
-    private OutgoingMessage adminChat(String[] inputText, String chatId, long userTgId) throws NoDataFound, IOException, ParseException, InvalidDataException, NumberFormatException{
+    private OutgoingMessage adminChat(final String[] inputText, final String chatId, final long userTgId)
+            throws NoDataFound, IOException, ParseException, InvalidDataException, NumberFormatException {
         switch (inputText[0]) {
             case "/start":
                 return getStartMessage(chatId);
             case "/help":
-                return getHelp(chatId,Constants.HELP_ADMIN_CHAT);
+                return getHelp(chatId, Constants.HELP_ADMIN_CHAT);
             case "/search":
                 if (inputText.length < 2) {
                     return new OutgoingMessage(chatId, Constants.NOT_PARAMETERS);
@@ -132,17 +143,20 @@ public class MessageHandler implements Runnable{
             case "/proxy":
                 return getProxy(chatId);
             case "/newloan":
-                if (inputText.length < 3 ) {
+                if (inputText.length < numberOfNewloanCommandParameters) {
                     return new OutgoingMessage(chatId, Constants.NOT_MONEY);
                 }
-                return addNewLoan(chatId ,inputText[1], inputText[2]);
+                return addNewLoan(chatId, inputText[1], inputText[2]);
             case "/queue":
                 return getQueue(chatId);
+            default:
+                return null;
         }
-        return null;
     }
 
-    private OutgoingMessage publicChat(String s, String chatId, String[] inputText, long userTgId) throws NoDataFound, IOException, ParseException {
+    private OutgoingMessage publicChat(
+            final String s, final String chatId, final String[] inputText, final long userTgId)
+            throws NoDataFound, IOException, ParseException {
         return switch (s) {
             case "/help" -> getHelp(chatId, Constants.HELP_PUBLIC_CHAT);
             case "/status" -> getStatus(chatId);
@@ -154,35 +168,37 @@ public class MessageHandler implements Runnable{
         };
     }
 
-    private OutgoingMessage getQueue(String chatId) throws NoDataFound, IOException, InvalidDataException, NumberFormatException {
+    private OutgoingMessage getQueue(final String chatId)
+            throws NoDataFound, IOException, InvalidDataException, NumberFormatException {
         StringBuffer result = new StringBuffer();
         Queue<QueueItem> queue = repository.getQueue();
         int count = 1;
-        for (QueueItem q : queue){
+        for (QueueItem q : queue) {
             String str = String.format("%d. %s - %d\n", count++, q.getName(), q.getSum());
             result.append(str);
         }
         return new OutgoingMessage(chatId, result.toString());
     }
 
-    private OutgoingMessage addNewLoan(String chatId, String tableId, String sumString) throws NoDataFound, IOException, InvalidDataException {
+    private OutgoingMessage addNewLoan(final String chatId, final String tableId, final String sumString)
+            throws NoDataFound, IOException, InvalidDataException {
         int sum = Integer.parseInt(sumString);
             return new OutgoingMessage(chatId, repository.addQueueItem(tableId, sum));
     }
 
-    private OutgoingMessage getId(String chatId) {
+    private OutgoingMessage getId(final String chatId) {
         return new OutgoingMessage(chatId, chatId);
     }
 
-    private OutgoingMessage getHelp(String chatId, String help) {
+    private OutgoingMessage getHelp(final String chatId, final String help) {
         return new OutgoingMessage(chatId, help);
     }
 
-    private OutgoingMessage getRules(String chatId) {
+    private OutgoingMessage getRules(final String chatId) {
         return new OutgoingMessage(chatId, Constants.RULE);
     }
 
-    private OutgoingMessage getDucklist(String chatId) throws IOException, NoDataFound {
+    private OutgoingMessage getDucklist(final String chatId) throws IOException, NoDataFound {
         List<Partner> elitePartners = repository.getDuckList();
         StringBuffer result = new StringBuffer();
         if (elitePartners.size() == 0) {
@@ -197,7 +213,8 @@ public class MessageHandler implements Runnable{
         return sendMessage;
     }
 
-    private OutgoingMessage getAboutMyPayment(String chatId, long userTgId) throws IOException, NoDataFound {
+    private OutgoingMessage getAboutMyPayment(final String chatId, final long userTgId)
+            throws IOException, NoDataFound {
         Partner partner = repository.getPartnerByTgId(String.valueOf(userTgId));
         Contributions contributions = repository.getContributions().get(partner.getTableId() - 2);
         if (contributions != null) {
@@ -206,7 +223,7 @@ public class MessageHandler implements Runnable{
         throw new NoDataFound(Constants.NOT_FOUND_DATA);
     }
 
-    private OutgoingMessage getAboutme(String chatId, long userTgId) throws IOException, NoDataFound {
+    private OutgoingMessage getAboutme(final String chatId, final long userTgId) throws IOException, NoDataFound {
         List<Partner> resultList = repository.getPartners(String.valueOf(userTgId));
         if (resultList.isEmpty()) {
             throw new NoDataFound(Constants.NOT_FOUND_DATA);
@@ -215,10 +232,10 @@ public class MessageHandler implements Runnable{
         }
     }
 
-    private OutgoingMessage getCards(String chatId) throws IOException, NoDataFound {
+    private OutgoingMessage getCards(final String chatId) throws IOException, NoDataFound {
         StringBuffer res = new StringBuffer();
         List<Cards> cards = repository.getCards();
-        if (cards.isEmpty()){
+        if (cards.isEmpty()) {
             throw new NoDataFound(Constants.NOT_FOUND_DATA);
         }
         for (Cards card : cards) {
@@ -229,7 +246,7 @@ public class MessageHandler implements Runnable{
         return outgoingMessage;
     }
 
-    public OutgoingMessage getDebtors(String chatId) throws IOException, ParseException, NoDataFound {
+    private OutgoingMessage getDebtors(final String chatId) throws IOException, ParseException, NoDataFound {
         StringBuffer result = new StringBuffer();
         Date dateNow = new Date();
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
@@ -240,11 +257,13 @@ public class MessageHandler implements Runnable{
         if (debts.size() == 0) {
             throw new NoDataFound(Constants.NOT_FOUND_DATA);
         }
-        for (Partner partner : debts){
+        for (Partner partner : debts) {
             Date date = dateFormat.parse(partner.getReturnDate());
-            if (date.getTime() <= dateNow.getTime() ){
+            if (date.getTime() <= dateNow.getTime()) {
                 overdueDebtor.add(partner);
-            }else notOverdueDebtor.add(partner);
+            } else {
+                notOverdueDebtor.add(partner);
+            }
         }
         result.append("*Просрочено:*\n\n");
         for (Partner partner : overdueDebtor) {
@@ -268,14 +287,14 @@ public class MessageHandler implements Runnable{
         return sendMessage;
     }
 
-    private OutgoingMessage getStatus(String chatId) throws IOException, NoDataFound {
+    private OutgoingMessage getStatus(final String chatId) throws IOException, NoDataFound {
         String result = repository.getInfo().toString();
         OutgoingMessage sendMessage = new OutgoingMessage(chatId, result);
         sendMessage.setEnableMarkdown(true);
         return sendMessage;
     }
 
-    private OutgoingMessage getSearch(String chatId, String nameOrTgId) throws IOException, NoDataFound {
+    private OutgoingMessage getSearch(final String chatId, final String nameOrTgId) throws IOException, NoDataFound {
         List<Partner> resultList = repository.getPartners(nameOrTgId);
         OutgoingMessage sendMessage;
         if (resultList.size() == 0) {
@@ -289,13 +308,14 @@ public class MessageHandler implements Runnable{
         return sendMessage;
     }
 
-    private OutgoingMessage getStartMessage(String chatId) {
+    private OutgoingMessage getStartMessage(final String chatId) {
         OutgoingMessage sendMessage = new OutgoingMessage(chatId, "Привет");
         sendMessage.setEnableMarkdown(true);
         return sendMessage;
     }
 
-    private OutgoingMessage getFast(String chatId, long userTgId, String[] inputTextAll) throws NoDataFound, IOException {
+    private OutgoingMessage getFast(final String chatId, final long userTgId, final String[] inputTextAll)
+            throws NoDataFound, IOException {
         int sum;
         if (inputTextAll.length < 2) {
             throw new NoDataFound(Constants.NO_AMOUNT_OF_MONEY);
@@ -303,10 +323,10 @@ public class MessageHandler implements Runnable{
         String inputText = inputTextAll[1];
         try {
             sum = Integer.parseInt(inputText);
-        } catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
             return new OutgoingMessage(chatId, Constants.INCORRECT_MONEY_TYPE);
         }
-        if (sum <= 0){
+        if (sum <= 0) {
             return new OutgoingMessage(chatId, Constants.INCORRECT_AMOUNT_OF_MONEY);
         }
         List<Partner> resultList = repository.getPartners(String.valueOf(userTgId));
@@ -314,7 +334,7 @@ public class MessageHandler implements Runnable{
             return new OutgoingMessage(chatId, Constants.NOT_FOUND_DATA);
         }
         String decision;
-        if ((double) sum > resultList.get(0).getSumContributions()){
+        if ((double) sum > resultList.get(0).getSumContributions()) {
             decision = Constants.LOAN_DENIED;
         } else {
             decision = Constants.LOAN_APPROVED + inputText;
@@ -328,11 +348,11 @@ public class MessageHandler implements Runnable{
         return sendMessage;
     }
 
-    private OutgoingMessage getProxy(String chatId) throws NoDataFound, IOException {
+    private OutgoingMessage getProxy(final String chatId) throws NoDataFound, IOException {
         List<String> proxyList = repository.getProxy();
         StringBuilder result = new StringBuilder("Наши прокси-серверы:");
         int i = 1;
-        for (String proxy : proxyList){
+        for (String proxy : proxyList) {
             String inlineUrl = String.format("\n[сервер %d](%s)", i, proxy);
             result.append(inlineUrl);
             i++;
@@ -342,8 +362,10 @@ public class MessageHandler implements Runnable{
         return message;
     }
 
-    private OutgoingMessage getCreditHistory(String chatId, long tgId, boolean full) throws NoDataFound, IOException, NumberFormatException, InvalidDataException {
-        log.info("\n getCreditHistory STARTED from chatId: " + chatId + "\n From user with tgId: " + tgId + "\n Is full CreditHistory?: " + full);
+    private OutgoingMessage getCreditHistory(final String chatId, final long tgId, final boolean full)
+            throws NoDataFound, IOException, NumberFormatException, InvalidDataException {
+        log.info("\n getCreditHistory STARTED from chatId: " + chatId + "\n From user with tgId: " + tgId
+                + "\n Is full CreditHistory?: " + full);
         Partner partner = repository.getPartnerByTgId(String.valueOf(tgId));
         List<Transaction> transactions;
         if (partner.getTableId() == 0) {
@@ -368,16 +390,17 @@ public class MessageHandler implements Runnable{
     }
 
     @Override
-    public void run() {
-        while (true){
+    public final void run() {
+        while (true) {
             String errorMessage = null;
             String chatId = null;
             try {
                 IncomingMessage incomingMessage = inQueue.take();
                 chatId = incomingMessage.getChatId();
-                errorMessage = String.format(Constants.ERROR_IN_SOME_FUNCTION, incomingMessage.getMessageText(), chatId, incomingMessage.getUserTgId());
+                errorMessage = String.format(Constants.ERROR_IN_SOME_FUNCTION, incomingMessage.getMessageText(),
+                        chatId, incomingMessage.getUserTgId());
                 OutgoingMessage outgoingMessage = answerMessage(incomingMessage);
-                if (outgoingMessage != null){
+                if (outgoingMessage != null) {
                     putToOutQueue(outgoingMessage);
                 }
             } catch (GeneralSecurityException | IOException e) {
@@ -388,17 +411,19 @@ public class MessageHandler implements Runnable{
                 putToOutQueue(new OutgoingMessage(chatId, e.getMessage()));
             } catch (InvalidDataException e) {
                 putToOutQueue(new OutgoingMessage(chatId, Constants.INVALID_DATA_IN_CELLS));
-                putToOutQueue(new OutgoingMessage( Constants.ADMIN_CHAT_ID, errorMessage + Constants.INVALID_DATA_IN_CELLS_TO_ADMIN + e.toMessage()));
+                putToOutQueue(new OutgoingMessage(Constants.ADMIN_CHAT_ID, errorMessage
+                        + Constants.INVALID_DATA_IN_CELLS_TO_ADMIN + e.toMessage()));
             } catch (NumberFormatException | ParseException e) {
                 log.info(e.getMessage(), e);
-                putToOutQueue(new OutgoingMessage(chatId,Constants.INVALID_DATA_IN_CELLS));
-                putToOutQueue(new OutgoingMessage(Constants.ADMIN_CHAT_ID,errorMessage + Constants.INVALID_DATA_IN_CELLS_TO_ADMIN ));
+                putToOutQueue(new OutgoingMessage(chatId, Constants.INVALID_DATA_IN_CELLS));
+                putToOutQueue(new OutgoingMessage(Constants.ADMIN_CHAT_ID, errorMessage
+                        + Constants.INVALID_DATA_IN_CELLS_TO_ADMIN));
             } catch (InterruptedException e) {
                 putToOutQueue(new OutgoingMessage(Constants.ADMIN_CHAT_ID, Constants.ERROR_TAKING_IN_MESSAGEHANDLER));
             }
         }
     }
-    private void putToOutQueue(OutgoingMessage outgoingMessage) {
+    private void putToOutQueue(final OutgoingMessage outgoingMessage) {
         try {
             outQueue.put(outgoingMessage);
         } catch (InterruptedException e) {
@@ -406,7 +431,7 @@ public class MessageHandler implements Runnable{
         }
 
     }
-    public OutgoingMessage getTodayDebtors(String chatId) throws NoDataFound, IOException {
+    private OutgoingMessage getTodayDebtors(final String chatId) throws NoDataFound, IOException {
         List<Partner> persons =  repository.getTodayDebtors();
         String text;
         if (persons.size() != 0) {
@@ -416,10 +441,11 @@ public class MessageHandler implements Runnable{
         }
         return new OutgoingMessage(chatId, text);
     }
-    private String getStringAboutTodayDebts(List<Partner> debts) {
+    private String getStringAboutTodayDebts(final List<Partner> debts) {
         StringBuilder result = new StringBuilder();
         for (Partner partner : debts) {
-            String text = String.format(Constants.SIMPLE_DEBTS, partner.getName(), partner.getDebt(), partner.getReturnDate());
+            String text = String.format(Constants.SIMPLE_DEBTS, partner.getName(), partner.getDebt(),
+                    partner.getReturnDate());
             result.append(text);
         }
         return result.toString();
