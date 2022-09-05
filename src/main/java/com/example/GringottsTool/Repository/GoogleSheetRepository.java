@@ -38,7 +38,7 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
     public GoogleSheetRepository() throws GeneralSecurityException, IOException, GoogleTokenException {
     }
 
-    private  List<List<Object>> getDataFromTable(String range) throws IOException, NoDataFound {
+    private List<List<Object>> getDataFromTable(String range) throws IOException, NoDataFound {
         ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
         List<List<Object>> values = response.getValues();
         if (values == null || values.isEmpty()) {
@@ -51,16 +51,16 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
         List<List<Object>> date = getDataFromTable("Взносы!1:1");
         List<List<Object>> values = getDataFromTable("Взносы!A2:AD");
         List<Contributions> result = new ArrayList<>();
-        for (List row : values) {
+        for (List<? extends Object> row : values) {
             String name = row.get(0).toString();
             ArrayList<Contributions.Contribution> pay = new ArrayList<>();
             String also;
             try {
-                also = row.get(row.size()-1).toString();
+                also = row.get(row.size() - 1).toString();
             } catch (IndexOutOfBoundsException e) {
                 also = "не было";
             }
-            for (int i = 3; i < (row.size()-1); i++) {
+            for (int i = 3; i < (row.size() - 1); i++) {
                 if (!row.get(i).toString().equals("!") && !row.get(i).toString().isEmpty()) {
                     pay.add(new Contributions.Contribution(date.get(0).get(i).toString(), row.get(i).toString()));
                 }
@@ -76,7 +76,7 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
         List<Cards> result = new ArrayList<>();
         List<List<String>> lists = new ArrayList<>();
         int i = -1;
-        for (List row : values) {
+        for (List<? extends Object> row : values) {
             if (row.size() > 1 && !row.get(1).toString().equals("")) {
                 i++;
                 lists.add(new ArrayList<>());
@@ -138,13 +138,14 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
         }
         return result;
     }
+
     private Partner findPartner(int tableId) throws NoDataFound, IOException {
         List<List<Object>> values = getDataFromTable(String.format("Участники!A%d:M%d", tableId, tableId));
         List<Object> row = values.get(0);
         int tableID = 2 + values.indexOf(row);
         if (values.size() != 0) {
             return getNewPartner(row, tableID);
-        }else return null;
+        } else return null;
     }
 
     private Partner getNewPartner(List<Object> row, int tableID) throws NoDataFound, IOException {
@@ -183,15 +184,15 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
         if (row.get(12).toString().equals("1")) {
             isPayedThisMonth = true;
         }
-        return new Partner(tableID ,name, tgId, vk, city, maxMyLoan, contributions, sumContributions, loan, debt, returnDate, earlyRepayment, overdueRepayment, elite, isPayedThisMonth);
+        return new Partner(tableID, name, tgId, vk, city, maxMyLoan, contributions, sumContributions, loan, debt, returnDate, earlyRepayment, overdueRepayment, elite, isPayedThisMonth);
     }
 
-    private int getMaxMyLoan(double sumContributions, int overdueRepayment, int maxLoan){
+    private int getMaxMyLoan(double sumContributions, int overdueRepayment, int maxLoan) {
         int maxMyLoan;
-        if (overdueRepayment < 6){
+        if (overdueRepayment < 6) {
             maxMyLoan = (int) (sumContributions * (5 - 0.5 * overdueRepayment));
-        }else maxMyLoan = (int) sumContributions * 2;
-        if (maxMyLoan > maxLoan){
+        } else maxMyLoan = (int) sumContributions * 2;
+        if (maxMyLoan > maxLoan) {
             maxMyLoan = maxLoan;
         }
         return maxMyLoan;
@@ -212,8 +213,8 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
 
     public boolean isPartner(String checkingTgId) throws IOException, NoDataFound {
         List<List<Object>> values = getDataFromTable(IS_PARTNER_RANGE);
-        for (List row : values) {
-            String tgId = getElement(row, FIRST).orElseThrow().toString();
+        for (List<Object> row : values) {
+            String tgId = getElement(row, FIRST).orElse("").toString();
             if (tgId.equals(checkingTgId)) {
                 return true;
             }
@@ -238,7 +239,7 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
     public List<Partner> getDebtors() throws IOException, NoDataFound {
         List<List<Object>> values = getDataFromTable(DEBT_RANGE);
         List<Partner> result = new ArrayList<>();
-        for (List row : values) {
+        for (List<? extends Object> row : values) {
             int debt = Integer.parseInt(row.get(7).toString());
             if (debt != 0) {
                 String name = row.get(0).toString();
@@ -255,7 +256,7 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
     public List<Partner> getDuckList() throws IOException, NoDataFound {
         List<List<Object>> names = getDataFromTable(DUCK_LIST_RANGE);
         ArrayList<Partner> partners = new ArrayList<>();
-        for (List row : names) {
+        for (List<? extends Object> row : names) {
             String name = row.get(0).toString();
             int elite = Integer.parseInt(row.get(11).toString());
             if (elite == 1) {
@@ -271,7 +272,7 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         LocalDate nowDate = LocalDate.now(ZoneId.of(Constants.CRON_TIMEZONE));
         nowDate.format(dateTimeFormatter);
-        for (List row : values) {
+        for (List<? extends Object> row : values) {
             int debt = Integer.parseInt(row.get(7).toString());
             if (debt != 0) {
                 LocalDate dayBeforeToPay = LocalDate.parse(row.get(8).toString(), dateTimeFormatter).minusDays(1);
@@ -289,7 +290,7 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
     public List<String> getProxy() throws IOException, NoDataFound {
         List<List<Object>> values = getDataFromTable(PROXY_RANGE);
         List<String> proxyList = new ArrayList<>();
-        for (List row : values){
+        for (List<? extends Object> row : values) {
             proxyList.add(row.get(0).toString());
         }
         return proxyList;
@@ -309,7 +310,7 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
         }
         List<Transaction> transactions = new LinkedList<>();
         if (values != null) {
-            for (List row : values) {
+            for (List<? extends Object> row : values) {
                 for (int i = row.size() - 1; i >= 5; i--) {
                     String cellValue = row.get(i).toString();
                     if (cellValue.isBlank()) {
@@ -319,7 +320,7 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
                         try {
                             value = Integer.parseInt(cellValue);
                         } catch (NumberFormatException ignored) {
-                            throw new InvalidDataException("Error in getTransactions",personRequestRange, i + 1, cellValue, Constants.NUMERIC_DECIMAL_EXPECTED_VALUE);
+                            throw new InvalidDataException("Error in getTransactions", personRequestRange, i + 1, cellValue, Constants.NUMERIC_DECIMAL_EXPECTED_VALUE);
                         }
                         Transaction transaction = new Transaction(date, value);
                         transactions.add(transaction);
@@ -330,7 +331,7 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
         return transactions;
     }
 
-    public Partner getPartnerByTgId(String tgId) throws IOException,NoDataFound {
+    public Partner getPartnerByTgId(String tgId) throws IOException, NoDataFound {
         ValueRange resNames = sheets.spreadsheets().values().get(Constants.SHEET_ID, "Участники!A2:B").execute();
         if (resNames == null) {
             throw new NoDataFound("No data found in sheet: \"Участники\"!");
@@ -338,12 +339,12 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
         List<List<Object>> names = resNames.getValues();
         Partner partner = new Partner();
         partner.setTgId(tgId);
-        for (List row : names) {
+        for (List<? extends Object> row : names) {
             String name = row.get(0).toString();
             String thisTgId = row.get(1).toString();
-                if (tgId.equals(thisTgId)) {
-                    partner.setName(name);
-                    partner.setTableId(names.indexOf(row) + 2);
+            if (tgId.equals(thisTgId)) {
+                partner.setName(name);
+                partner.setTableId(names.indexOf(row) + 2);
             }
         }
         return partner;
@@ -352,14 +353,14 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
     public Queue<QueueItem> getQueue() throws NoDataFound, IOException, NumberFormatException, InvalidDataException {
         List<List<Object>> values = getDataFromTable(QUEUE_LOAN);
         Queue<QueueItem> result = new LinkedList<>();
-        for (List<Object> row : values){
+        for (List<Object> row : values) {
             String name = row.get(0).toString();
             String tgId = row.get(1).toString();
             int sum;
             try {
                 sum = Integer.parseInt(row.get(2).toString());
             } catch (NumberFormatException ignored) {
-                throw new InvalidDataException("Error in getQueue",QUEUE_LOAN, 3, row.get(2).toString(), Constants.NUMERIC_DECIMAL_EXPECTED_VALUE);
+                throw new InvalidDataException("Error in getQueue", QUEUE_LOAN, 3, row.get(2).toString(), Constants.NUMERIC_DECIMAL_EXPECTED_VALUE);
             }
             result.add(new QueueItem(name, tgId, sum));
         }
@@ -370,19 +371,19 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
         int tableId;
         try {
             tableId = Integer.parseInt(tableIdString);
-            if (tableId < 2){
+            if (tableId < 2) {
                 throw new NumberFormatException();
             }
-        }catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
             return Constants.NOT_PARTNER_FROM_ID;
         }
         int count = getNumberInQueue(tableId);
-        if (count == 0){
+        if (count == 0) {
             String name;
             Partner partner = findPartner(tableId);
-            if (partner == null){
+            if (partner == null) {
                 return Constants.NOT_PARTNERS;
-            }else name = partner.getName();
+            } else name = partner.getName();
             ValueRange appendBody = new ValueRange()
                     .setValues(Arrays.asList(Arrays.asList(name, tableId, sum)));
             sheets.spreadsheets().values()
@@ -391,7 +392,7 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
                     .setIncludeValuesInResponse(true)
                     .execute();
             return Constants.ADDED_IN_QUEUE;
-        }else {
+        } else {
             ValueRange body = new ValueRange()
                     .setValues(Arrays.asList(Arrays.asList(sum)));
             sheets.spreadsheets().values()
@@ -403,11 +404,11 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
 
     }
 
-    private int getNumberInQueue(int tableId) throws InvalidDataException, NoDataFound, IOException,  NumberFormatException {
+    private int getNumberInQueue(int tableId) throws InvalidDataException, NoDataFound, IOException, NumberFormatException {
         Queue<QueueItem> queues = getQueue();
         int count = 2;
-        for (QueueItem q : queues){
-            if (Integer.parseInt(q.getTgId()) == tableId){
+        for (QueueItem q : queues) {
+            if (Integer.parseInt(q.getTgId()) == tableId) {
                 return count;
             }
             count++;
@@ -420,7 +421,7 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
         try {
             getInfo();
             log.info("GoogleSheetRepository is healthy");
-        } catch (NoDataFound | IOException e){
+        } catch (NoDataFound | IOException e) {
             throw new HealthExeption("There is a problem with GoogleSheetRepository");
         }
     }
