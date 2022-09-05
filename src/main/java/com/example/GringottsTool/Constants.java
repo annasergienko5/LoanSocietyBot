@@ -120,4 +120,17 @@ public interface Constants {
             Вернуть до:\t<strong>%s</strong>
 
             """;
+    String OVERDUE_DEBTORS = """
+            \t*%s*
+            \t%s₽
+            до:\t%s
+
+            """;
+    String NOT_OVERDUE_DEBTORS = """
+            \t*%s*
+            \t%s₽
+            до:\t%s
+            последний платёж:\t%s
+
+            """;
 }

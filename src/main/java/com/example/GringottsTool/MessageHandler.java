@@ -55,7 +55,8 @@ public class MessageHandler implements Runnable {
             return getId(chatId);
         }
         if (userTgId == 0) {
-            return systemMessage(inputText[0], chatId);
+            systemMessage(inputText[0], chatId);
+            return null;
         } else if (chatId.equals(Constants.PUBLIC_CHAT_ID)) {
             return publicChat(inputText[0], chatId, inputText, userTgId);
         } else if (chatId.equals(Constants.ADMIN_CHAT_ID)) {
@@ -66,13 +67,28 @@ public class MessageHandler implements Runnable {
         return null;
     }
 
-    private OutgoingMessage systemMessage(final String inputText, final String chatId)
-            throws NoDataFound, IOException, ParseException {
-        return switch (inputText) {
-            case "getTodayDebtors" -> getTodayDebtors(chatId);
-            case "getDebtors" -> getDebtors(chatId);
-            default -> throw new RuntimeException();
-        };
+    private void systemMessage(final String inputText, final String chatId) throws NoDataFound, IOException,
+            ParseException {
+        OutgoingMessage message = null;
+        if (inputText.equals("getTodayDebtors")) {
+            message = getTodayDebtors(chatId);
+        } else if (inputText.equals("getDebtors")) {
+            message = getDebtors(chatId, true);
+        } else {
+            throw new IOException("Problems with scheduled notifications. "
+                    + "systemMessage() received wrong inputText.");
+        }
+        if (message != null) {
+            sendToChats(message);
+        }
+    }
+
+    private void sendToChats(final OutgoingMessage message) {
+        if (!message.isEnableMarkdown()) {
+            message.setParseMode(ParseMode.HTML);
+        }
+        putToOutQueue(message);
+        putToOutQueue(message.withChatId(Constants.PUBLIC_CHAT_ID));
     }
 
     private OutgoingMessage privateChat(final String[] inputText, final String chatId, final long userTgId)
@@ -90,7 +106,7 @@ public class MessageHandler implements Runnable {
             case "/status":
                 return getStatus(chatId);
             case "/debts":
-                return getDebtors(chatId);
+                return getDebtors(chatId, false);
             case "/cards":
                 return getCards(chatId);
             case "/rules":
@@ -129,7 +145,7 @@ public class MessageHandler implements Runnable {
             case "/status":
                 return getStatus(chatId);
             case "/debts":
-                return getDebtors(chatId);
+                return getDebtors(chatId, false);
             case "/cards":
                 return getCards(chatId);
             case "/rules":
@@ -160,7 +176,7 @@ public class MessageHandler implements Runnable {
         return switch (s) {
             case "/help" -> getHelp(chatId, Constants.HELP_PUBLIC_CHAT);
             case "/status" -> getStatus(chatId);
-            case "/debts" -> getDebtors(chatId);
+            case "/debts" -> getDebtors(chatId, false);
             case "/cards" -> getCards(chatId);
             case "/rules" -> getRules(chatId);
             case "/fast" -> getFast(chatId, userTgId, inputText);
@@ -246,45 +262,47 @@ public class MessageHandler implements Runnable {
         return outgoingMessage;
     }
 
-    private OutgoingMessage getDebtors(final String chatId) throws IOException, ParseException, NoDataFound {
-        StringBuffer result = new StringBuffer();
-        Date dateNow = new Date();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
-
+    private OutgoingMessage getDebtors(final String chatId, final boolean isScheduled)
+            throws IOException, ParseException, NoDataFound {
         List<Partner> debts = repository.getDebtors();
+        if (debts.size() == 0 && !isScheduled) {
+                throw new NoDataFound(Constants.NOT_FOUND_DATA);
+        } else if (debts.size() != 0) {
+            String debtorsString = getStringAboutAllDebtors(debts);
+            OutgoingMessage sendMessage = new OutgoingMessage(chatId, debtorsString);
+            sendMessage.setEnableMarkdown(true);
+            return sendMessage;
+        }
+        return null;
+    }
+
+    private String getStringAboutAllDebtors(final List<Partner> debts) throws ParseException, NoDataFound, IOException {
         List<Partner> overdueDebtor = new ArrayList<>();
         List<Partner> notOverdueDebtor = new ArrayList<>();
-        if (debts.size() == 0) {
-            throw new NoDataFound(Constants.NOT_FOUND_DATA);
-        }
+        StringBuilder result = new StringBuilder();
+        Date dateNow = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
         for (Partner partner : debts) {
             Date date = dateFormat.parse(partner.getReturnDate());
             if (date.getTime() <= dateNow.getTime()) {
                 overdueDebtor.add(partner);
-            } else {
-                notOverdueDebtor.add(partner);
             }
+            notOverdueDebtor.add(partner);
         }
         result.append("*Просрочено:*\n\n");
         for (Partner partner : overdueDebtor) {
-            result.append("*" + partner.getName() + "*\n")
-                    .append(partner.getDebt() + "₽\n")
-                    .append("до: " + partner.getReturnDate() + "\n\n");
+            result.append(String.format(Constants.OVERDUE_DEBTORS, partner.getName(), partner.getDebt(),
+                    partner.getReturnDate()));
         }
         result.append("----------\n\n")
                 .append("*Должники:*\n\n");
         List<Contributions> contributions = repository.getContributions();
         for (Partner partner : notOverdueDebtor) {
             Contributions.Contribution lastContr = contributions.get(partner.getTableId() - 2).getPays().get(0);
-            result.append("*" + partner.getName() + "*\n")
-                    .append(partner.getDebt() + "₽\n")
-                    .append("до: " + partner.getReturnDate() + "\n")
-                    .append("последний платёж: " + lastContr.getDate() + "\n\n");
+            result.append(String.format(Constants.NOT_OVERDUE_DEBTORS, partner.getName(), partner.getDebt(),
+                    partner.getReturnDate(), lastContr.getDate()));
         }
-        OutgoingMessage sendMessage = new OutgoingMessage(chatId, result.toString());
-        sendMessage.setEnableMarkdown(true);
-
-        return sendMessage;
+        return result.toString();
     }
 
     private OutgoingMessage getStatus(final String chatId) throws IOException, NoDataFound {
@@ -437,10 +455,14 @@ public class MessageHandler implements Runnable {
         if (persons.size() != 0) {
             text = String.format(Constants.TODAY_DEBTS_MESSAGE, getStringAboutTodayDebts(persons));
         } else {
-            throw new NoDataFound("No information about debtors.");
+            return null;
         }
-        return new OutgoingMessage(chatId, text);
+        OutgoingMessage outgoingMessage = new OutgoingMessage(chatId, text);
+        outgoingMessage.setParseMode(ParseMode.HTML);
+        outgoingMessage.setEnableMarkdown(false);
+        return outgoingMessage;
     }
+
     private String getStringAboutTodayDebts(final List<Partner> debts) {
         StringBuilder result = new StringBuilder();
         for (Partner partner : debts) {
