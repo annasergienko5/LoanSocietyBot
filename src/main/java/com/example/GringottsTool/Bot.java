@@ -114,10 +114,8 @@ public class Bot extends SpringWebhookBot implements Runnable, Healthcheckable {
     public void reportAboutDebts() {
         log.info("Making everyMonth request about Debts...");
         try {
-            IncomingMessage incomingMessagePublic = new IncomingMessage(Constants.PUBLIC_CHAT_ID, "getDebtors");
             IncomingMessage incomingMessageAdmin = new IncomingMessage(Constants.ADMIN_CHAT_ID, "getDebtors");
             inQueue.put(incomingMessageAdmin);
-            inQueue.put(incomingMessagePublic);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -127,12 +125,10 @@ public class Bot extends SpringWebhookBot implements Runnable, Healthcheckable {
     public void reportAboutTodayDebts()  {
         log.info("Making everyDay request about Debts...");
         try {
-            IncomingMessage incomingMessagePublic = new IncomingMessage(Constants.PUBLIC_CHAT_ID, "getTodayDebtors");
-            IncomingMessage incomingMessageAdmin = new IncomingMessage(Constants.ADMIN_CHAT_ID, "getTodayDebtors");
-            inQueue.put(incomingMessageAdmin);
-            inQueue.put(incomingMessagePublic);
+        IncomingMessage incomingMessageAdmin = new IncomingMessage(Constants.ADMIN_CHAT_ID, "getTodayDebtors");
+        inQueue.put(incomingMessageAdmin);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+        throw new RuntimeException(e);
         }
     }
 
