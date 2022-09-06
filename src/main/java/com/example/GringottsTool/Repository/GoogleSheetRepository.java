@@ -340,6 +340,9 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
         Partner partner = new Partner();
         partner.setTgId(tgId);
         for (List<? extends Object> row : names) {
+            if (row.size() < 2) {
+                continue;
+            }
             String name = row.get(0).toString();
             String thisTgId = row.get(1).toString();
             if (tgId.equals(thisTgId)) {
