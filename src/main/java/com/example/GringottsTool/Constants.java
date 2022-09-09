@@ -44,6 +44,7 @@ public interface Constants {
             /fast - попросить быстрый займ""";
     String HELP_ADMIN_CHAT = """
             /id - получить id текущего чата
+            /version - получить версию бота
             /search - поиск участника
             /status - баланс кассы
             /debts - список должников
@@ -57,6 +58,7 @@ public interface Constants {
             /queue - показать очередь""";
     String HELP_PRIVAT_CHAT = """
             /id - получить id текущего чата
+            /version - получить версию бота
             /search - поиск участника
             /status - баланс кассы
             /debts - список должников
@@ -135,5 +137,5 @@ public interface Constants {
 
             """;
     String NOT_PARTNER = "Для использования функций бота необходимо быть участником";
-    int COUNT_OF_ALPHABET = 26;
+    String VERSION = "dev";
 }

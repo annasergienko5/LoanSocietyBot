@@ -191,7 +191,7 @@ public class MessageHandler implements Runnable {
     }
 
     private OutgoingMessage getVersion(final String chatId) {
-        return new OutgoingMessage(chatId, Version.VERSION);
+        return new OutgoingMessage(chatId, Constants.VERSION);
     }
 
     private OutgoingMessage getQueue(final String chatId)

@@ -3,9 +3,12 @@ package com.example.GringottsTool;
 import com.example.GringottsTool.DTO.IncomingMessage;
 import com.example.GringottsTool.DTO.OutgoingMessage;
 import com.example.GringottsTool.Exeptions.EnvironmentNullExeption;
+import com.example.GringottsTool.Exeptions.HealthExeption;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.SpringApplication;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -22,8 +25,11 @@ import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+
 @Configuration
 public class Config {
+    @Autowired
+    private ApplicationContext applicationContext;
 
     private final Logger log =  LogManager.getLogger();
 
@@ -54,7 +60,12 @@ public class Config {
     @DependsOn({"checkENV", "registerTgBot", "setWebhookInstance", "springWebhookBot"})
     public HealthChecker healthChecker(final List<Healthcheckable> programEntitiesList) {
         HealthChecker healthChecker = new HealthChecker(programEntitiesList);
-        healthChecker.areAllAlive();
+        try {
+            healthChecker.areAllAlive();
+        } catch (HealthExeption e) {
+            e.printStackTrace();
+            SpringApplication.exit(applicationContext, () -> 2);
+        }
         return healthChecker;
     }
 
