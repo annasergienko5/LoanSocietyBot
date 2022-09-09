@@ -3,13 +3,15 @@ package com.example.GringottsTool.Exeptions;
 import com.example.GringottsTool.Constants;
 import com.example.GringottsTool.Repository.A1NotationParser;
 
-public class InvalidDataException extends Exception {
-    private String sheetRange;
-    private String cellValue;
-    private String expectedValue;
-    private String columnA1Notation;
+public final class InvalidDataException extends Exception {
+    private final String sheetRange;
+    private final String cellValue;
+    private final String expectedValue;
+    private final String columnA1Notation;
 
-    public InvalidDataException (String msg, String sheetRange,int columnNumber, String cellValue, String expectedValue) {
+    public InvalidDataException(final String msg, final String sheetRange, final int columnNumber,
+                                final String cellValue,
+                                final String expectedValue) {
         super(msg);
         this.cellValue = cellValue;
         this.expectedValue = expectedValue;

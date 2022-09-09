@@ -1,6 +1,11 @@
 package com.example.GringottsTool.Repository;
 
-import com.example.GringottsTool.Enteties.*;
+import com.example.GringottsTool.Enteties.Transaction;
+import com.example.GringottsTool.Enteties.QueueItem;
+import com.example.GringottsTool.Enteties.Cards;
+import com.example.GringottsTool.Enteties.Contributions;
+import com.example.GringottsTool.Enteties.Info;
+import com.example.GringottsTool.Enteties.Partner;
 import com.example.GringottsTool.Exeptions.InvalidDataException;
 import com.example.GringottsTool.Exeptions.NoDataFound;
 

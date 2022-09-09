@@ -19,17 +19,18 @@ import org.telegram.telegrambots.starter.SpringWebhookBot;
 
 import java.util.concurrent.BlockingQueue;
 
-public class Bot extends SpringWebhookBot implements Runnable, Healthcheckable {
+public final class Bot extends SpringWebhookBot implements Runnable, Healthcheckable {
     private final BlockingQueue<IncomingMessage> inQueue;
     private final BlockingQueue<OutgoingMessage> outQueue;
-    Logger log = LogManager.getLogger();
+    private final Logger log = LogManager.getLogger();
     private String botPath;
     private String botUserName;
     private String botToken;
     private final String CRON_DEBT_SCHEDULE = "${cron.expression.debt}";
     private final String CRON_TODAY_PAYERS = "${cron.expression.todayPayers}";
     private final String CRON_ZONE = "${cron.expression.zone}";
-    public Bot(SetWebhook setWebhook, BlockingQueue<IncomingMessage> inQueue, BlockingQueue<OutgoingMessage> outQueue) {
+    public Bot(final SetWebhook setWebhook, final BlockingQueue<IncomingMessage> inQueue,
+               final BlockingQueue<OutgoingMessage> outQueue) {
         super(setWebhook);
         this.inQueue = inQueue;
         this.outQueue = outQueue;
@@ -48,21 +49,23 @@ public class Bot extends SpringWebhookBot implements Runnable, Healthcheckable {
         return botToken;
     }
 
-    public void setBotToken(String botToken) {
+    public void setBotToken(final String botToken) {
         this.botToken = botToken;
     }
 
     @Override
     public void run() {
-        while(true){
+        while (true) {
             try {
                 OutgoingMessage outgoingMessage = outQueue.take();
                 SendMessage sendMessage = new SendMessage();
                 sendMessage.setChatId(outgoingMessage.getChatId());
                 sendMessage.setText(outgoingMessage.getText());
-                if (outgoingMessage.isEnableMarkdown()){
+                if (outgoingMessage.isEnableMarkdown()) {
                     sendMessage.enableMarkdown(true);
-                }else sendMessage.setParseMode(outgoingMessage.getParseMode());
+                } else {
+                    sendMessage.setParseMode(outgoingMessage.getParseMode());
+                }
                 execute(sendMessage);
             } catch (InterruptedException e) {
                 executeMessage(Constants.ERROR_TAKING_IN_BOT, Constants.ADMIN_CHAT_ID);
@@ -73,7 +76,7 @@ public class Bot extends SpringWebhookBot implements Runnable, Healthcheckable {
     }
 
     @Override
-    public BotApiMethod<?> onWebhookUpdateReceived(Update update) {
+    public BotApiMethod<?> onWebhookUpdateReceived(final Update update) {
         if (!update.hasMessage()) {
             return null;
         }
@@ -81,7 +84,7 @@ public class Bot extends SpringWebhookBot implements Runnable, Healthcheckable {
         String chatId = message.getChatId().toString();
         long userTgId = message.getFrom().getId();
 
-        if (message.getDate() < (System.currentTimeMillis() / 1000L)){
+        if (message.getDate() < (System.currentTimeMillis() / 1000L)) {
             return null;
         }
 
@@ -102,11 +105,11 @@ public class Bot extends SpringWebhookBot implements Runnable, Healthcheckable {
         return botPath;
     }
 
-    public void setBotPath(String botPath) {
+    public void setBotPath(final String botPath) {
         this.botPath = botPath;
     }
 
-    public void setBotUserName(String botUserName) {
+    public void setBotUserName(final String botUserName) {
         this.botUserName = botUserName;
     }
 
@@ -132,7 +135,7 @@ public class Bot extends SpringWebhookBot implements Runnable, Healthcheckable {
         }
     }
 
-    private void executeMessage(String text, String chatID) {
+    private void executeMessage(final String text, final String chatID) {
         try {
             SendMessage message = new SendMessage();
             message.setChatId(chatID);

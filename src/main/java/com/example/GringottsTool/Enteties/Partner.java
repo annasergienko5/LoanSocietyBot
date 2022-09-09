@@ -39,29 +39,28 @@ public final class Partner {
         this.returnDate = returnDates;
     }
     public String getDebt() {
-        String result = String.format("%,d", debt).replace(",", " ");
-        return result;
+        return String.format("%,d", debt).replace(",", " ");
     }
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append(this.name);
-        sb.append("\nВсего взносов: " + this.contributions);
-        sb.append("\nНа сумму: " + this.sumContributions);
-        sb.append("\nМакс. займ: " + maxMyLoan);
-        sb.append("\nx0.6: " + (int) Math.floor(this.sumContributions * Constants.MINIMUM_LOAN_COEFFICIENT));
-        sb.append("\nВсего займов: " + this.loan);
+        sb.append("\nВсего взносов: ").append(this.contributions);
+        sb.append("\nНа сумму: ").append(this.sumContributions);
+        sb.append("\nМакс. займ: ").append(maxMyLoan);
+        sb.append("\nx0.6: ").append((int) Math.floor(this.sumContributions * Constants.MINIMUM_LOAN_COEFFICIENT));
+        sb.append("\nВсего займов: ").append(this.loan);
         if (this.returnDate != null && !this.returnDate.equals("")) {
-            sb.append("\nСейчас должен: " + this.debt);
-            sb.append("\nДата возврата: " + this.returnDate);
+            sb.append("\nСейчас должен: ").append(this.debt);
+            sb.append("\nДата возврата: ").append(this.returnDate);
         }
         if (this.amountOfEarlyRepayment != 0) {
-            sb.append("\nДосрочных погашений: " + this.amountOfEarlyRepayment);
+            sb.append("\nДосрочных погашений: ").append(this.amountOfEarlyRepayment);
         } else {
             sb.append("\nДосрочных погашений: нет");
         }
         if (this.amountOfOverdueRepayment != 0) {
-            sb.append("\nПросрочек: " + this.amountOfOverdueRepayment);
+            sb.append("\nПросрочек: ").append(this.amountOfOverdueRepayment);
         } else {
             sb.append("\nПросрочек: нет");
         }
