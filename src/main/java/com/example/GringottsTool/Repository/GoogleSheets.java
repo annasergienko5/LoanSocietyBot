@@ -21,7 +21,11 @@ import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
 
-public class GoogleSheets {
+public final class GoogleSheets {
+
+    private GoogleSheets() {
+    }
+
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final List<String> SCOPES = Collections.singletonList(SheetsScopes.SPREADSHEETS);
     private static final Logger LOG = LogManager.getLogger();

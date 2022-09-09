@@ -10,8 +10,8 @@ import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ExecutorBase {
-    Logger log = LogManager.getLogger();
+public final class ExecutorBase {
+    private final Logger log = LogManager.getLogger();
     @Autowired
     private TaskExecutor taskExecutor;
     @Autowired

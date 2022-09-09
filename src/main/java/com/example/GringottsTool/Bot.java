@@ -26,9 +26,10 @@ public final class Bot extends SpringWebhookBot implements Runnable, Healthcheck
     private String botPath;
     private String botUserName;
     private String botToken;
-    private final String CRON_DEBT_SCHEDULE = "${cron.expression.debt}";
-    private final String CRON_TODAY_PAYERS = "${cron.expression.todayPayers}";
-    private final String CRON_ZONE = "${cron.expression.zone}";
+    private static final String CRON_DEBT_SCHEDULE = "${cron.expression.debt}";
+    private static final String CRON_TODAY_PAYERS = "${cron.expression.todayPayers}";
+    private static final String CRON_ZONE = "${cron.expression.zone}";
+    private static final long TIME_DIVISOR = 1000L;
     public Bot(final SetWebhook setWebhook, final BlockingQueue<IncomingMessage> inQueue,
                final BlockingQueue<OutgoingMessage> outQueue) {
         super(setWebhook);
@@ -84,7 +85,7 @@ public final class Bot extends SpringWebhookBot implements Runnable, Healthcheck
         String chatId = message.getChatId().toString();
         long userTgId = message.getFrom().getId();
 
-        if (message.getDate() < (System.currentTimeMillis() / 1000L)) {
+        if (message.getDate() < (System.currentTimeMillis() / TIME_DIVISOR)) {
             return null;
         }
 

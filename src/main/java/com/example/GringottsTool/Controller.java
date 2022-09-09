@@ -1,6 +1,5 @@
 package com.example.GringottsTool;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,11 +9,13 @@ import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
 @RestController
-public class Controller {
+public final class Controller {
     private final Bot bot;
+    private HealthCheckerResponse healthCheckerResponse;
 
-    public Controller(final Bot bot) {
+    public Controller(final Bot bot, final HealthCheckerResponse healthCheckerResponse) {
         this.bot = bot;
+        this.healthCheckerResponse = healthCheckerResponse;
     }
 
     @PostMapping("/")
@@ -24,6 +25,6 @@ public class Controller {
 
     @GetMapping("/live")
     public ResponseEntity isAlive() {
-        return new ResponseEntity(HttpStatus.OK);
+        return healthCheckerResponse.isAlive();
     }
 }
