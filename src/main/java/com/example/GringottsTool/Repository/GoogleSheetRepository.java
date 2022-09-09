@@ -18,7 +18,13 @@ import java.security.GeneralSecurityException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+import java.util.Queue;
 
 @Component
 public class GoogleSheetRepository implements Repository, Healthcheckable {
@@ -211,11 +217,11 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
         } else return false;
     }
 
-    public boolean isPartner(String checkingTgId) throws IOException, NoDataFound {
+    public final boolean isPartner(final long checkingTgId) throws IOException, NoDataFound {
         List<List<Object>> values = getDataFromTable(IS_PARTNER_RANGE);
         for (List<Object> row : values) {
             String tgId = getElement(row, FIRST).orElse("").toString();
-            if (tgId.equals(checkingTgId)) {
+            if (tgId.equals(String.valueOf(checkingTgId))) {
                 return true;
             }
         }

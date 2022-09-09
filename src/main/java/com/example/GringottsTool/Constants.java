@@ -134,5 +134,6 @@ public interface Constants {
             последний платёж:\t%s
 
             """;
+    String NOT_PARTNER = "Для использования функций бота необходимо быть участником";
     int COUNT_OF_ALPHABET = 26;
 }

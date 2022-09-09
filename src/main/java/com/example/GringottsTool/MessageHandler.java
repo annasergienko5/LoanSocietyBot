@@ -57,13 +57,18 @@ public class MessageHandler implements Runnable {
         if (userTgId == 0) {
             systemMessage(inputText[0], chatId);
             return null;
-        } else if (chatId.equals(Constants.PUBLIC_CHAT_ID)) {
-            return publicChat(inputText[0], chatId, inputText, userTgId);
-        } else if (chatId.equals(Constants.ADMIN_CHAT_ID)) {
-            return adminChat(inputText, chatId, userTgId);
-        } else if (Long.parseLong(chatId) == userTgId && repository.isPartner(chatId)) {
-            return privateChat(inputText, chatId, userTgId);
         }
+            if (repository.isPartner(userTgId)) {
+                if (chatId.equals(Constants.PUBLIC_CHAT_ID)) {
+                    return publicChat(inputText[0], chatId, inputText, userTgId);
+                } else if (chatId.equals(Constants.ADMIN_CHAT_ID)) {
+                    return adminChat(inputText, chatId, userTgId);
+                } else if (Long.parseLong(chatId) == userTgId) {
+                    return privateChat(inputText, chatId, userTgId);
+                }
+            } else {
+                throw new NoDataFound(Constants.NOT_PARTNER);
+            }
         return null;
     }
 
@@ -155,10 +160,6 @@ public class MessageHandler implements Runnable {
                 return getCards(chatId);
             case "/rules":
                 return getRules(chatId);
-            case "/aboutme":
-                return getAboutme(chatId, userTgId);
-            case "/aboutmypayment":
-                return getAboutMyPayment(chatId, userTgId);
             case "/ducklist":
                 return getDucklist(chatId);
             case "/proxy":

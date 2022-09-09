@@ -19,7 +19,7 @@ public interface Repository {
     List<Cards> getCards() throws NoDataFound, IOException;
     Info getInfo() throws IOException, NoDataFound;
     List<Partner> getPartners(String nameOrTgId) throws IOException, NoDataFound;
-    boolean isPartner(String checkingTgId) throws IOException, NoDataFound;
+    boolean isPartner(long checkingTgId) throws IOException, NoDataFound;
     List<Partner> getDebtors() throws IOException, ParseException, NoDataFound;
     List<Partner> getDuckList() throws IOException, NoDataFound;
     List<Partner> getTodayDebtors() throws IOException, NoDataFound;
