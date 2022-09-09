@@ -1,14 +1,16 @@
 package com.example.GringottsTool.Repository;
 
-public class A1NotationParser {
-    public String toA1Notation(int columnNumber) {
+import com.example.GringottsTool.Constants;
+
+public final class A1NotationParser {
+    public String toA1Notation(final int columnNumber) {
         String columnA1Notation = "";
-        int Base = 26;
+        int base = Constants.COUNT_OF_ALPHABET;
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        int TempNumber = columnNumber;
-        while (TempNumber > 0) {
-            int position = TempNumber % Base;
-            if (position == 0){
+        int tempNumber = columnNumber;
+        while (tempNumber > 0) {
+            int position = tempNumber % base;
+            if (position == 0) {
                 columnA1Notation = 'Z' + columnA1Notation;
             } else {
                 if (position > 0) {
@@ -18,7 +20,7 @@ public class A1NotationParser {
                 }
                 columnA1Notation = chars.charAt(position) + columnA1Notation;
             }
-            TempNumber = (TempNumber - 1) / Base;
+            tempNumber = (tempNumber - 1) / base;
         }
         return columnA1Notation;
     }

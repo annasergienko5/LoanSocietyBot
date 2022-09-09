@@ -18,7 +18,7 @@ public interface Constants {
             ВНИМАНИЕ: Ошибка в работе программы в команде: %s.
             Обратитесь к разработчику.
             Функция вызвана из чата chatID:\t%s,
-            Участником с userTgId:\t%s    
+            Участником с userTgId:\t%s
             """;
     String INVALID_DATA_EXCEPTION =  """
             Ошибка в диапазоне таблицы:\t%s
@@ -26,7 +26,8 @@ public interface Constants {
             Найденное значение:\t%s
             Ожидаемое значение:\t%s
             """;
-    String NUMERIC_DECIMAL_EXPECTED_VALUE = "Числовое значение без разделительных знаков, арабскими цифрами. Пример: \"2000\"";
+    String NUMERIC_DECIMAL_EXPECTED_VALUE = "Числовое значение без разделительных знаков, арабскими цифрами."
+            + " Пример: \"2000\"";
     String NOT_PARAMETERS = "Нет параметров поиска. Укажи через пробел после /search";
     String NOT_MONEY = "Нет суммы займа или тг. Укажи через пробел после /newloan";
     String NO_AMOUNT_OF_MONEY = "Нет запрашиваемой суммы. Укажи через пробел после /fast";
@@ -133,4 +134,5 @@ public interface Constants {
             последний платёж:\t%s
 
             """;
+    int COUNT_OF_ALPHABET = 26;
 }

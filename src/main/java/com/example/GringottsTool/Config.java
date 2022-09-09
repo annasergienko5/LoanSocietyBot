@@ -25,7 +25,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 @Configuration
 public class Config {
 
-    Logger log =  LogManager.getLogger();
+    private final Logger log =  LogManager.getLogger();
 
     @Bean
     public void checkENV() throws EnvironmentNullExeption {
@@ -43,8 +43,8 @@ public class Config {
         envMap.put("DEBT_REMINDER_TIME", System.getenv("DEBT_REMINDER_TIME"));
         envMap.put("TODAY_PAYERS_REMINDER_TIME", System.getenv("TODAY_PAYERS_REMINDER_TIME"));
 
-        for (Map.Entry<String, String> env : envMap.entrySet()){
-            if (env.getValue() == null || env.getValue().isEmpty()){
+        for (Map.Entry<String, String> env : envMap.entrySet()) {
+            if (env.getValue() == null || env.getValue().isEmpty()) {
                 throw new EnvironmentNullExeption(env.getKey() + " = null or empty");
             }
         }
@@ -52,27 +52,28 @@ public class Config {
 
     @Bean
     @DependsOn({"checkENV", "registerTgBot", "setWebhookInstance", "springWebhookBot"})
-    public HealthChecker healthChecker(List<Healthcheckable> programEntitiesList){
+    public HealthChecker healthChecker(final List<Healthcheckable> programEntitiesList) {
         HealthChecker healthChecker = new HealthChecker(programEntitiesList);
         healthChecker.areAllAlive();
         return healthChecker;
     }
 
     @Bean
-    public BlockingQueue<IncomingMessage> inQueue(){
+    public BlockingQueue<IncomingMessage> inQueue() {
         return new LinkedBlockingQueue<IncomingMessage>();
     }
 
     @Bean
-    public BlockingQueue<OutgoingMessage> outQueue(){
+    public BlockingQueue<OutgoingMessage> outQueue() {
         return new LinkedBlockingQueue<OutgoingMessage>();
     }
 
     @Bean
     public  void registerTgBot() throws IOException {
-        URL url = new URL("https://api.telegram.org/bot" + Constants.TOKEN_BOT + "/setWebhook?url=" + Constants.WEBHOOK_PATH);
+        URL url = new URL("https://api.telegram.org/bot" + Constants.TOKEN_BOT
+                + "/setWebhook?url=" + Constants.WEBHOOK_PATH);
         HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
-        try (final BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+        try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
             String inputLine;
             final StringBuilder content = new StringBuilder();
             while ((inputLine = in.readLine()) != null) {
@@ -90,7 +91,8 @@ public class Config {
     }
 
     @Bean
-    public Bot springWebhookBot(SetWebhook setWebhook, BlockingQueue<IncomingMessage> inQueue, BlockingQueue<OutgoingMessage> outQueue) {
+    public Bot springWebhookBot(final SetWebhook setWebhook, final BlockingQueue<IncomingMessage> inQueue,
+                                final BlockingQueue<OutgoingMessage> outQueue) {
         Bot bot = new Bot(setWebhook, inQueue, outQueue);
         bot.setBotPath(Constants.WEBHOOK_PATH);
         bot.setBotUserName(Constants.BOT_USERNAME);
@@ -100,7 +102,7 @@ public class Config {
 
     @Bean
     @DependsOn("healthChecker")
-    public int reportStartMessage(@Autowired Bot bot){
+    public int reportStartMessage(@Autowired final Bot bot) {
         bot.reportStartMessage();
         return 0;
     }

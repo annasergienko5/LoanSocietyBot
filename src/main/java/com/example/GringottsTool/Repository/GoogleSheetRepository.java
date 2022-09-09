@@ -178,10 +178,10 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
 
         boolean elite = false;
         boolean isPayedThisMonth = false;
-        if (row.get(11).toString().equals("1")) {
+        if (row.get(11).toString().equals("0")) {
             elite = true;
         }
-        if (row.get(12).toString().equals("1")) {
+        if (row.get(12).toString().equals("0")) {
             isPayedThisMonth = true;
         }
         return new Partner(tableID, name, tgId, vk, city, maxMyLoan, contributions, sumContributions, loan, debt, returnDate, earlyRepayment, overdueRepayment, elite, isPayedThisMonth);
@@ -259,7 +259,7 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
         for (List<? extends Object> row : names) {
             String name = row.get(0).toString();
             int elite = Integer.parseInt(row.get(11).toString());
-            if (elite == 1) {
+            if (elite == 0) {
                 partners.add(new Partner(name));
             }
         }

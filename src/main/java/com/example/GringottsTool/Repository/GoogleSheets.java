@@ -24,7 +24,7 @@ import java.util.List;
 public class GoogleSheets {
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
     private static final List<String> SCOPES = Collections.singletonList(SheetsScopes.SPREADSHEETS);
-    private static final Logger log = LogManager.getLogger();
+    private static final Logger LOG = LogManager.getLogger();
 
     private static GoogleCredentials getCredentials() throws GoogleTokenException {
         Path path = Path.of(Constants.CREDENTIALS_FILE_PATH);
@@ -32,7 +32,7 @@ public class GoogleSheets {
         if (Files.exists(path)) {
             try (InputStream inputStream = Files.newInputStream(path)) {
                 credentials = ServiceAccountCredentials.fromStream(inputStream).createScoped(SCOPES);
-                log.info("ServiceAccountJsonFile just read.");
+                LOG.info("ServiceAccountJsonFile just read.");
             } catch (IOException | RuntimeException e) {
                 throw new GoogleTokenException("Could not read JSON-file or wrong fields of JSON-file in path: "
                         + Constants.CREDENTIALS_FILE_PATH);

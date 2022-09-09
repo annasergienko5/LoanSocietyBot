@@ -10,7 +10,7 @@ public class IncomingMessage {
     private long userTgId;
     private String messageText;
 
-    public IncomingMessage(String chatId, String messageText) {
+    public IncomingMessage(final String chatId, final String messageText) {
         this.chatId = chatId;
         this.messageText = messageText;
     }

@@ -94,6 +94,8 @@ public class MessageHandler implements Runnable {
     private OutgoingMessage privateChat(final String[] inputText, final String chatId, final long userTgId)
             throws NoDataFound, IOException, ParseException, NumberFormatException, InvalidDataException {
         switch (inputText[0]) {
+            case "/version":
+                return getVersion(chatId);
             case "/start":
                 return getStartMessage(chatId);
             case "/help":
@@ -130,9 +132,12 @@ public class MessageHandler implements Runnable {
         }
     }
 
+
     private OutgoingMessage adminChat(final String[] inputText, final String chatId, final long userTgId)
             throws NoDataFound, IOException, ParseException, InvalidDataException, NumberFormatException {
         switch (inputText[0]) {
+            case "/version":
+                return getVersion(chatId);
             case "/start":
                 return getStartMessage(chatId);
             case "/help":
@@ -182,6 +187,10 @@ public class MessageHandler implements Runnable {
             case "/fast" -> getFast(chatId, userTgId, inputText);
             default -> null;
         };
+    }
+
+    private OutgoingMessage getVersion(final String chatId) {
+        return new OutgoingMessage(chatId, Version.VERSION);
     }
 
     private OutgoingMessage getQueue(final String chatId)

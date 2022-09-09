@@ -9,22 +9,22 @@ import org.springframework.context.ApplicationContext;
 
 import java.util.List;
 
-public class HealthChecker {
-    Logger log = LogManager.getLogger();
-    private List<Healthcheckable> healthcheckableList;
+public final class HealthChecker {
+    private final Logger log = LogManager.getLogger();
+    private final List<Healthcheckable> healthcheckableList;
     @Autowired
     private ApplicationContext applicationContext;
 
     @Autowired
-    public HealthChecker(List<Healthcheckable> healthcheckableList){
+    public HealthChecker(final List<Healthcheckable> healthcheckableList) {
         this.healthcheckableList = healthcheckableList;
     }
 
     public void areAllAlive() {
-        for (Healthcheckable healthcheckable : healthcheckableList){
+        for (Healthcheckable healthcheckable : healthcheckableList) {
             try {
                 healthcheckable.isAlive();
-            } catch (HealthExeption e){
+            } catch (HealthExeption e) {
                 e.printStackTrace();
                 SpringApplication.exit(applicationContext, () -> 2);
             }
