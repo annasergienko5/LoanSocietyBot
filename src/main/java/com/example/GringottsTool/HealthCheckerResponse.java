@@ -3,7 +3,6 @@ package com.example.GringottsTool;
 import com.example.GringottsTool.Exeptions.HealthExeption;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -11,7 +10,11 @@ import org.springframework.stereotype.Component;
 @Component
 public final class HealthCheckerResponse {
     @Autowired
-    private final ApplicationContext applicationContext = new AnnotationConfigApplicationContext(Config.class);
+    private final ApplicationContext applicationContext;
+
+    public HealthCheckerResponse(final ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
 
     public ResponseEntity isAlive() {
         HealthChecker healthChecker = (HealthChecker) applicationContext.getBean("healthChecker");
