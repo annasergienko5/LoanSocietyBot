@@ -18,7 +18,7 @@ build-jar-with-art:
   stage: build
   image: "$MAVEN_IMAGE"
   variables: 
-    FILE: 'src/main/java/com/example/GringottsTool/Version.java'
+    FILE: 'src/main/java/com/example/GringottsTool/Constants.java'
   script:
     - DATE=`date -u +"%Y"-%m-%d-%H_%M`
     - sed -i "s/dev/$CI_COMMIT_BRANCH\_$CI_COMMIT_SHA\_$DATE/" $FILE
