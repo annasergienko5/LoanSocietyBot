@@ -13,6 +13,8 @@ src/main/resources/token/client_secret_266641561922_5llknmfdn3oam08tgf3vbjunjg87
 logs
 Auth.env
 src/main/resources/token
+tokens_dev
 tokens
 token
 /StoredCredential
+run.sh
