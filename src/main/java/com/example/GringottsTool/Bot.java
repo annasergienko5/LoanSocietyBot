@@ -65,6 +65,7 @@ public final class Bot extends SpringWebhookBot implements Runnable, Healthcheck
                 SendMessage sendMessage = new SendMessage();
                 sendMessage.setChatId(outgoingMessage.getChatId());
                 sendMessage.setText(outgoingMessage.getText());
+                sendMessage.setReplyToMessageId(outgoingMessage.getReplyToMessageId());
                 if (outgoingMessage.isEnableMarkdown()) {
                     sendMessage.enableMarkdown(true);
                 } else {
@@ -88,14 +89,15 @@ public final class Bot extends SpringWebhookBot implements Runnable, Healthcheck
         Message message = update.getMessage();
         String chatId = message.getChatId().toString();
         long userTgId = message.getFrom().getId();
+        String text = message.getText();
         if (checkTimeMessage(message.getDate())) {
             return null;
         }
-        if (message.getText() == null) {
+        if (text == null) {
             return null;
         }
         try {
-            IncomingMessage incomingMessage = new IncomingMessage(chatId, userTgId, message.getText());
+            IncomingMessage incomingMessage = new IncomingMessage(chatId, userTgId, text, message.getMessageId());
             inQueue.put(incomingMessage);
         } catch (InterruptedException e) {
             executeMessage(Constants.ERROR_OUT_WRITE_IN_BOT, Constants.ADMIN_CHAT_ID);
