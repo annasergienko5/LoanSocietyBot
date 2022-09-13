@@ -20,6 +20,7 @@ import org.telegram.telegrambots.starter.SpringWebhookBot;
 import java.util.concurrent.BlockingQueue;
 
 public final class Bot extends SpringWebhookBot implements Runnable, Healthcheckable {
+
     private final BlockingQueue<IncomingMessage> inQueue;
     private final BlockingQueue<OutgoingMessage> outQueue;
     private final Logger log = LogManager.getLogger();
@@ -30,6 +31,8 @@ public final class Bot extends SpringWebhookBot implements Runnable, Healthcheck
     private static final String CRON_TODAY_PAYERS = "${cron.expression.todayPayers}";
     private static final String CRON_ZONE = "${cron.expression.zone}";
     private static final long TIME_DIVISOR = 1000L;
+    private static final int MINUTE = 5;
+    private static final long SECOND_IN_1_MINUTE = 60L;
     public Bot(final SetWebhook setWebhook, final BlockingQueue<IncomingMessage> inQueue,
                final BlockingQueue<OutgoingMessage> outQueue) {
         super(setWebhook);
@@ -84,11 +87,9 @@ public final class Bot extends SpringWebhookBot implements Runnable, Healthcheck
         Message message = update.getMessage();
         String chatId = message.getChatId().toString();
         long userTgId = message.getFrom().getId();
-
-        if (message.getDate() < (System.currentTimeMillis() / TIME_DIVISOR)) {
+        if (checkTimeMessage(message.getDate())) {
             return null;
         }
-
         if (message.getText() == null) {
             return null;
         }
@@ -99,6 +100,9 @@ public final class Bot extends SpringWebhookBot implements Runnable, Healthcheck
             executeMessage(Constants.ERROR_OUT_WRITE_IN_BOT, Constants.ADMIN_CHAT_ID);
         }
         return null;
+    }
+    private boolean checkTimeMessage(final int messageDate) {
+        return messageDate + MINUTE * SECOND_IN_1_MINUTE < (System.currentTimeMillis() / TIME_DIVISOR);
     }
 
     @Override
