@@ -70,6 +70,9 @@ public class MessageHandler implements Runnable {
                 outgoingMessage = privateChat(inputText, chatId, userTgId);
             }
             try {
+                if (outgoingMessage == null) {
+                    return null;
+                }
                 outgoingMessage.setReplyToMessageId(message.getMessageId());
             } catch (NullPointerException e) {
                 String errorMessage = String.format(Constants.ERROR_IN_SOME_FUNCTION, message.getMessageText(),
