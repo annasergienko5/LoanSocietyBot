@@ -126,6 +126,8 @@ public class MessageHandler implements Runnable {
                 return getDucklist(chatId);
             case "/proxy":
                 return getProxy(chatId);
+            case "/fast":
+                return getFast(chatId, userTgId, inputText);
             case "/queue":
                 return getQueue(chatId);
             case "/credithistory":
@@ -361,13 +363,20 @@ public class MessageHandler implements Runnable {
         if (resultList.isEmpty()) {
             return new OutgoingMessage(chatId, Constants.NOT_FOUND_DATA);
         }
+        String info = repository.getInfo().toString();
         String decision;
         if ((double) sum > resultList.get(0).getSumContributions()) {
             decision = Constants.LOAN_DENIED;
         } else {
             decision = Constants.LOAN_APPROVED + inputText;
+            StringBuilder messageToAdmins = new StringBuilder();
+            messageToAdmins.append(String.format(Constants.FAST_MESSAGE_TO_ADMINS, userTgId, sum));
+            messageToAdmins.append("\n\n" + resultList.get(0).toString() + "\n" + info);
+            OutgoingMessage sendMessageToAdmins = new OutgoingMessage(Constants.ADMIN_CHAT_ID,
+                    messageToAdmins.toString());
+            sendMessageToAdmins.setEnableMarkdown(true);
+            putToOutQueue(sendMessageToAdmins);
         }
-        String info = repository.getInfo().toString();
         StringBuilder answer = new StringBuilder(decision);
         answer.append("\n\n" + resultList.get(0).toString());
         answer.append("\n" + info);

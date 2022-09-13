@@ -33,6 +33,7 @@ public interface Constants {
     String NO_AMOUNT_OF_MONEY = "Нет запрашиваемой суммы. Укажи через пробел после /fast";
     String LOAN_DENIED = "В займе отказано: сумма превышает доступные тебе 0.6";
     String LOAN_APPROVED = "Одобрен займ в пределах 0.6 на сумму ";
+    String FAST_MESSAGE_TO_ADMINS = "[Пользователь](tg://user?id=%d) запросил быстрый займ на сумму %d";
     String INCORRECT_AMOUNT_OF_MONEY = "Неверная запрашиваемая сумма";
     String INCORRECT_MONEY_TYPE = "Неверная запрашиваемая сумма. Укажи целое число";
     String HELP_PUBLIC_CHAT = """
@@ -68,6 +69,8 @@ public interface Constants {
             /aboutmypayment - выписка по платежам
             /proxy - ссылка на наш прокси для телеги
             /ducklist - список премиальных участников
+            /fast - попросить быстрый займ
+            /queue - показать очередь
             /credithistory - история займов краткая
             /credithistoryfull - история займов с транзакциями""";
     String RULE = System.getenv("RULE");

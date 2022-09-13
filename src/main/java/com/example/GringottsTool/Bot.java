@@ -71,6 +71,7 @@ public final class Bot extends SpringWebhookBot implements Runnable, Healthcheck
             } catch (InterruptedException e) {
                 executeMessage(Constants.ERROR_TAKING_IN_BOT, Constants.ADMIN_CHAT_ID);
             } catch (TelegramApiException e) {
+                e.printStackTrace();
                 log.info(Constants.ERROR_SEND_MESSAGE_TG);
             }
         }
