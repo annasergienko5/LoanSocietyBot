@@ -52,24 +52,34 @@ public class MessageHandler implements Runnable {
         String[] inputTextWithout = message.getMessageText().split("@", 2);
         String[] inputText = inputTextWithout[0].split(" ", 2);
         if (inputText[0].equals("/id")) {
-            return getId(chatId);
+            OutgoingMessage outgoingMessage = getId(chatId);
+            outgoingMessage.setReplyToMessageId(message.getMessageId());
+            return outgoingMessage;
         }
         if (userTgId == 0) {
             systemMessage(inputText[0], chatId);
             return null;
         }
-            if (repository.isPartner(userTgId)) {
-                if (chatId.equals(Constants.PUBLIC_CHAT_ID)) {
-                    return publicChat(inputText[0], chatId, inputText, userTgId);
-                } else if (chatId.equals(Constants.ADMIN_CHAT_ID)) {
-                    return adminChat(inputText, chatId, userTgId);
-                } else if (Long.parseLong(chatId) == userTgId) {
-                    return privateChat(inputText, chatId, userTgId);
-                }
-            } else {
-                throw new NoDataFound(Constants.NOT_PARTNER);
+        if (repository.isPartner(userTgId)) {
+            OutgoingMessage outgoingMessage = null;
+            if (chatId.equals(Constants.PUBLIC_CHAT_ID)) {
+                outgoingMessage = publicChat(inputText[0], chatId, inputText, userTgId);
+            } else if (chatId.equals(Constants.ADMIN_CHAT_ID)) {
+                outgoingMessage = adminChat(inputText, chatId, userTgId);
+            } else if (Long.parseLong(chatId) == userTgId) {
+                outgoingMessage = privateChat(inputText, chatId, userTgId);
             }
-        return null;
+            try {
+                outgoingMessage.setReplyToMessageId(message.getMessageId());
+            } catch (NullPointerException e) {
+                String errorMessage = String.format(Constants.ERROR_IN_SOME_FUNCTION, message.getMessageText(),
+                        chatId, userTgId);
+                putToOutQueue(new OutgoingMessage(Constants.ADMIN_CHAT_ID, errorMessage));
+            }
+            return outgoingMessage;
+        } else {
+            throw new NoDataFound(Constants.NOT_PARTNER);
+        }
     }
 
     private void systemMessage(final String inputText, final String chatId) throws NoDataFound, IOException,

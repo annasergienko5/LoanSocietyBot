@@ -12,6 +12,7 @@ public class OutgoingMessage {
     @With
     private String chatId;
     private String text;
+    private int replyToMessageId;
     private String parseMode;
     private boolean enableMarkdown = false;
 
