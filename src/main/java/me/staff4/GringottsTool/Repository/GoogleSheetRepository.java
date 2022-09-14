@@ -271,6 +271,16 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
         return c == null || c.isEmpty();
     }
 
+    public final List<String> getAllPartners() throws NoDataFound, IOException {
+        List<List<Object>> values = getDataFromTable(IS_PARTNER_RANGE);
+        List<String> resultList = new ArrayList<>();
+        for (List<Object> row : values) {
+            String tgId = getElement(row, FIRST).orElse("").toString();
+            resultList.add(tgId);
+        }
+        return resultList;
+    }
+
     public final List<Partner> getDebtors() throws IOException, NoDataFound {
         List<List<Object>> values = getDataFromTable(DEBT_RANGE);
         List<Partner> result = new ArrayList<>();

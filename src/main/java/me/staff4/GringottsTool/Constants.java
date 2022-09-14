@@ -31,6 +31,7 @@ public interface Constants {
     String NOT_PARAMETERS = "Нет параметров поиска. Укажи через пробел после /search";
     String NOT_MONEY = "Нет суммы займа или тг. Укажи через пробел после /newloan";
     String NO_AMOUNT_OF_MONEY = "Нет запрашиваемой суммы. Укажи через пробел после /fast";
+    String NO_TEXT = "Нет текста сообщения. Укажи через пробел после /sendToAll";
     String LOAN_DENIED = "В займе отказано: сумма превышает доступные тебе 0.6";
     String LOAN_APPROVED = "Одобрен займ в пределах 0.6 на сумму ";
     String FAST_MESSAGE_TO_ADMINS = "[Пользователь](tg://user?id=%d) запросил быстрый займ на сумму %d";
@@ -51,12 +52,11 @@ public interface Constants {
             /debts - список должников
             /cards - список держателей
             /rules - правила кассы
-            /aboutme - статистика по мне
-            /aboutmypayment - выписка по платежам
             /proxy - ссылка на наш прокси для телеги
             /ducklist - список премиальных участников
             /newloan - добавить займ в очередь
-            /queue - показать очередь""";
+            /queue - показать очередь
+            /sendToAll - создать рассылку""";
     String HELP_PRIVAT_CHAT = """
             /id - получить id текущего чата
             /version - получить версию бота
