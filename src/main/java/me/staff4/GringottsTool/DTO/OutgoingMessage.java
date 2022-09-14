@@ -1,6 +1,7 @@
 package me.staff4.GringottsTool.DTO;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.With;
@@ -8,6 +9,7 @@ import lombok.With;
 @Getter
 @Setter
 @AllArgsConstructor
+@Builder
 public class OutgoingMessage {
     @With
     private String chatId;
