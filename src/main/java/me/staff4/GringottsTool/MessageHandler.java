@@ -49,7 +49,7 @@ public class MessageHandler implements Runnable {
         String chatId = message.getChatId();
         long userTgId = message.getUserTgId();
         log.info("\nReceived message. Chat ID: " + chatId + "\nTelegramm-user ID: " + userTgId);
-        String[] inputTextWithout = message.getMessageText().split("@", 2);
+        String[] inputTextWithout = message.getText().split("@", 2);
         String[] inputText = inputTextWithout[0].split(" ", 2);
         if (inputText[0].equals("/id")) {
             OutgoingMessage outgoingMessage = getId(chatId);
@@ -75,7 +75,7 @@ public class MessageHandler implements Runnable {
                 }
                 outgoingMessage.setReplyToMessageId(message.getMessageId());
             } catch (NullPointerException e) {
-                String errorMessage = String.format(Constants.ERROR_IN_SOME_FUNCTION, message.getMessageText(),
+                String errorMessage = String.format(Constants.ERROR_IN_SOME_FUNCTION, message.getText(),
                         chatId, userTgId);
                 putToOutQueue(new OutgoingMessage(Constants.ADMIN_CHAT_ID, errorMessage));
             }
@@ -447,7 +447,7 @@ public class MessageHandler implements Runnable {
             try {
                 IncomingMessage incomingMessage = inQueue.take();
                 chatId = incomingMessage.getChatId();
-                errorMessage = String.format(Constants.ERROR_IN_SOME_FUNCTION, incomingMessage.getMessageText(),
+                errorMessage = String.format(Constants.ERROR_IN_SOME_FUNCTION, incomingMessage.getText(),
                         chatId, incomingMessage.getUserTgId());
                 OutgoingMessage outgoingMessage = answerMessage(incomingMessage);
                 if (outgoingMessage != null) {
