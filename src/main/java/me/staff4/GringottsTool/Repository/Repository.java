@@ -28,4 +28,5 @@ public interface Repository {
     Partner getPartnerByTgId(String tgId) throws IOException, NoDataFound;
     Queue<QueueItem> getQueue() throws NoDataFound, IOException, InvalidDataException;
     String addQueueItem(String tableIdString, int sum) throws NoDataFound, IOException, InvalidDataException;
+    List<String> getAllPartners() throws NoDataFound, IOException;
 }

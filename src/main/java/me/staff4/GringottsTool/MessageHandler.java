@@ -186,6 +186,11 @@ public class MessageHandler implements Runnable {
                 return addNewLoan(chatId, inputText[1], inputText[2]);
             case "/queue":
                 return getQueue(chatId);
+            case "/sendToAll":
+                if (inputText.length < 2) {
+                    return new OutgoingMessage(chatId, Constants.NO_TEXT);
+                }
+                return getSendToAll(chatId, inputText[1]);
             default:
                 return null;
         }
@@ -437,6 +442,17 @@ public class MessageHandler implements Runnable {
         OutgoingMessage sendMessage = new OutgoingMessage(chatId, message);
         sendMessage.setParseMode(ParseMode.HTML);
         return sendMessage;
+    }
+
+    private OutgoingMessage getSendToAll(final String chatId, final String text) throws NoDataFound, IOException {
+        List<String> allPartners = repository.getAllPartners();
+        for (String tgId : allPartners) {
+            if (tgId.equals(chatId) || tgId.equals("")) {
+                continue;
+            }
+            putToOutQueue(new OutgoingMessage(tgId, text));
+        }
+        return null;
     }
 
     @Override
