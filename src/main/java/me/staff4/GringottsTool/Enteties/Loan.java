@@ -19,29 +19,44 @@ public final class Loan {
     public Loan() {
         this.transactions = new ArrayList<>();
     }
-    public String fullString() {
+    public String getString(final boolean isHtmlParseModeOn, final boolean addTransactions) {
         if (dateEnd == null) {
             dateEnd = "Займ не закрыт";
         }
+        String textTemplate;
+        if (addTransactions) {
+            textTemplate = getStringWithTransactions(isHtmlParseModeOn);
+        } else {
+            textTemplate = getStringWithoutTransactions(isHtmlParseModeOn);
+        }
+        return textTemplate;
+    }
+    private String getStringWithTransactions(final boolean isHtmlParseModeOn) {
+        String textTemplate;
         StringBuilder transactionsString = new StringBuilder();
         for (Transaction transaction : transactions) {
-            String text = transaction.toString();
+            String text = transaction.getString(isHtmlParseModeOn);
             transactionsString.append(text);
         }
-        return String.format(Constants.LOAN_WITH_TRANSACTIONS,
-                loanId, dateStart,
-                dateEnd, value, transactionsString).replace(',', ' ');
-    }
-
-        public String partialString() {
-        if (dateEnd == null) {
-            dateEnd = "Займ не закрыт";
+        if (isHtmlParseModeOn) {
+            textTemplate = Constants.LOAN_WITH_TRANSACTIONS;
+        } else {
+            textTemplate = Constants.LOAN_WITH_TRANSACTIONS_PARSEMODE_OFF;
         }
-        return String.format(Constants.LOAN_WITHOUT_TRANSACTIONS,
+        return String.format(textTemplate, loanId, dateStart, dateEnd, value,
+                transactionsString).replace(',', ' ');
+    }
+    private String getStringWithoutTransactions(final boolean isHtmlParseModeOn) {
+        String textTemplate;
+        if (isHtmlParseModeOn) {
+            textTemplate = Constants.LOAN_WITHOUT_TRANSACTIONS;
+        } else {
+            textTemplate = Constants.LOAN_WITHOUT_TRANSACTIONS_PARSEMODE_OFF;
+        }
+        return String.format(textTemplate,
                 loanId, dateStart,
                 dateEnd, value).replace(',', ' ');
     }
-
     public void appendTransaction(final Transaction transaction) {
         this.transactions.add(transaction);
     }

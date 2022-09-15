@@ -48,7 +48,7 @@ public class Config {
         envMap.put("CRON_TIMEZONE", System.getenv("CRON_TIMEZONE"));
         envMap.put("DEBT_REMINDER_TIME", System.getenv("DEBT_REMINDER_TIME"));
         envMap.put("TODAY_PAYERS_REMINDER_TIME", System.getenv("TODAY_PAYERS_REMINDER_TIME"));
-
+        envMap.put("TEMPORARY_FILES_DIRECTORY", System.getenv("TEMPORARY_FILES_DIRECTORY"));
         for (Map.Entry<String, String> env : envMap.entrySet()) {
             if (env.getValue() == null || env.getValue().isEmpty()) {
                 throw new EnvironmentNullExeption(env.getKey() + " = null or empty");
@@ -80,7 +80,7 @@ public class Config {
     }
 
     @Bean
-    public  void registerTgBot() throws IOException {
+    public void registerTgBot() throws IOException {
         URL url = new URL("https://api.telegram.org/bot" + Constants.TOKEN_BOT
                 + "/setWebhook?url=" + Constants.WEBHOOK_PATH);
         HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();

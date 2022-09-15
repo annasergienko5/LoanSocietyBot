@@ -1,5 +1,6 @@
 package me.staff4.GringottsTool;
 
+import me.staff4.GringottsTool.Converters.ConverterTxt;
 import me.staff4.GringottsTool.DTO.IncomingMessage;
 import me.staff4.GringottsTool.DTO.OutgoingMessage;
 
@@ -147,6 +148,8 @@ public class MessageHandler implements Runnable {
                 return getCreditHistory(chatId, userTgId, false);
             case "/credithistoryfull":
                 return getCreditHistory(chatId, userTgId, true);
+            case "/fullsearch":
+                return getFullSearch(chatId, inputText, userTgId);
             default:
                 return null;
         }
@@ -191,6 +194,8 @@ public class MessageHandler implements Runnable {
                     return new OutgoingMessage(chatId, Constants.NO_TEXT);
                 }
                 return getSendToAll(chatId, inputText[1]);
+            case "/fullsearch":
+                return getFullSearch(chatId, inputText, userTgId);
             default:
                 return null;
         }
@@ -434,9 +439,9 @@ public class MessageHandler implements Runnable {
         CreditHistory creditHistory = new CreditHistory(transactions);
         String creditString;
         if (full) {
-            creditString = creditHistory.fullString();
+            creditString = creditHistory.fullString(true);
         } else {
-            creditString = creditHistory.partialString();
+            creditString = creditHistory.partialString(true);
         }
         String message = String.format(Constants.ABOUT_CREDIT_HISTORY_MESSAGE, partner.getName(), creditString);
         OutgoingMessage sendMessage = new OutgoingMessage(chatId, message);
@@ -471,7 +476,7 @@ public class MessageHandler implements Runnable {
                 }
             } catch (GeneralSecurityException | IOException e) {
                 log.error(errorMessage, e);
-                putToOutQueue(new OutgoingMessage(Constants.ADMIN_CHAT_ID, errorMessage));
+                putToOutQueue(new OutgoingMessage(Constants.ADMIN_CHAT_ID, errorMessage + e.getMessage()));
             } catch (NoDataFound e) {
                 log.info(e.getMessage(), e);
                 putToOutQueue(new OutgoingMessage(chatId, e.getMessage()));
@@ -519,5 +524,44 @@ public class MessageHandler implements Runnable {
             result.append(text);
         }
         return result.toString();
+    }
+    private OutgoingMessage getFullSearch(final String chatId, final String[] inputText,
+                                          final long tgId)
+            throws NoDataFound, IOException, NumberFormatException, InvalidDataException {
+        if (inputText.length < 2) {
+            return new OutgoingMessage(chatId, Constants.NOT_PARAMETERS);
+        }
+        String lookingForNameOrTgId = inputText[1];
+        log.info("\n getFullSearch STARTED from chatId: " + chatId + "\n From user with tgId: " + tgId
+                + "\n Looking for person: " + lookingForNameOrTgId);
+        List<Partner> partners = repository.getPartners(lookingForNameOrTgId);
+        if (partners.size() == 0) {
+            return new OutgoingMessage(chatId, Constants.NO_PERSON_FOUND);
+        } else if (partners.size() > 1) {
+            return new OutgoingMessage(chatId, Constants.FIND_MORE_RESULT);
+        } else {
+            return getPersonHistoryMessage(partners.get(0), chatId);
+        }
+    }
+    private OutgoingMessage getPersonHistoryMessage(final Partner partner, final String chatId)
+            throws InvalidDataException, IOException {
+        String aboutTransactions;
+        String txtFilePath = null;
+        OutgoingMessage outgoingMessage;
+        List<Transaction> transactions = repository.getTransactions(partner);
+        if (transactions.size() == 0) {
+            aboutTransactions = Constants.NO_TRANSACTIONS_FOUND;
+        } else {
+            CreditHistory creditHistory = new CreditHistory(transactions);
+            String textWithCreditHistory = String.format(Constants.ABOUT_CREDIT_HISTORY_MESSAGE_PARSEMODE_OFF,
+                    partner.getName(), creditHistory.fullString(false));
+            txtFilePath = new ConverterTxt().toTxtFile(partner.getTgId(), textWithCreditHistory);
+            aboutTransactions = Constants.TRANSACTIONS_BY_FILE;
+        }
+        outgoingMessage = new OutgoingMessage(chatId,
+                String.format(Constants.FULL_SEARCH_TEMPLATE, partner, aboutTransactions));
+        outgoingMessage.setParseMode(ParseMode.HTML);
+        outgoingMessage.setDocumentFilePath(txtFilePath);
+        return outgoingMessage;
     }
 }
