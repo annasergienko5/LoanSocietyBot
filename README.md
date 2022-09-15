@@ -49,3 +49,5 @@
 у которых сегодня - последний день до фиксации просрочки. в общий чат и чат админов. Выражение использует формат cron.
 Пример раз в минуту:"TODAY_PAYERS_REMINDER_TIME=0 * * ? * *"
 Пример раз в день в 9 утра:"TODAY_PAYERS_REMINDER_TIME=0 0 9 * * ?"
+* TEMPORARY_FILES_DIRECTORY - полный путь к директории со временными файлами.
+Пример: "TEMPORARY_FILES_DIRECTORY=/home/user/IdeaProjects/gringottstool/temp"

@@ -9,8 +9,9 @@ public interface Constants {
     String WEBHOOK_PATH = System.getenv("WEBHOOK_PATH");
     String APPLICATION_NAME = System.getenv("APPLICATION_NAME");
     String CREDENTIALS_FILE_PATH = System.getenv("CREDENTIALS_FILE_PATH");
+    String TEMPORARY_FILES_DIRECTORY = System.getenv("TEMPORARY_FILES_DIRECTORY");
     String SHEET_ID = System.getenv("SHEET_ID");
-    String FIND_MORE_RESULT = "Много таких, уточни";
+    String FIND_MORE_RESULT = "Много таких, уточни.";
     String NOT_FOUND_DATA = "Данные не найдены";
     String INVALID_DATA_IN_CELLS = "В базе данных сохранены неверные данные.\n Обратитесь к Администратору.";
     String INVALID_DATA_IN_CELLS_TO_ADMIN = "В базе данных сохранены неверные данные.\n";
@@ -61,6 +62,7 @@ public interface Constants {
             /id - получить id текущего чата
             /version - получить версию бота
             /search - поиск участника
+            /fullsearch - поиск участника со статистикой и с полной кредитной историей.
             /status - баланс кассы
             /debts - список должников
             /cards - список держателей
@@ -72,7 +74,8 @@ public interface Constants {
             /fast - попросить быстрый займ
             /queue - показать очередь
             /credithistory - история займов краткая
-            /credithistoryfull - история займов с транзакциями""";
+            /credithistoryfull - история займов с транзакциями
+            """;
     String RULE = System.getenv("RULE");
     String PUBLIC_CHAT_ID = System.getenv("PUBLIC_CHAT_ID");
     String ADMIN_CHAT_ID = System.getenv("ADMIN_CHAT_ID");
@@ -91,9 +94,24 @@ public interface Constants {
             <strong>%s</strong>:
             %s
             """;
+    String ABOUT_CREDIT_HISTORY_MESSAGE_PARSEMODE_OFF = """
+            История займов Участника -
+            %s:
+            %s
+            """;
+    String FULL_SEARCH_TEMPLATE = """
+            <strong>Информация по запросу на Участника:</strong>
+            %s
+            <strong>Кредитная история Участника:</strong>
+            %s
+            """;
     String TRANSACTION = """
             Дата:\t<strong>%s</strong>
             Сумма транзакций:\t<strong>%,+d</strong> ₽
+            """;
+    String TRANSACTION_PARSEMODE_OFF = """
+            Дата:\t%s
+            Сумма транзакций:\t%,+d ₽
             """;
     String LOAN_WITH_TRANSACTIONS = """
                                 
@@ -106,13 +124,32 @@ public interface Constants {
             %s
             <strong>___</strong>
             """;
-    String LOAN_WITHOUT_TRANSACTIONS = """
+    String LOAN_WITH_TRANSACTIONS_PARSEMODE_OFF = """
                                 
+            Займ №:\t%s
+            Дата открытия:\t%s
+            Дата закрытия:\t%s
+            Сумма займа:\t%,+d ₽
+                                
+            Список транзакций по займу:
+            %s
+            ___
+            """;
+    String LOAN_WITHOUT_TRANSACTIONS = """
+            
             <strong>Займ №:\t%s</strong>
             Дата открытия:\t<strong>%s</strong>
             Дата закрытия:\t<strong>%s</strong>
             Сумма займа:\t<strong>%,+d</strong> ₽
             <strong>___</strong>
+            """;
+    String LOAN_WITHOUT_TRANSACTIONS_PARSEMODE_OFF = """
+
+            Займ №:\t%s
+            Дата открытия:\t%s
+            Дата закрытия:\t%s
+            Сумма займа:\t%,+d ₽
+            ___
             """;
     String TODAY_DEBTS_MESSAGE = """
             <strong>Сегодня ожидаем погашения задолженности следующих Участников:</strong>
@@ -141,4 +178,9 @@ public interface Constants {
             """;
     String NOT_PARTNER = "Для использования функций бота необходимо быть участником";
     String VERSION = "dev";
+    String NO_PERSON_FOUND = "Участник не найден.";
+    String NO_TRANSACTIONS_FOUND = "Транзакции по займам отсутствуют.";
+    String TRANSACTIONS_BY_FILE = "Транзакции по займам записаны в файл:";
+    String ERROR_WRITING_TXT_FILE = "Ошибка записи txt-файла.";
+    String ERROR_DELETING_TEMP_FILE = "Ошибка удаления временного файла.";
 }

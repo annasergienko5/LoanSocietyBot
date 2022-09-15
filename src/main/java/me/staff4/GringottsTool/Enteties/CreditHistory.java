@@ -37,19 +37,19 @@ public final class CreditHistory {
         }
     }
 
-    public String fullString() {
+    public String fullString(final boolean isHtmlParseModeOn) {
         StringBuilder loansString = new StringBuilder();
         for (Loan loan : loans) {
-            String text = loan.fullString();
+            String text = loan.getString(isHtmlParseModeOn, true);
             loansString.append(text);
         }
         return loansString.toString();
     }
 
-    public String partialString() {
+    public String partialString(final boolean isHtmlParseModeOn) {
         StringBuilder loansString = new StringBuilder();
         for (Loan loan : loans) {
-            String text = loan.partialString();
+            String text = loan.getString(isHtmlParseModeOn, false);
             loansString.append(text);
         }
         return loansString.toString();

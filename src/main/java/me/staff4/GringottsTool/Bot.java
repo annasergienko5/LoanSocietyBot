@@ -9,14 +9,20 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
+import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.starter.SpringWebhookBot;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.concurrent.BlockingQueue;
 
 public final class Bot extends SpringWebhookBot implements Runnable, Healthcheckable {
@@ -72,11 +78,18 @@ public final class Bot extends SpringWebhookBot implements Runnable, Healthcheck
                     sendMessage.setParseMode(outgoingMessage.getParseMode());
                 }
                 execute(sendMessage);
+                if (outgoingMessage.isHasDocument()) {
+                    InputFile inputFile = new InputFile(new File(outgoingMessage.getDocumentFilePath()));
+                    SendDocument sendDocument = new SendDocument(outgoingMessage.getChatId(), inputFile);
+                    execute(sendDocument);
+                    Files.delete(Paths.get(outgoingMessage.getDocumentFilePath()));
+                }
             } catch (InterruptedException e) {
                 executeMessage(Constants.ERROR_TAKING_IN_BOT, Constants.ADMIN_CHAT_ID);
             } catch (TelegramApiException e) {
-                e.printStackTrace();
-                log.info(Constants.ERROR_SEND_MESSAGE_TG);
+                log.info(Constants.ERROR_SEND_MESSAGE_TG, e);
+            } catch (IOException e) {
+                log.info(Constants.ERROR_DELETING_TEMP_FILE, e);
             }
         }
     }
