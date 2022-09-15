@@ -23,6 +23,13 @@ public class OutgoingMessage {
         this.chatId = chatId;
         this.text = text;
     }
+
+    public OutgoingMessage(final String chatId, final String text, final int replyToMessageId) {
+        this.chatId = chatId;
+        this.text = text;
+        this.replyToMessageId = replyToMessageId;
+    }
+
     public final void setDocumentFilePath(final String documentFilePath) {
         if (documentFilePath != null && !documentFilePath.isEmpty()) {
             this.documentFilePath = documentFilePath;
