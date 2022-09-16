@@ -70,16 +70,10 @@ public class MessageHandler implements Runnable {
             } else if (Long.parseLong(chatId) == userTgId) {
                 outgoingMessage = privateChat(inputText, chatId, userTgId);
             }
-            try {
-                if (outgoingMessage == null) {
-                    return null;
-                }
-                outgoingMessage.setReplyToMessageId(message.getMessageId());
-            } catch (NullPointerException e) {
-                String errorMessage = String.format(Constants.ERROR_IN_SOME_FUNCTION, message.getText(),
-                        chatId, userTgId);
-                putToOutQueue(new OutgoingMessage(Constants.ADMIN_CHAT_ID, errorMessage));
+            if (outgoingMessage == null) {
+                return null;
             }
+            outgoingMessage.setReplyToMessageId(message.getMessageId());
             return outgoingMessage;
         } else {
             throw new NoDataFound(Constants.NOT_PARTNER);
@@ -465,8 +459,9 @@ public class MessageHandler implements Runnable {
         while (true) {
             String errorMessage = null;
             String chatId = null;
+            IncomingMessage incomingMessage = null;
             try {
-                IncomingMessage incomingMessage = inQueue.take();
+                incomingMessage = inQueue.take();
                 chatId = incomingMessage.getChatId();
                 errorMessage = String.format(Constants.ERROR_IN_SOME_FUNCTION, incomingMessage.getText(),
                         chatId, incomingMessage.getUserTgId());
@@ -479,14 +474,16 @@ public class MessageHandler implements Runnable {
                 putToOutQueue(new OutgoingMessage(Constants.ADMIN_CHAT_ID, errorMessage + e.getMessage()));
             } catch (NoDataFound e) {
                 log.info(e.getMessage(), e);
-                putToOutQueue(new OutgoingMessage(chatId, e.getMessage()));
+                putToOutQueue(new OutgoingMessage(chatId, e.getMessage(), incomingMessage.getMessageId()));
             } catch (InvalidDataException e) {
-                putToOutQueue(new OutgoingMessage(chatId, Constants.INVALID_DATA_IN_CELLS));
+                putToOutQueue(new OutgoingMessage(chatId, Constants.INVALID_DATA_IN_CELLS,
+                        incomingMessage.getMessageId()));
                 putToOutQueue(new OutgoingMessage(Constants.ADMIN_CHAT_ID, errorMessage
                         + Constants.INVALID_DATA_IN_CELLS_TO_ADMIN + e.toMessage()));
             } catch (NumberFormatException | ParseException e) {
                 log.info(e.getMessage(), e);
-                putToOutQueue(new OutgoingMessage(chatId, Constants.INVALID_DATA_IN_CELLS));
+                putToOutQueue(new OutgoingMessage(chatId, Constants.INVALID_DATA_IN_CELLS,
+                        incomingMessage.getMessageId()));
                 putToOutQueue(new OutgoingMessage(Constants.ADMIN_CHAT_ID, errorMessage
                         + Constants.INVALID_DATA_IN_CELLS_TO_ADMIN));
             } catch (InterruptedException e) {
