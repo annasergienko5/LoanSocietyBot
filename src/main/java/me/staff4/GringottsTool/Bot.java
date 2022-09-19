@@ -40,12 +40,14 @@ public final class Bot extends SpringWebhookBot implements Runnable, Healthcheck
     private static final long TIME_DIVISOR = 1000L;
     private static final int MINUTE = 5;
     private static final long SECOND_IN_1_MINUTE = 60L;
+
     public Bot(final SetWebhook setWebhook, final BlockingQueue<IncomingMessage> inQueue,
                final BlockingQueue<OutgoingMessage> outQueue) {
         super(setWebhook);
         this.inQueue = inQueue;
         this.outQueue = outQueue;
     }
+
     public void reportStartMessage() {
         executeMessage(Constants.START_MESSAGE, Constants.ADMIN_CHAT_ID);
     }
@@ -112,14 +114,20 @@ public final class Bot extends SpringWebhookBot implements Runnable, Healthcheck
             return null;
         }
         try {
-            IncomingMessage incomingMessage = new IncomingMessage(IncomingMessageType.COMMAND, chatId, userTgId,
-                    text, message.getMessageId());
+            IncomingMessage incomingMessage = IncomingMessage.builder().
+                    type(IncomingMessageType.COMMAND).
+                    chatId(chatId).
+                    userTgId(userTgId).
+                    text(text).
+                    messageId(message.getMessageId()).
+                    build();
             inQueue.put(incomingMessage);
         } catch (InterruptedException e) {
             executeMessage(Constants.ERROR_OUT_WRITE_IN_BOT, Constants.ADMIN_CHAT_ID);
         }
         return null;
     }
+
     private boolean checkTimeMessage(final int messageDate) {
         return messageDate + MINUTE * SECOND_IN_1_MINUTE < (System.currentTimeMillis() / TIME_DIVISOR);
     }
@@ -141,21 +149,21 @@ public final class Bot extends SpringWebhookBot implements Runnable, Healthcheck
     public void reportAboutDebts() {
         log.info("Making everyMonth request about Debts...");
         try {
-            IncomingMessage incomingMessageAdmin = new IncomingMessage(IncomingMessageType.SYSTEM_COMMAND,
-                    Constants.ADMIN_CHAT_ID, "getDebtors");
-            inQueue.put(incomingMessageAdmin);
+            inQueue.put(IncomingMessage.builder().type(IncomingMessageType.SYSTEM_COMMAND).
+                    chatId(Constants.ADMIN_CHAT_ID).
+                    text("getDebtors").build());
         } catch (InterruptedException e) {
             executeMessage(Constants.ERROR_OUT_WRITE_IN_BOT, Constants.ADMIN_CHAT_ID);
         }
     }
 
     @Scheduled(cron = CRON_TODAY_PAYERS, zone = CRON_ZONE)
-    public void reportAboutTodayDebts()  {
+    public void reportAboutTodayDebts() {
         log.info("Making everyDay request about Debts...");
         try {
-            IncomingMessage incomingMessageAdmin = new IncomingMessage(IncomingMessageType.SYSTEM_COMMAND,
-                    Constants.ADMIN_CHAT_ID, "getTodayDebtors");
-            inQueue.put(incomingMessageAdmin);
+            inQueue.put(IncomingMessage.builder().type(IncomingMessageType.SYSTEM_COMMAND).
+                    chatId(Constants.ADMIN_CHAT_ID).
+                    text("getTodayDebtors").build());
         } catch (InterruptedException e) {
             executeMessage(Constants.ERROR_OUT_WRITE_IN_BOT, Constants.ADMIN_CHAT_ID);
         }

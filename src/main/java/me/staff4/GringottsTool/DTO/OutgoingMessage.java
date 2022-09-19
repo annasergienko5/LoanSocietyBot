@@ -16,7 +16,9 @@ public class OutgoingMessage {
     private String text;
     private int replyToMessageId;
     private String parseMode;
+    @Builder.Default
     private boolean enableMarkdown = false;
+    @Builder.Default
     private boolean hasDocument = false;
     private String documentFilePath;
     public OutgoingMessage(final String chatId, final String text) {
