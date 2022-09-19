@@ -2,6 +2,7 @@ package me.staff4.GringottsTool;
 
 
 import me.staff4.GringottsTool.DTO.IncomingMessage;
+import me.staff4.GringottsTool.DTO.IncomingMessageType;
 import me.staff4.GringottsTool.DTO.OutgoingMessage;
 import me.staff4.GringottsTool.Exeptions.HealthExeption;
 import org.apache.logging.log4j.LogManager;
@@ -111,7 +112,8 @@ public final class Bot extends SpringWebhookBot implements Runnable, Healthcheck
             return null;
         }
         try {
-            IncomingMessage incomingMessage = new IncomingMessage(chatId, userTgId, text, message.getMessageId());
+            IncomingMessage incomingMessage = new IncomingMessage(IncomingMessageType.COMMAND, chatId, userTgId,
+                    text, message.getMessageId());
             inQueue.put(incomingMessage);
         } catch (InterruptedException e) {
             executeMessage(Constants.ERROR_OUT_WRITE_IN_BOT, Constants.ADMIN_CHAT_ID);
@@ -139,7 +141,8 @@ public final class Bot extends SpringWebhookBot implements Runnable, Healthcheck
     public void reportAboutDebts() {
         log.info("Making everyMonth request about Debts...");
         try {
-            IncomingMessage incomingMessageAdmin = new IncomingMessage(Constants.ADMIN_CHAT_ID, "getDebtors");
+            IncomingMessage incomingMessageAdmin = new IncomingMessage(IncomingMessageType.SYSTEM_COMMAND,
+                    Constants.ADMIN_CHAT_ID, "getDebtors");
             inQueue.put(incomingMessageAdmin);
         } catch (InterruptedException e) {
             executeMessage(Constants.ERROR_OUT_WRITE_IN_BOT, Constants.ADMIN_CHAT_ID);
@@ -150,7 +153,8 @@ public final class Bot extends SpringWebhookBot implements Runnable, Healthcheck
     public void reportAboutTodayDebts()  {
         log.info("Making everyDay request about Debts...");
         try {
-            IncomingMessage incomingMessageAdmin = new IncomingMessage(Constants.ADMIN_CHAT_ID, "getTodayDebtors");
+            IncomingMessage incomingMessageAdmin = new IncomingMessage(IncomingMessageType.SYSTEM_COMMAND,
+                    Constants.ADMIN_CHAT_ID, "getTodayDebtors");
             inQueue.put(incomingMessageAdmin);
         } catch (InterruptedException e) {
             executeMessage(Constants.ERROR_OUT_WRITE_IN_BOT, Constants.ADMIN_CHAT_ID);
