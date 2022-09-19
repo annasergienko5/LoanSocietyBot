@@ -456,7 +456,7 @@ public class MessageHandler implements Runnable {
 
     @Override
     public final void run() {
-        while (true) {
+        while (!Thread.currentThread().isInterrupted()) {
             String errorMessage = null;
             String chatId = null;
             IncomingMessage incomingMessage = null;
@@ -487,7 +487,8 @@ public class MessageHandler implements Runnable {
                 putToOutQueue(new OutgoingMessage(Constants.ADMIN_CHAT_ID, errorMessage
                         + Constants.INVALID_DATA_IN_CELLS_TO_ADMIN));
             } catch (InterruptedException e) {
-                putToOutQueue(new OutgoingMessage(Constants.ADMIN_CHAT_ID, Constants.ERROR_TAKING_IN_MESSAGEHANDLER));
+                Thread.currentThread().interrupt();
+                log.info(Constants.ERROR_TAKING_IN_MESSAGEHANDLER);
             }
         }
     }
