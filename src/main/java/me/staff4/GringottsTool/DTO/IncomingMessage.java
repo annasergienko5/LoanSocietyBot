@@ -21,14 +21,18 @@ public class IncomingMessage {
     private int messageId;
 
     private String messageMeta;
-    private IncomingMessageType type;
+    @Builder.Default
+    private IncomingMessageType type = IncomingMessageType.UNKNOWN;
 
-    public IncomingMessage(final String chatId, final String text) {
+    public IncomingMessage(final IncomingMessageType type, final String chatId, final String text) {
+        this.type = type;
         this.chatId = chatId;
         this.text = text;
     }
 
-    public IncomingMessage(final String chatId, final long userTgId, final String text, final int messageId) {
+    public IncomingMessage(final IncomingMessageType type, final String chatId, final long userTgId,
+                           final String text, final int messageId) {
+        this.type = type;
         this.chatId = chatId;
         this.text = text;
         this.userTgId = userTgId;
