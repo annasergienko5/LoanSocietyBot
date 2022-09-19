@@ -1,7 +1,7 @@
 package me.staff4.GringottsTool;
 
 public interface Constants {
-    String START_MESSAGE = "Добрый день! Бот работает и готов принимать запросы.";
+    String START_MESSAGE = "Штатно! Боеготово!";
     double MAXIMUM_LOAN_COEFFICIENT = 0.125;
     double MINIMUM_LOAN_COEFFICIENT = 0.6;
     String TOKEN_BOT = System.getenv("TOKEN_BOT");
@@ -87,8 +87,8 @@ public interface Constants {
     String NOT_PARTNER_FROM_ID = "Неправославный id. Не записываю";
     String ERROR_OUT_WRITE_IN_BOT = "Ошибка записи в очередь со стороны бота";
     String ERROR_OUT_WRITE_IN_MESSAGEHANDLER = "Ошибка записи в очередь со стороны обработки сообщений";
-    String ERROR_TAKING_IN_BOT = "Ошибка чтения из очереди со стороны бота";
-    String ERROR_TAKING_IN_MESSAGEHANDLER = "Ошибка чтения из очереди со стороны обработки сообщений";
+    String ERROR_TAKING_IN_BOT = "Остановка потока Bot";
+    String ERROR_TAKING_IN_MESSAGEHANDLER = "Остановка потока MessageHandler";
     String ABOUT_CREDIT_HISTORY_MESSAGE = """
             История займов Участника -
             <strong>%s</strong>:

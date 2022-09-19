@@ -65,7 +65,7 @@ public final class Bot extends SpringWebhookBot implements Runnable, Healthcheck
 
     @Override
     public void run() {
-        while (true) {
+        while (!Thread.currentThread().isInterrupted()) {
             try {
                 OutgoingMessage outgoingMessage = outQueue.take();
                 SendMessage sendMessage = new SendMessage();
@@ -85,7 +85,8 @@ public final class Bot extends SpringWebhookBot implements Runnable, Healthcheck
                     Files.delete(Paths.get(outgoingMessage.getDocumentFilePath()));
                 }
             } catch (InterruptedException e) {
-                executeMessage(Constants.ERROR_TAKING_IN_BOT, Constants.ADMIN_CHAT_ID);
+                Thread.currentThread().interrupt();
+                log.info(Constants.ERROR_TAKING_IN_BOT);
             } catch (TelegramApiException e) {
                 log.info(Constants.ERROR_SEND_MESSAGE_TG, e);
             } catch (IOException e) {
