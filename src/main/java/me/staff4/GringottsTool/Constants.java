@@ -159,10 +159,12 @@ public interface Constants {
             """;
     String SIMPLE_DEBTS = """
             Участник:\t<strong>%s</strong>
-            Текущий долг:\t<strong>%s</strong>₽
+            Текущий займ:\t<strong>%s</strong>₽
             Вернуть до:\t<strong>%s</strong>
 
             """;
+    String OVERDUE = "*Просрочено:*\n\n";
+    String DEBTORS = "*Заёмщики:*\n\n";
     String OVERDUE_DEBTORS = """
             \t*%s*
             \t%s₽

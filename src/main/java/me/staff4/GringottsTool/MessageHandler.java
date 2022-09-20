@@ -318,13 +318,13 @@ public class MessageHandler implements Runnable {
             }
             notOverdueDebtor.add(partner);
         }
-        result.append("*Просрочено:*\n\n");
+        result.append(Constants.OVERDUE);
         for (Partner partner : overdueDebtor) {
             result.append(String.format(Constants.OVERDUE_DEBTORS, partner.getName(), partner.getDebt(),
                     partner.getReturnDate()));
         }
         result.append("----------\n\n")
-                .append("*Должники:*\n\n");
+                .append(Constants.DEBTORS);
         List<Contributions> contributions = repository.getContributions();
         for (Partner partner : notOverdueDebtor) {
             Contributions.Contribution lastContr = contributions.get(partner.getTableId() - 2).getPays().get(0);
