@@ -10,6 +10,7 @@ import me.staff4.GringottsTool.Enteties.CreditHistory;
 import me.staff4.GringottsTool.Enteties.Partner;
 import me.staff4.GringottsTool.Enteties.Transaction;
 import me.staff4.GringottsTool.Enteties.QueueItem;
+import me.staff4.GringottsTool.Exeptions.HealthExeption;
 import me.staff4.GringottsTool.Exeptions.InvalidDataException;
 import me.staff4.GringottsTool.Exeptions.NoDataFound;
 import me.staff4.GringottsTool.Repository.Repository;
@@ -30,11 +31,12 @@ import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 
 @Component
-public class MessageHandler implements Runnable {
+public class MessageHandler implements Runnable, Healthcheckable {
 
     private Logger log = LogManager.getLogger();
     @Autowired
     private Repository repository;
+    private Thread current;
     private final BlockingQueue<IncomingMessage> inQueue;
     private final BlockingQueue<OutgoingMessage> outQueue;
     private final int numberOfNewloanCommandParameters = 3;
@@ -456,6 +458,7 @@ public class MessageHandler implements Runnable {
 
     @Override
     public final void run() {
+        current = Thread.currentThread();
         while (!Thread.currentThread().isInterrupted()) {
             String errorMessage = null;
             String chatId = null;
@@ -561,5 +564,12 @@ public class MessageHandler implements Runnable {
         outgoingMessage.setParseMode(ParseMode.HTML);
         outgoingMessage.setDocumentFilePath(txtFilePath);
         return outgoingMessage;
+    }
+
+    @Override
+    public void isAlive() throws HealthExeption {
+        if (current != null && !current.isAlive()) {
+            throw new HealthExeption("Handler thread stop");
+        }
     }
 }
