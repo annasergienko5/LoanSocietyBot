@@ -191,10 +191,10 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
         int earlyRepayment = 0;
         int overdueRepayment = 0;
 
-        if (row.get(SEVENTH).toString().equals("")) {
+        if (!row.get(SEVENTH).toString().equals("")) {
             loan = Integer.parseInt(row.get(SEVENTH).toString());
         }
-        if (row.get(EIGHTH).toString().equals("")) {
+        if (!row.get(EIGHTH).toString().equals("")) {
             debt = Integer.parseInt(row.get(EIGHTH).toString());
         }
         String returnDate = row.get(NINTH).toString();
