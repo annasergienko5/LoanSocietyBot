@@ -9,7 +9,6 @@ public interface Constants {
     String WEBHOOK_PATH = System.getenv("WEBHOOK_PATH");
     String APPLICATION_NAME = System.getenv("APPLICATION_NAME");
     String CREDENTIALS_FILE_PATH = System.getenv("CREDENTIALS_FILE_PATH");
-    String TEMPORARY_FILES_DIRECTORY = System.getenv("TEMPORARY_FILES_DIRECTORY");
     String SHEET_ID = System.getenv("SHEET_ID");
     String FIND_MORE_RESULT = "Много таких, уточни.";
     String NOT_FOUND_DATA = "Данные не найдены";
@@ -185,4 +184,5 @@ public interface Constants {
     String TRANSACTIONS_BY_FILE = "Транзакции по займам записаны в файл:";
     String ERROR_WRITING_TXT_FILE = "Ошибка записи txt-файла.";
     String ERROR_DELETING_TEMP_FILE = "Ошибка удаления временного файла.";
+    String FULL_SEARCH_FILENAME_ABOUT_FULLCREDIT = "Отчет от %s по %s";
 }
