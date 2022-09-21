@@ -4,6 +4,7 @@ import me.staff4.GringottsTool.Converters.ConverterTxt;
 import me.staff4.GringottsTool.DTO.IncomingMessage;
 import me.staff4.GringottsTool.DTO.OutgoingMessage;
 
+import me.staff4.GringottsTool.DTO.OutgoingMessageType;
 import me.staff4.GringottsTool.Enteties.Cards;
 import me.staff4.GringottsTool.Enteties.Contributions;
 import me.staff4.GringottsTool.Enteties.CreditHistory;
@@ -117,7 +118,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
                 return getHelp(chatId, Constants.HELP_PRIVAT_CHAT);
             case "/search":
                 if (inputText.length < 2) {
-                    return new OutgoingMessage(chatId, Constants.NOT_PARAMETERS);
+                    return new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.NOT_PARAMETERS);
                 }
                 return getSearch(chatId, inputText[1]);
             case "/status":
@@ -163,7 +164,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
                 return getHelp(chatId, Constants.HELP_ADMIN_CHAT);
             case "/search":
                 if (inputText.length < 2) {
-                    return new OutgoingMessage(chatId, Constants.NOT_PARAMETERS);
+                    return new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.NOT_PARAMETERS);
                 }
                 return getSearch(chatId, inputText[1]);
             case "/status":
@@ -180,14 +181,14 @@ public class MessageHandler implements Runnable, Healthcheckable {
                 return getProxy(chatId);
             case "/newloan":
                 if (inputText.length < numberOfNewloanCommandParameters) {
-                    return new OutgoingMessage(chatId, Constants.NOT_MONEY);
+                    return new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.NOT_MONEY);
                 }
                 return addNewLoan(chatId, inputText[1], inputText[2]);
             case "/queue":
                 return getQueue(chatId);
             case "/sendToAll":
                 if (inputText.length < 2) {
-                    return new OutgoingMessage(chatId, Constants.NO_TEXT);
+                    return new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.NO_TEXT);
                 }
                 return getSendToAll(chatId, inputText[1]);
             case "/fullsearch":
@@ -212,7 +213,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
     }
 
     private OutgoingMessage getVersion(final String chatId) {
-        return new OutgoingMessage(chatId, Constants.VERSION);
+        return new OutgoingMessage(OutgoingMessageType.TEXT, chatId, Constants.VERSION);
     }
 
     private OutgoingMessage getQueue(final String chatId)
@@ -224,25 +225,25 @@ public class MessageHandler implements Runnable, Healthcheckable {
             String str = String.format("%d. %s - %d\n", count++, q.getName(), q.getSum());
             result.append(str);
         }
-        return new OutgoingMessage(chatId, result.toString());
+        return new OutgoingMessage(OutgoingMessageType.TEXT, chatId, result.toString());
     }
 
     private OutgoingMessage addNewLoan(final String chatId, final String tableId, final String sumString)
             throws NoDataFound, IOException, InvalidDataException {
         int sum = Integer.parseInt(sumString);
-            return new OutgoingMessage(chatId, repository.addQueueItem(tableId, sum));
+            return new OutgoingMessage(OutgoingMessageType.TEXT, chatId, repository.addQueueItem(tableId, sum));
     }
 
     private OutgoingMessage getId(final String chatId) {
-        return new OutgoingMessage(chatId, chatId);
+        return new OutgoingMessage(OutgoingMessageType.TEXT, chatId, chatId);
     }
 
     private OutgoingMessage getHelp(final String chatId, final String help) {
-        return new OutgoingMessage(chatId, help);
+        return new OutgoingMessage(OutgoingMessageType.TEXT, chatId, help);
     }
 
     private OutgoingMessage getRules(final String chatId) {
-        return new OutgoingMessage(chatId, Constants.RULE);
+        return new OutgoingMessage(OutgoingMessageType.TEXT, chatId, Constants.RULE);
     }
 
     private OutgoingMessage getDucklist(final String chatId) throws IOException, NoDataFound {
@@ -255,7 +256,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
         for (Partner partner : elitePartners) {
             result.append("<strong>" + partner.getName() + "</strong>\n");
         }
-        OutgoingMessage sendMessage = new OutgoingMessage(chatId, result.toString());
+        OutgoingMessage sendMessage = new OutgoingMessage(OutgoingMessageType.TEXT, chatId, result.toString());
         sendMessage.setParseMode(ParseMode.HTML);
         return sendMessage;
     }
@@ -265,7 +266,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
         Partner partner = repository.getPartnerByTgId(String.valueOf(userTgId));
         Contributions contributions = repository.getContributions().get(partner.getTableId() - 2);
         if (contributions != null) {
-                return new OutgoingMessage(chatId, contributions.toString());
+                return new OutgoingMessage(OutgoingMessageType.TEXT, chatId, contributions.toString());
             }
         throw new NoDataFound(Constants.NOT_FOUND_DATA);
     }
@@ -275,7 +276,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
         if (resultList.isEmpty()) {
             throw new NoDataFound(Constants.NOT_FOUND_DATA);
         } else {
-            return new OutgoingMessage(chatId, resultList.get(0).toString());
+            return new OutgoingMessage(OutgoingMessageType.TEXT, chatId, resultList.get(0).toString());
         }
     }
 
@@ -288,7 +289,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
         for (Cards card : cards) {
             res.append("\n").append(card.toString());
         }
-        OutgoingMessage outgoingMessage = new OutgoingMessage(chatId, res.toString());
+        OutgoingMessage outgoingMessage = new OutgoingMessage(OutgoingMessageType.TEXT, chatId, res.toString());
         outgoingMessage.setEnableMarkdown(true);
         return outgoingMessage;
     }
@@ -300,7 +301,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
                 throw new NoDataFound(Constants.NOT_FOUND_DATA);
         } else if (debts.size() != 0) {
             String debtorsString = getStringAboutAllDebtors(debts);
-            OutgoingMessage sendMessage = new OutgoingMessage(chatId, debtorsString);
+            OutgoingMessage sendMessage = new OutgoingMessage(OutgoingMessageType.TEXT, chatId, debtorsString);
             sendMessage.setEnableMarkdown(true);
             return sendMessage;
         }
@@ -338,7 +339,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
 
     private OutgoingMessage getStatus(final String chatId) throws IOException, NoDataFound {
         String result = repository.getInfo().toString();
-        OutgoingMessage sendMessage = new OutgoingMessage(chatId, result);
+        OutgoingMessage sendMessage = new OutgoingMessage(OutgoingMessageType.TEXT, chatId, result);
         sendMessage.setEnableMarkdown(true);
         return sendMessage;
     }
@@ -350,15 +351,15 @@ public class MessageHandler implements Runnable, Healthcheckable {
             throw new NoDataFound(Constants.NOT_FOUND_DATA);
         }
         if (resultList.size() > 1) {
-            sendMessage = new OutgoingMessage(chatId, Constants.FIND_MORE_RESULT);
+            sendMessage = new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.FIND_MORE_RESULT);
             return sendMessage;
         }
-        sendMessage = new OutgoingMessage(chatId, resultList.get(0).toString());
+        sendMessage = new OutgoingMessage(OutgoingMessageType.TEXT, chatId, resultList.get(0).toString());
         return sendMessage;
     }
 
     private OutgoingMessage getStartMessage(final String chatId) {
-        OutgoingMessage sendMessage = new OutgoingMessage(chatId, "Привет");
+        OutgoingMessage sendMessage = new OutgoingMessage(OutgoingMessageType.TEXT, chatId, "Привет");
         sendMessage.setEnableMarkdown(true);
         return sendMessage;
     }
@@ -373,14 +374,14 @@ public class MessageHandler implements Runnable, Healthcheckable {
         try {
             sum = Integer.parseInt(inputText);
         } catch (NumberFormatException e) {
-            return new OutgoingMessage(chatId, Constants.INCORRECT_MONEY_TYPE);
+            return new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.INCORRECT_MONEY_TYPE);
         }
         if (sum <= 0) {
-            return new OutgoingMessage(chatId, Constants.INCORRECT_AMOUNT_OF_MONEY);
+            return new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.INCORRECT_AMOUNT_OF_MONEY);
         }
         List<Partner> resultList = repository.getPartners(String.valueOf(userTgId));
         if (resultList.isEmpty()) {
-            return new OutgoingMessage(chatId, Constants.NOT_FOUND_DATA);
+            return new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.NOT_FOUND_DATA);
         }
         String info = repository.getInfo().toString();
         String decision;
@@ -391,7 +392,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
             StringBuilder messageToAdmins = new StringBuilder();
             messageToAdmins.append(String.format(Constants.FAST_MESSAGE_TO_ADMINS, userTgId, sum));
             messageToAdmins.append("\n\n" + resultList.get(0).toString() + "\n" + info);
-            OutgoingMessage sendMessageToAdmins = new OutgoingMessage(Constants.ADMIN_CHAT_ID,
+            OutgoingMessage sendMessageToAdmins = new OutgoingMessage(OutgoingMessageType.TEXT, Constants.ADMIN_CHAT_ID,
                     messageToAdmins.toString());
             sendMessageToAdmins.setEnableMarkdown(true);
             putToOutQueue(sendMessageToAdmins);
@@ -399,7 +400,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
         StringBuilder answer = new StringBuilder(decision);
         answer.append("\n\n" + resultList.get(0).toString());
         answer.append("\n" + info);
-        OutgoingMessage sendMessage = new OutgoingMessage(chatId, answer.toString());
+        OutgoingMessage sendMessage = new OutgoingMessage(OutgoingMessageType.TEXT, chatId, answer.toString());
         sendMessage.setEnableMarkdown(true);
         return sendMessage;
     }
@@ -413,7 +414,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
             result.append(inlineUrl);
             i++;
         }
-        OutgoingMessage message = new OutgoingMessage(chatId, result.toString());
+        OutgoingMessage message = new OutgoingMessage(OutgoingMessageType.TEXT, chatId, result.toString());
         message.setEnableMarkdown(true);
         return message;
     }
@@ -440,7 +441,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
             creditString = creditHistory.partialString(true);
         }
         String message = String.format(Constants.ABOUT_CREDIT_HISTORY_MESSAGE, partner.getName(), creditString);
-        OutgoingMessage sendMessage = new OutgoingMessage(chatId, message);
+        OutgoingMessage sendMessage = new OutgoingMessage(OutgoingMessageType.TEXT, chatId, message);
         sendMessage.setParseMode(ParseMode.HTML);
         return sendMessage;
     }
@@ -451,7 +452,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
             if (tgId.equals(chatId) || tgId.equals("")) {
                 continue;
             }
-            putToOutQueue(new OutgoingMessage(tgId, text));
+            putToOutQueue(new OutgoingMessage(OutgoingMessageType.TEXT, tgId, text));
         }
         return null;
     }
@@ -474,20 +475,22 @@ public class MessageHandler implements Runnable, Healthcheckable {
                 }
             } catch (GeneralSecurityException | IOException e) {
                 log.error(errorMessage, e);
-                putToOutQueue(new OutgoingMessage(Constants.ADMIN_CHAT_ID, errorMessage + e.getMessage()));
+                putToOutQueue(new OutgoingMessage(OutgoingMessageType.ERROR, Constants.ADMIN_CHAT_ID,
+                        errorMessage + e.getMessage()));
             } catch (NoDataFound e) {
                 log.info(e.getMessage(), e);
-                putToOutQueue(new OutgoingMessage(chatId, e.getMessage(), incomingMessage.getMessageId()));
-            } catch (InvalidDataException e) {
-                putToOutQueue(new OutgoingMessage(chatId, Constants.INVALID_DATA_IN_CELLS,
+                putToOutQueue(new OutgoingMessage(OutgoingMessageType.ERROR, chatId, e.getMessage(),
                         incomingMessage.getMessageId()));
-                putToOutQueue(new OutgoingMessage(Constants.ADMIN_CHAT_ID, errorMessage
+            } catch (InvalidDataException e) {
+                putToOutQueue(new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.INVALID_DATA_IN_CELLS,
+                        incomingMessage.getMessageId()));
+                putToOutQueue(new OutgoingMessage(OutgoingMessageType.ERROR, Constants.ADMIN_CHAT_ID, errorMessage
                         + Constants.INVALID_DATA_IN_CELLS_TO_ADMIN + e.toMessage()));
             } catch (NumberFormatException | ParseException e) {
                 log.info(e.getMessage(), e);
-                putToOutQueue(new OutgoingMessage(chatId, Constants.INVALID_DATA_IN_CELLS,
+                putToOutQueue(new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.INVALID_DATA_IN_CELLS,
                         incomingMessage.getMessageId()));
-                putToOutQueue(new OutgoingMessage(Constants.ADMIN_CHAT_ID, errorMessage
+                putToOutQueue(new OutgoingMessage(OutgoingMessageType.ERROR, Constants.ADMIN_CHAT_ID, errorMessage
                         + Constants.INVALID_DATA_IN_CELLS_TO_ADMIN));
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -511,7 +514,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
         } else {
             return null;
         }
-        OutgoingMessage outgoingMessage = new OutgoingMessage(chatId, text);
+        OutgoingMessage outgoingMessage = new OutgoingMessage(OutgoingMessageType.TEXT, chatId, text);
         outgoingMessage.setParseMode(ParseMode.HTML);
         outgoingMessage.setEnableMarkdown(false);
         return outgoingMessage;
@@ -530,16 +533,16 @@ public class MessageHandler implements Runnable, Healthcheckable {
                                           final long tgId)
             throws NoDataFound, IOException, NumberFormatException, InvalidDataException {
         if (inputText.length < 2) {
-            return new OutgoingMessage(chatId, Constants.NOT_PARAMETERS);
+            return new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.NOT_PARAMETERS);
         }
         String lookingForNameOrTgId = inputText[1];
         log.info("\n getFullSearch STARTED from chatId: " + chatId + "\n From user with tgId: " + tgId
                 + "\n Looking for person: " + lookingForNameOrTgId);
         List<Partner> partners = repository.getPartners(lookingForNameOrTgId);
         if (partners.size() == 0) {
-            return new OutgoingMessage(chatId, Constants.NO_PERSON_FOUND);
+            return new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.NO_PERSON_FOUND);
         } else if (partners.size() > 1) {
-            return new OutgoingMessage(chatId, Constants.FIND_MORE_RESULT);
+            return new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.FIND_MORE_RESULT);
         } else {
             return getPersonHistoryMessage(partners.get(0), chatId);
         }
@@ -559,7 +562,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
             txtFilePath = new ConverterTxt().toTxtFile(partner.getTgId(), textWithCreditHistory);
             aboutTransactions = Constants.TRANSACTIONS_BY_FILE;
         }
-        outgoingMessage = new OutgoingMessage(chatId,
+        outgoingMessage = new OutgoingMessage(OutgoingMessageType.TEXT, chatId,
                 String.format(Constants.FULL_SEARCH_TEMPLATE, partner, aboutTransactions));
         outgoingMessage.setParseMode(ParseMode.HTML);
         outgoingMessage.setDocumentFilePath(txtFilePath);
