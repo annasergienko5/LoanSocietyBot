@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.With;
 
+import java.util.Optional;
+
 @Getter
 @Setter
 @AllArgsConstructor
@@ -21,12 +23,18 @@ public class OutgoingMessage {
     @Builder.Default
     private boolean hasDocument = false;
     private String documentFilePath;
-    public OutgoingMessage(final String chatId, final String text) {
+    @Builder.Default
+    private OutgoingMessageType type = OutgoingMessageType.UNKNOWN;
+    private String messageMeta;
+    public OutgoingMessage(final OutgoingMessageType type, final String chatId, final String text) {
+        this.type = type;
         this.chatId = chatId;
         this.text = text;
     }
 
-    public OutgoingMessage(final String chatId, final String text, final int replyToMessageId) {
+    public OutgoingMessage(final OutgoingMessageType type, final String chatId, final String text,
+                           final int replyToMessageId) {
+        this.type = type;
         this.chatId = chatId;
         this.text = text;
         this.replyToMessageId = replyToMessageId;
@@ -37,5 +45,12 @@ public class OutgoingMessage {
             this.documentFilePath = documentFilePath;
             this.hasDocument = true;
         }
+    }
+
+    public Optional<String> getMessageMeta() {
+        if (this.messageMeta == null || this.messageMeta.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(this.messageMeta);
     }
 }
