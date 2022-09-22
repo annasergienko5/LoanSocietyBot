@@ -559,7 +559,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
             CreditHistory creditHistory = new CreditHistory(transactions);
             String textWithCreditHistory = String.format(Constants.ABOUT_CREDIT_HISTORY_MESSAGE_PARSEMODE_OFF,
                     partner.getName(), creditHistory.fullString(false));
-            txtFilePath = new ConverterTxt().toTxtFile(partner.getTgId(), textWithCreditHistory);
+            txtFilePath = new ConverterTxt().toTxtFile(partner.getName(), textWithCreditHistory);
             aboutTransactions = Constants.TRANSACTIONS_BY_FILE;
         }
         outgoingMessage = new OutgoingMessage(OutgoingMessageType.TEXT, chatId,
