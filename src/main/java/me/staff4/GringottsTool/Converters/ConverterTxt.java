@@ -1,15 +1,17 @@
 package me.staff4.GringottsTool.Converters;
 
+import lombok.extern.slf4j.Slf4j;
 import me.staff4.GringottsTool.Constants;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
+@Slf4j
 public class ConverterTxt {
     public final String toTxtFile(final String namePerson, final String text) throws IOException {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
@@ -17,11 +19,13 @@ public class ConverterTxt {
         nowDate.format(dateTimeFormatter);
         Path path;
         try {
-            String filePath = System.getProperty("java.io.tmpdir") + "/"
-                    + String.format(Constants.FULL_SEARCH_FILENAME_ABOUT_FULLCREDIT, nowDate, namePerson) + ".txt";
-            path = Files.createFile(Paths.get(filePath));
+            Path tempPath = Files.createTempFile(null, null);
+            path = tempPath.resolveSibling(String.format(Constants.FULL_SEARCH_FILENAME_ABOUT_FULLCREDIT,
+                    nowDate, namePerson + ".txt"));
+            Files.move(tempPath, path, StandardCopyOption.REPLACE_EXISTING);
         Files.write(path, text.getBytes());
-        } catch (IOException e) {
+        } catch (IOException | RuntimeException e) {
+            e.printStackTrace();
             throw new IOException(Constants.ERROR_WRITING_TXT_FILE);
         }
         return path.toString();
