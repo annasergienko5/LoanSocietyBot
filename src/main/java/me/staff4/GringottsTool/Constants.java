@@ -32,9 +32,15 @@ public interface Constants {
     String NOT_MONEY = "Нет суммы займа или тг. Укажи через пробел после /newloan";
     String NO_AMOUNT_OF_MONEY = "Нет запрашиваемой суммы. Укажи через пробел после /fast";
     String NO_TEXT = "Нет текста сообщения. Укажи через пробел после /sendToAll";
+    String NO_MONEY_LOAN = "Отсутствует запрашиваемая сумма. Укажи целое число через пробел после /loan";
+    String NO_TARGET_LOAN = "Укажи срок возврата, график погашений и пару слов о причинах через пробел после суммы";
+    String NO_MONEY_AND_TERGET_LOAN = "Отсутствует запрашиваемая сумма, срок возврата, график погашений"
+            + " и пару слов о причинах. Укажи через пробел после /loan";
     String LOAN_DENIED = "В займе отказано: сумма превышает доступные тебе 0.6";
     String LOAN_APPROVED = "Одобрен займ в пределах 0.6 на сумму ";
     String FAST_MESSAGE_TO_ADMINS = "[Пользователь](tg://user?id=%d) запросил быстрый займ на сумму %d";
+    String POLL_NOTIFICATION = "В общем чате появилось новое голосование:\nhttps://t.me/c/%s/%d";
+    String POLL_QUESTION = "Выдать ли пользователю %s займ на сумму %d?";
     String INCORRECT_AMOUNT_OF_MONEY = "Неверная запрашиваемая сумма";
     String INCORRECT_MONEY_TYPE = "Неверная запрашиваемая сумма. Укажи целое число";
     String HELP_PUBLIC_CHAT = """
@@ -70,6 +76,7 @@ public interface Constants {
             /aboutmypayment - выписка по платежам
             /proxy - ссылка на наш прокси для телеги
             /ducklist - список премиальных участников
+            /loan - попросить займ (с голосованием)
             /fast - попросить быстрый займ
             /queue - показать очередь
             /credithistory - история займов краткая

@@ -394,6 +394,7 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
             if (tgId.equals(thisTgId)) {
                 partner.setName(name);
                 partner.setTableId(names.indexOf(row) + 2);
+                break;
             }
         }
         return partner;

@@ -2,6 +2,7 @@ package me.staff4.GringottsTool;
 
 import me.staff4.GringottsTool.Converters.ConverterTxt;
 import me.staff4.GringottsTool.DTO.IncomingMessage;
+import me.staff4.GringottsTool.DTO.IncomingMessageType;
 import me.staff4.GringottsTool.DTO.OutgoingMessage;
 
 import me.staff4.GringottsTool.DTO.OutgoingMessageType;
@@ -41,6 +42,8 @@ public class MessageHandler implements Runnable, Healthcheckable {
     private final BlockingQueue<IncomingMessage> inQueue;
     private final BlockingQueue<OutgoingMessage> outQueue;
     private final int numberOfNewloanCommandParameters = 3;
+    private final int numberOfSupergroupIdentifierSymbols = 4;
+    private final int numberOfLoanCommandParamets = 2;
 
     public MessageHandler(final BlockingQueue<IncomingMessage> inQueue, final BlockingQueue<OutgoingMessage> outQueue) {
         this.inQueue = inQueue;
@@ -52,12 +55,17 @@ public class MessageHandler implements Runnable, Healthcheckable {
             InvalidDataException {
         String chatId = message.getChatId();
         long userTgId = message.getUserTgId();
+        int messageId = message.getMessageId();
         log.info("\nReceived message. Chat ID: " + chatId + "\nTelegramm-user ID: " + userTgId);
+        if (message.getType() == IncomingMessageType.POLL) {
+            toForwardPoll(userTgId, messageId);
+            return null;
+        }
         String[] inputTextWithout = message.getText().split("@", 2);
         String[] inputText = inputTextWithout[0].split(" ", 2);
         if (inputText[0].equals("/id")) {
             OutgoingMessage outgoingMessage = getId(chatId);
-            outgoingMessage.setReplyToMessageId(message.getMessageId());
+            outgoingMessage.setReplyToMessageId(messageId);
             return outgoingMessage;
         }
         if (userTgId == 0) {
@@ -68,15 +76,15 @@ public class MessageHandler implements Runnable, Healthcheckable {
             OutgoingMessage outgoingMessage = null;
             if (chatId.equals(Constants.PUBLIC_CHAT_ID)) {
                 outgoingMessage = publicChat(inputText[0], chatId, inputText, userTgId);
-            } else if (chatId.equals(Constants.ADMIN_CHAT_ID)) {
-                outgoingMessage = adminChat(inputText, chatId, userTgId);
             } else if (Long.parseLong(chatId) == userTgId) {
                 outgoingMessage = privateChat(inputText, chatId, userTgId);
+            } else if (chatId.equals(Constants.ADMIN_CHAT_ID)) {
+                outgoingMessage = adminChat(inputText, chatId, userTgId);
             }
             if (outgoingMessage == null) {
                 return null;
             }
-            outgoingMessage.setReplyToMessageId(message.getMessageId());
+            outgoingMessage.setReplyToMessageId(messageId);
             return outgoingMessage;
         } else {
             throw new NoDataFound(Constants.NOT_PARTNER);
@@ -147,6 +155,11 @@ public class MessageHandler implements Runnable, Healthcheckable {
                 return getCreditHistory(chatId, userTgId, true);
             case "/fullsearch":
                 return getFullSearch(chatId, inputText, userTgId);
+            case "/loan":
+                if (inputText.length < 2) {
+                    return new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.NO_MONEY_AND_TERGET_LOAN);
+                }
+                return getLoan(chatId, inputText[1]);
             default:
                 return null;
         }
@@ -455,6 +468,58 @@ public class MessageHandler implements Runnable, Healthcheckable {
             putToOutQueue(new OutgoingMessage(OutgoingMessageType.TEXT, tgId, text));
         }
         return null;
+    }
+
+    private OutgoingMessage getLoan(final String chatId, final String inputText)
+            throws NumberFormatException, NoDataFound, IOException {
+        String[] text = inputText.split(" ", 2);
+        int money;
+        try {
+            money = Integer.parseInt(text[0]);
+        } catch (NumberFormatException e) {
+            return new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.NO_MONEY_LOAN);
+        }
+        if (text.length < numberOfLoanCommandParamets) {
+            return new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.NO_TARGET_LOAN);
+        }
+        List<String> answers = new ArrayList<>();
+        answers.add("За");
+        answers.add("Против");
+        answers.add("Воздержусь");
+        List<Partner> partnerList = repository.getPartners(chatId);
+        if (partnerList.isEmpty()) {
+            throw new NoDataFound(Constants.NOT_FOUND_DATA);
+        }
+        Partner partner = partnerList.get(0);
+        String aboutMe = partner.toString();
+        String status = repository.getInfo().toString();
+        String targetString = String.format("[%s](tg://user?id=%d): ", partner.getName(), Integer.parseInt(chatId))
+                + text[1];
+        OutgoingMessage targetMessage = new OutgoingMessage(OutgoingMessageType.TEXT, Constants.PUBLIC_CHAT_ID,
+                targetString);
+        targetMessage.setEnableMarkdown(true);
+        OutgoingMessage infoMessage = new OutgoingMessage(OutgoingMessageType.TEXT, Constants.PUBLIC_CHAT_ID,
+                aboutMe + "\n\n" + status);
+        infoMessage.setEnableMarkdown(true);
+        putToOutQueue(targetMessage);
+        putToOutQueue(infoMessage);
+        String pollText = String.format(Constants.POLL_QUESTION, partner.getName(), money);
+        OutgoingMessage pollMessage = new OutgoingMessage(OutgoingMessageType.POLL, Constants.PUBLIC_CHAT_ID, pollText);
+        pollMessage.setUserTgId(chatId);
+        pollMessage.setOptions(answers);
+        return pollMessage;
+    }
+
+    private void toForwardPoll(final long userTgId, final int messageId) throws NoDataFound, IOException {
+        List<String> allPartners = repository.getAllPartners();
+        for (String tgId : allPartners) {
+            if (tgId.equals(String.valueOf(userTgId)) || tgId.equals("")) {
+                continue;
+            }
+            String publicChat = Constants.PUBLIC_CHAT_ID.substring(numberOfSupergroupIdentifierSymbols);
+            String notificationText = String.format(Constants.POLL_NOTIFICATION, publicChat, messageId);
+            putToOutQueue(new OutgoingMessage(OutgoingMessageType.TEXT, tgId, notificationText));
+        }
     }
 
     @Override
