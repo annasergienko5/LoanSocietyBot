@@ -17,6 +17,7 @@ public final class IncomingMessage {
     @Getter
     private int messageId;
     private String messageMeta;
+    @Getter
     @Builder.Default
     private IncomingMessageType type = IncomingMessageType.UNKNOWN;
 

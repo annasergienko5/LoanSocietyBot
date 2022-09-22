@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.With;
 
+import java.util.List;
 import java.util.Optional;
 
 @Getter
@@ -15,6 +16,7 @@ import java.util.Optional;
 public class OutgoingMessage {
     @With
     private String chatId;
+    private String userTgId;
     private String text;
     private int replyToMessageId;
     private String parseMode;
@@ -23,9 +25,11 @@ public class OutgoingMessage {
     @Builder.Default
     private boolean hasDocument = false;
     private String documentFilePath;
+    private List<String> options;
     @Builder.Default
     private OutgoingMessageType type = OutgoingMessageType.UNKNOWN;
     private String messageMeta;
+
     public OutgoingMessage(final OutgoingMessageType type, final String chatId, final String text) {
         this.type = type;
         this.chatId = chatId;

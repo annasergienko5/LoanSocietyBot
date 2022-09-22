@@ -4,12 +4,14 @@ package me.staff4.GringottsTool;
 import me.staff4.GringottsTool.DTO.IncomingMessage;
 import me.staff4.GringottsTool.DTO.IncomingMessageType;
 import me.staff4.GringottsTool.DTO.OutgoingMessage;
+import me.staff4.GringottsTool.DTO.OutgoingMessageType;
 import me.staff4.GringottsTool.Exeptions.HealthExeption;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
+import org.telegram.telegrambots.meta.api.methods.polls.SendPoll;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
@@ -71,16 +73,20 @@ public final class Bot extends SpringWebhookBot implements Runnable, Healthcheck
         while (!Thread.currentThread().isInterrupted()) {
             try {
                 OutgoingMessage outgoingMessage = outQueue.take();
-                SendMessage sendMessage = new SendMessage();
-                sendMessage.setChatId(outgoingMessage.getChatId());
-                sendMessage.setText(outgoingMessage.getText());
-                sendMessage.setReplyToMessageId(outgoingMessage.getReplyToMessageId());
-                if (outgoingMessage.isEnableMarkdown()) {
-                    sendMessage.enableMarkdown(true);
+                if (outgoingMessage.getType() == OutgoingMessageType.POLL) {
+                    sendPollx(outgoingMessage);
                 } else {
-                    sendMessage.setParseMode(outgoingMessage.getParseMode());
+                    SendMessage sendMessage = new SendMessage();
+                    sendMessage.setChatId(outgoingMessage.getChatId());
+                    sendMessage.setText(outgoingMessage.getText());
+                    sendMessage.setReplyToMessageId(outgoingMessage.getReplyToMessageId());
+                    if (outgoingMessage.isEnableMarkdown()) {
+                        sendMessage.enableMarkdown(true);
+                    } else {
+                        sendMessage.setParseMode(outgoingMessage.getParseMode());
+                    }
+                    execute(sendMessage);
                 }
-                execute(sendMessage);
                 if (outgoingMessage.isHasDocument()) {
                     InputFile inputFile = new InputFile(new File(outgoingMessage.getDocumentFilePath()));
                     SendDocument sendDocument = new SendDocument(outgoingMessage.getChatId(), inputFile);
@@ -96,6 +102,17 @@ public final class Bot extends SpringWebhookBot implements Runnable, Healthcheck
                 log.info(Constants.ERROR_DELETING_TEMP_FILE, e);
             }
         }
+    }
+
+    private void sendPollx(final OutgoingMessage outgoingMessage) throws TelegramApiException, InterruptedException {
+        SendPoll sendPoll = new SendPoll(Constants.PUBLIC_CHAT_ID, outgoingMessage.getText(),
+                outgoingMessage.getOptions());
+        sendPoll.setIsAnonymous(false);
+        Message pollMessage = execute(sendPoll);
+        inQueue.put(IncomingMessage.builder().type(IncomingMessageType.POLL).
+                userTgId(Long.parseLong(outgoingMessage.getUserTgId())).
+                messageId(pollMessage.getMessageId()).
+                build());
     }
 
     @Override
@@ -151,7 +168,8 @@ public final class Bot extends SpringWebhookBot implements Runnable, Healthcheck
         try {
             inQueue.put(IncomingMessage.builder().type(IncomingMessageType.SYSTEM_COMMAND).
                     chatId(Constants.ADMIN_CHAT_ID).
-                    text("getDebtors").build());
+                    text("getDebtors").
+                    build());
         } catch (InterruptedException e) {
             executeMessage(Constants.ERROR_OUT_WRITE_IN_BOT, Constants.ADMIN_CHAT_ID);
         }
@@ -163,7 +181,8 @@ public final class Bot extends SpringWebhookBot implements Runnable, Healthcheck
         try {
             inQueue.put(IncomingMessage.builder().type(IncomingMessageType.SYSTEM_COMMAND).
                     chatId(Constants.ADMIN_CHAT_ID).
-                    text("getTodayDebtors").build());
+                    text("getTodayDebtors").
+                    build());
         } catch (InterruptedException e) {
             executeMessage(Constants.ERROR_OUT_WRITE_IN_BOT, Constants.ADMIN_CHAT_ID);
         }
