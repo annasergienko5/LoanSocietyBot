@@ -58,7 +58,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
         int messageId = message.getMessageId();
         log.info("\nReceived message. Chat ID: " + chatId + "\nTelegramm-user ID: " + userTgId);
         if (message.getType() == IncomingMessageType.POLL) {
-            toForwardPoll(userTgId, messageId);
+            forwardPoll(userTgId, messageId);
             return null;
         }
         String[] inputTextWithout = message.getText().split("@", 2);
@@ -510,14 +510,19 @@ public class MessageHandler implements Runnable, Healthcheckable {
         return pollMessage;
     }
 
-    private void toForwardPoll(final long userTgId, final int messageId) throws NoDataFound, IOException {
+    private void forwardPoll(final long userTgId, final int messageId) throws NoDataFound, IOException {
         List<String> allPartners = repository.getAllPartners();
+        String publicChat;
+        if (Constants.PUBLIC_CHAT_ID.startsWith("-100")) {
+            publicChat = Constants.PUBLIC_CHAT_ID.substring(numberOfSupergroupIdentifierSymbols);
+        } else {
+            publicChat = Constants.PUBLIC_CHAT_ID.substring(1);
+        }
+        String notificationText = String.format(Constants.POLL_NOTIFICATION, publicChat, messageId);
         for (String tgId : allPartners) {
             if (tgId.equals(String.valueOf(userTgId)) || tgId.equals("")) {
                 continue;
             }
-            String publicChat = Constants.PUBLIC_CHAT_ID.substring(numberOfSupergroupIdentifierSymbols);
-            String notificationText = String.format(Constants.POLL_NOTIFICATION, publicChat, messageId);
             putToOutQueue(new OutgoingMessage(OutgoingMessageType.TEXT, tgId, notificationText));
         }
     }
