@@ -1,5 +1,6 @@
 package me.staff4.GringottsTool.Converters;
 
+import com.ibm.icu.text.Transliterator;
 import lombok.extern.slf4j.Slf4j;
 import me.staff4.GringottsTool.Constants;
 
@@ -17,13 +18,14 @@ public class ConverterTxt {
         DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         LocalDate nowDate = LocalDate.now(ZoneId.of(Constants.CRON_TIMEZONE));
         nowDate.format(dateTimeFormatter);
+        Transliterator toLatinTrans = Transliterator.getInstance("Cyrillic-Latin");
+        String fileName = toLatinTrans.transliterate(namePerson + " " + nowDate + ".txt");
         Path path;
         try {
             Path tempPath = Files.createTempFile(null, null);
-            path = tempPath.resolveSibling(String.format(Constants.FULL_SEARCH_FILENAME_ABOUT_FULLCREDIT,
-                    nowDate, namePerson + ".txt"));
+            path = tempPath.resolveSibling(fileName);
             Files.move(tempPath, path, StandardCopyOption.REPLACE_EXISTING);
-        Files.write(path, text.getBytes());
+            Files.write(path, text.getBytes());
         } catch (IOException | RuntimeException e) {
             e.printStackTrace();
             throw new IOException(Constants.ERROR_WRITING_TXT_FILE);

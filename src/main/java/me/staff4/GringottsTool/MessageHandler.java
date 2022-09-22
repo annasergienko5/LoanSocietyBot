@@ -598,7 +598,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
                                           final long tgId)
             throws NoDataFound, IOException, NumberFormatException, InvalidDataException {
         if (inputText.length < 2) {
-            return new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.NOT_PARAMETERS);
+            return new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.NOT_PARAMETERS_FULLSEARCH);
         }
         String lookingForNameOrTgId = inputText[1];
         log.info("\n getFullSearch STARTED from chatId: " + chatId + "\n From user with tgId: " + tgId
