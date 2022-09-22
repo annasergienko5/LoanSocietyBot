@@ -26,6 +26,9 @@ import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -623,19 +626,26 @@ public class MessageHandler implements Runnable, Healthcheckable {
         String txtFilePath = null;
         OutgoingMessage outgoingMessage;
         List<Transaction> transactions = repository.getTransactions(partner);
+        String fileName = null;
         if (transactions.size() == 0) {
             aboutTransactions = Constants.NO_TRANSACTIONS_FOUND;
         } else {
             CreditHistory creditHistory = new CreditHistory(transactions);
             String textWithCreditHistory = String.format(Constants.ABOUT_CREDIT_HISTORY_MESSAGE_PARSEMODE_OFF,
                     partner.getName(), creditHistory.fullString(false));
-            txtFilePath = new ConverterTxt().toTxtFile(partner.getName(), textWithCreditHistory);
+            txtFilePath = new ConverterTxt().toTxtFile(textWithCreditHistory);
             aboutTransactions = Constants.TRANSACTIONS_BY_FILE;
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+            LocalDate nowDate = LocalDate.now(ZoneId.of(Constants.CRON_TIMEZONE));
+            nowDate.format(dateTimeFormatter);
+            fileName = String.format(Constants.FULL_SEARCH_FILENAME_ABOUT_FULLCREDIT,
+                    partner.getName(), nowDate);
         }
         outgoingMessage = new OutgoingMessage(OutgoingMessageType.TEXT, chatId,
                 String.format(Constants.FULL_SEARCH_TEMPLATE, partner, aboutTransactions));
         outgoingMessage.setParseMode(ParseMode.HTML);
         outgoingMessage.setDocumentFilePath(txtFilePath);
+        outgoingMessage.setDocumentFileName(fileName);
         return outgoingMessage;
     }
 

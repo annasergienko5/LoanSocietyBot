@@ -192,5 +192,5 @@ public interface Constants {
     String TRANSACTIONS_BY_FILE = "Транзакции по займам записаны в файл:";
     String ERROR_WRITING_TXT_FILE = "Ошибка записи txt-файла.";
     String ERROR_DELETING_TEMP_FILE = "Ошибка удаления временного файла.";
-    String FULL_SEARCH_FILENAME_ABOUT_FULLCREDIT = "Отчет от %s по %s";
+    String FULL_SEARCH_FILENAME_ABOUT_FULLCREDIT = "Отчет по %s от %s";
 }
