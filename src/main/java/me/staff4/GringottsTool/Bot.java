@@ -88,10 +88,12 @@ public final class Bot extends SpringWebhookBot implements Runnable, Healthcheck
                     execute(sendMessage);
                 }
                 if (outgoingMessage.isHasDocument()) {
-                    InputFile inputFile = new InputFile(new File(outgoingMessage.getDocumentFilePath()));
-                    SendDocument sendDocument = new SendDocument(outgoingMessage.getChatId(), inputFile);
+                    String filePath = outgoingMessage.getDocumentFilePath();
+                    SendDocument sendDocument = new SendDocument(outgoingMessage.getChatId(),
+                            new InputFile(new File(filePath)));
+                    sendDocument.setCaption(outgoingMessage.getDocumentFileName());
                     execute(sendDocument);
-                    Files.delete(Paths.get(outgoingMessage.getDocumentFilePath()));
+                    Files.delete(Paths.get(filePath));
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();

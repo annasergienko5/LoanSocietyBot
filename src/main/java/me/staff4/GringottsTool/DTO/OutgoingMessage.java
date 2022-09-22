@@ -25,6 +25,7 @@ public class OutgoingMessage {
     @Builder.Default
     private boolean hasDocument = false;
     private String documentFilePath;
+    private String documentFileName;
     private List<String> options;
     @Builder.Default
     private OutgoingMessageType type = OutgoingMessageType.UNKNOWN;
@@ -50,8 +51,13 @@ public class OutgoingMessage {
             this.hasDocument = true;
         }
     }
+    public final void setDocumentFileName(final String documentFileName) {
+        if (documentFileName != null && !documentFileName.isEmpty()) {
+            this.documentFileName = documentFileName;
+        }
+    }
 
-    public Optional<String> getMessageMeta() {
+    public final Optional<String> getMessageMeta() {
         if (this.messageMeta == null || this.messageMeta.isEmpty()) {
             return Optional.empty();
         }
