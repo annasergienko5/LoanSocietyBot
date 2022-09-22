@@ -29,6 +29,7 @@ public interface Constants {
     String NUMERIC_DECIMAL_EXPECTED_VALUE = "Числовое значение без разделительных знаков, арабскими цифрами."
             + " Пример: \"2000\"";
     String NOT_PARAMETERS = "Нет параметров поиска. Укажи через пробел после /search";
+    String NOT_PARAMETERS_FULLSEARCH = "Нет параметров поиска. Укажи через пробел после /fullsearch";
     String NOT_MONEY = "Нет суммы займа или тг. Укажи через пробел после /newloan";
     String NO_AMOUNT_OF_MONEY = "Нет запрашиваемой суммы. Укажи через пробел после /fast";
     String NO_TEXT = "Нет текста сообщения. Укажи через пробел после /sendToAll";
