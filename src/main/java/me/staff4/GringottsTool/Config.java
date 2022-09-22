@@ -35,6 +35,7 @@ public class Config {
 
     @Bean
     public void checkENV() throws EnvironmentNullExeption {
+        log.info("version - " + Constants.VERSION);
         Map<String, String> envMap = new HashMap<>();
         envMap.put("TOKEN_BOT", System.getenv("TOKEN_BOT"));
         envMap.put("BOT_USERNAME", System.getenv("BOT_USERNAME"));
