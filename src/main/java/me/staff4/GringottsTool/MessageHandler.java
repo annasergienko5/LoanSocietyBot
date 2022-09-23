@@ -41,6 +41,8 @@ public class MessageHandler implements Runnable, Healthcheckable {
     private Logger log = LogManager.getLogger();
     @Autowired
     private Repository repository;
+    @Autowired
+    private HelpFileReader helpFileReader;
     private Thread current;
     private final BlockingQueue<IncomingMessage> inQueue;
     private final BlockingQueue<OutgoingMessage> outQueue;
@@ -126,7 +128,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
             case "/start":
                 return getStartMessage(chatId);
             case "/help":
-                return getHelp(chatId, Constants.HELP_PRIVAT_CHAT);
+                return getHelp(chatId, helpFileReader.read(Constants.HELP_PRIVAT_CHAT));
             case "/search":
                 if (inputText.length < 2) {
                     return new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.NOT_PARAMETERS);
@@ -177,7 +179,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
             case "/start":
                 return getStartMessage(chatId);
             case "/help":
-                return getHelp(chatId, Constants.HELP_ADMIN_CHAT);
+                return getHelp(chatId, helpFileReader.read(Constants.HELP_ADMIN_CHAT));
             case "/search":
                 if (inputText.length < 2) {
                     return new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.NOT_PARAMETERS);
@@ -218,7 +220,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
             final String s, final String chatId, final String[] inputText, final long userTgId)
             throws NoDataFound, IOException, ParseException, InvalidDataException {
         return switch (s) {
-            case "/help" -> getHelp(chatId, Constants.HELP_PUBLIC_CHAT);
+            case "/help" -> getHelp(chatId, helpFileReader.read(Constants.HELP_PUBLIC_CHAT));
             case "/status" -> getStatus(chatId);
             case "/debts" -> getDebtors(chatId, false);
             case "/cards" -> getCards(chatId);
