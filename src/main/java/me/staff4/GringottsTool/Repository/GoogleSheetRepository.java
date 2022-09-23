@@ -14,6 +14,7 @@ import me.staff4.GringottsTool.Exeptions.NoDataFound;
 import me.staff4.GringottsTool.Healthcheckable;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.ValueRange;
+import me.staff4.GringottsTool.Sorters.Sorter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
@@ -23,9 +24,11 @@ import java.security.GeneralSecurityException;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +43,7 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
     private static final String IS_PARTNER_RANGE = "Участники!B2:B";
     private static final String DEBT_RANGE = "Участники!A2:M";
     private static final String DUCK_LIST_RANGE = "Участники!A2:L";
-    private static final String TODAY_PAY_PERSONS_RANGE = "Участники!A2:I";
+    private static final String TODAY_PAY_PERSONS_RANGE = "Участники!A2:J";
     private static final String PROXY_RANGE = "Прокси!A2:A";
     private static final int FIRST = 0;
     private static final int SECOND = 1;
@@ -57,7 +60,6 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
     private static final int THIRTEENTH = 12;
     private static final int CARDS_PARAMETR_COUNT = 7;
     private static final int BEGIN_OF_TRANSACTION_RANGE = 5;
-    private static final int QUEUE_COLUMN_NUMBER = 3;
     private static final int MAX_LOAN_RATIO = 5;
     private static final double OVERDUE_REPAYMENT_RATIO = 0.5;
     private static final int NUMBER_OF_OVERDUES_WITHOUT_RATIO = 6;
@@ -281,57 +283,87 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
         return resultList;
     }
 
-    public final List<Partner> getDebtors() throws IOException, NoDataFound {
+    public final List<Partner> getDebtors() throws IOException, NoDataFound, InvalidDataException {
         List<List<Object>> values = getDataFromTable(DEBT_RANGE);
+        if (values.size() == 0) {
+            return null;
+        }
         List<Partner> result = new ArrayList<>();
-        for (List<? extends Object> row : values) {
-            int debt = Integer.parseInt(row.get(EIGHTH).toString());
-            if (debt != 0) {
-                String name = row.get(0).toString();
-                String returnDate = row.get(NINTH).toString();
-                int tableId = values.indexOf(row) + 2;
-                Partner partner = new Partner(name, debt, returnDate);
+            for (List<Object> row : values) {
+                    Partner partner = buildPartnerWithDebt(row, values.indexOf(row) + 2);
+                    if (partner != null) {
+                        result.add(partner);
+                    }
+                }
+            return new Sorter().sortDebtorsByDateToPay(result);
+    }
+    private Partner buildPartnerWithDebt(final  List<Object> row, final int tableId) throws InvalidDataException {
+        final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+        if (row.size() >= NINTH) {
+            String debtString = getElement(row, EIGHTH).orElse("").toString();
+            if (!debtString.equals("0") & !debtString.isBlank()) {
+                String dayToPay = getElement(row, NINTH).orElse("").toString();
+                String name = getElement(row, FIRST).orElse("").toString();
+                int debt;
+                try {
+                    debt = Integer.parseInt(debtString);
+                    LocalDate.parse(dayToPay, dateTimeFormatter);
+                } catch (DateTimeParseException e) {
+                    log.info(dateTimeFormatter, e);
+                    throw new InvalidDataException("Error in buildPartnerWithDebt",
+                            DEBT_RANGE, NINTH, dayToPay, Constants.EXPECTED_CELL_VALUE_DATE, name);
+                } catch (NumberFormatException e) {
+                    throw new InvalidDataException("Error in buildPartnerWithDebt",
+                            DEBT_RANGE, EIGHTH, debtString, Constants.EXPECTED_CELL_VALUE_NUMERIC_DECIMAL, name);
+                }
+                Partner partner = new Partner(name, debt, dayToPay);
                 partner.setTableId(tableId);
-                result.add(partner);
+                return partner;
             }
         }
-        return result;
+        return null;
     }
-
-    public final List<Partner> getDuckList() throws IOException, NoDataFound {
+    public final List<Partner> getTodayDebtors() throws
+            IOException, NoDataFound, InvalidDataException {
+        List<List<Object>> values = getDataFromTable(TODAY_PAY_PERSONS_RANGE);
+        if (values.size() > 0) {
+            LinkedList<Partner> partners = new LinkedList<>();
+            DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+            LocalDate nowDate = LocalDate.now(ZoneId.of(Constants.CRON_TIMEZONE));
+            nowDate.format(dateTimeFormatter);
+            for (List<Object> row : values) {
+                Partner partner = buildPartnerWithDebt(row, values.indexOf(row) + 2);
+                if (partner != null) {
+                    if (LocalDate.parse(partner.getReturnDate(), dateTimeFormatter).equals(nowDate)) {
+                        partners.add(partner);
+                    }
+                }
+            }
+            return partners;
+        }
+        return null;
+    }
+    public final List<Partner> getDuckList() throws IOException, NoDataFound, InvalidDataException {
         List<List<Object>> names = getDataFromTable(DUCK_LIST_RANGE);
         ArrayList<Partner> partners = new ArrayList<>();
         for (List<? extends Object> row : names) {
             String name = row.get(0).toString();
-            int elite = Integer.parseInt(row.get(TWELFTH).toString());
-            if (elite == 0) {
-                partners.add(new Partner(name));
-            }
-        }
-        return partners;
-    }
-
-    public final List<Partner> getTodayDebtors() throws IOException, NoDataFound {
-        List<List<Object>> values = getDataFromTable(TODAY_PAY_PERSONS_RANGE);
-        LinkedList<Partner> partners = new LinkedList<>();
-        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
-        LocalDate nowDate = LocalDate.now(ZoneId.of(Constants.CRON_TIMEZONE));
-        nowDate.format(dateTimeFormatter);
-        for (List<? extends Object> row : values) {
-            int debt = Integer.parseInt(row.get(EIGHTH).toString());
-            if (debt != 0) {
-                LocalDate dayBeforeToPay = LocalDate.parse(row.get(NINTH).toString(), dateTimeFormatter).minusDays(1);
-                String name = row.get(FIRST).toString();
-                String returnDate = row.get(NINTH).toString();
-                if (dayBeforeToPay.equals(nowDate)) {
-                    Partner partner = new Partner(name, debt, returnDate);
-                    partners.add(partner);
+            String elite = row.get(TWELFTH).toString();
+            if (!elite.isBlank()) {
+                int duck;
+                try {
+                    duck = Integer.parseInt(row.get(TWELFTH).toString());
+                } catch (NumberFormatException e) {
+                    throw new InvalidDataException("getDuckList", DUCK_LIST_RANGE, TWELFTH, elite,
+                            Constants.EXPECTED_CELL_VALUE_LAST_3_MONTH, name);
+                }
+                if (duck >= 1) {
+                    partners.add(new Partner(name));
                 }
             }
         }
         return partners;
     }
-
     public final List<String> getProxy() throws IOException, NoDataFound {
         List<List<Object>> values = getDataFromTable(PROXY_RANGE);
         List<String> proxyList = new ArrayList<>();
@@ -340,7 +372,6 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
         }
         return proxyList;
     }
-
     public final List<Transaction> getTransactions(final Partner partner) throws IOException, InvalidDataException {
         String personRequestRange = "Займы!%s:%s".formatted(partner.getTableId(), partner.getTableId());
         ValueRange datesResponse = sheets.spreadsheets().values().get(Constants.SHEET_ID, "Займы!1:1").execute();
@@ -365,8 +396,8 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
                         try {
                             value = Integer.parseInt(cellValue);
                         } catch (NumberFormatException ignored) {
-                            throw new InvalidDataException("Error in getTransactions", personRequestRange, i + 1,
-                                    cellValue, Constants.NUMERIC_DECIMAL_EXPECTED_VALUE);
+                            throw new InvalidDataException("Error in getTransactions", personRequestRange, i,
+                                    cellValue, Constants.EXPECTED_CELL_VALUE_NUMERIC_DECIMAL, partner.getName());
                         }
                         Transaction transaction = new Transaction(date, value);
                         transactions.add(transaction);
@@ -411,8 +442,8 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
             try {
                 sum = Integer.parseInt(row.get(THIRD).toString());
             } catch (NumberFormatException ignored) {
-                throw new InvalidDataException("Error in getQueue", QUEUE_LOAN, QUEUE_COLUMN_NUMBER,
-                        row.get(THIRD).toString(), Constants.NUMERIC_DECIMAL_EXPECTED_VALUE);
+                throw new InvalidDataException("Error in getQueue", QUEUE_LOAN, THIRD,
+                        row.get(THIRD).toString(), Constants.EXPECTED_CELL_VALUE_NUMERIC_DECIMAL, name);
             }
             result.add(new QueueItem(name, tgId, sum));
         }

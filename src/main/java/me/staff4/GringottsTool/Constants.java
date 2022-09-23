@@ -23,10 +23,11 @@ public interface Constants {
     String INVALID_DATA_EXCEPTION =  """
             Ошибка в диапазоне таблицы:\t%s
             Столбец: \t%s
+            Строка с именем:\t%s
             Найденное значение:\t%s
             Ожидаемое значение:\t%s
             """;
-    String NUMERIC_DECIMAL_EXPECTED_VALUE = "Числовое значение без разделительных знаков, арабскими цифрами."
+    String EXPECTED_CELL_VALUE_NUMERIC_DECIMAL = "Числовое значение без разделительных знаков, арабскими цифрами."
             + " Пример: \"2000\"";
     String NOT_PARAMETERS = "Нет параметров поиска. Укажи через пробел после /search";
     String NOT_PARAMETERS_FULLSEARCH = "Нет параметров поиска. Укажи через пробел после /fullsearch";
@@ -175,14 +176,14 @@ public interface Constants {
     String OVERDUE_DEBTORS = """
             \t*%s*
             \t%s₽
-            до:\t%s
+            Вернуть до:\t%s
 
             """;
     String NOT_OVERDUE_DEBTORS = """
             \t*%s*
             \t%s₽
-            до:\t%s
-            последний взнос:\t%s
+            Вернуть до:\t%s
+            Последний взнос:\t%s
 
             """;
     String NOT_PARTNER = "Для использования функций бота необходимо быть участником";
@@ -192,5 +193,7 @@ public interface Constants {
     String TRANSACTIONS_BY_FILE = "Транзакции по займам записаны в файл:";
     String ERROR_WRITING_TXT_FILE = "Ошибка записи txt-файла.";
     String ERROR_DELETING_TEMP_FILE = "Ошибка удаления временного файла.";
-    String FULL_SEARCH_FILENAME_ABOUT_FULLCREDIT = "Отчет по %s от %s";
+    String FULL_SEARCH_FILENAME_ABOUT_FULLCREDIT = "Отчет от %s по %s";
+    String EXPECTED_CELL_VALUE_DATE = "Дата в формате \"dd.MM.yyyy\"";
+    String EXPECTED_CELL_VALUE_LAST_3_MONTH = "От \"1\" и больше.";
 }

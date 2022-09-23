@@ -20,9 +20,9 @@ public interface Repository {
     Info getInfo() throws IOException, NoDataFound;
     List<Partner> getPartners(String nameOrTgId) throws IOException, NoDataFound;
     boolean isPartner(long checkingTgId) throws IOException, NoDataFound;
-    List<Partner> getDebtors() throws IOException, ParseException, NoDataFound;
-    List<Partner> getDuckList() throws IOException, NoDataFound;
-    List<Partner> getTodayDebtors() throws IOException, NoDataFound;
+    List<Partner> getDebtors() throws IOException, ParseException, NoDataFound, InvalidDataException;
+    List<Partner> getDuckList() throws IOException, NoDataFound, InvalidDataException;
+    List<Partner> getTodayDebtors() throws IOException, NoDataFound, InvalidDataException;
     List<String> getProxy() throws IOException, NoDataFound;
     List<Transaction> getTransactions(Partner partner) throws IOException, InvalidDataException;
     Partner getPartnerByTgId(String tgId) throws IOException, NoDataFound;

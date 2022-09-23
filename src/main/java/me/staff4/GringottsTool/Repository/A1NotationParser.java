@@ -5,7 +5,7 @@ public final class A1NotationParser {
     public String toA1Notation(final int columnNumber) {
         String columnA1Notation = "";
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        int tempNumber = columnNumber;
+        int tempNumber = columnNumber + 1;
         while (tempNumber > 0) {
             int position = tempNumber % COUNT_OF_ALPHABET;
             if (position == 0) {

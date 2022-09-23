@@ -95,7 +95,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
     }
 
     private void systemMessage(final String inputText, final String chatId) throws NoDataFound, IOException,
-            ParseException {
+            ParseException, InvalidDataException {
         OutgoingMessage message = null;
         if (inputText.equals("getTodayDebtors")) {
             message = getTodayDebtors(chatId);
@@ -216,7 +216,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
 
     private OutgoingMessage publicChat(
             final String s, final String chatId, final String[] inputText, final long userTgId)
-            throws NoDataFound, IOException, ParseException {
+            throws NoDataFound, IOException, ParseException, InvalidDataException {
         return switch (s) {
             case "/help" -> getHelp(chatId, Constants.HELP_PUBLIC_CHAT);
             case "/status" -> getStatus(chatId);
@@ -262,7 +262,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
         return new OutgoingMessage(OutgoingMessageType.TEXT, chatId, Constants.RULE);
     }
 
-    private OutgoingMessage getDucklist(final String chatId) throws IOException, NoDataFound {
+    private OutgoingMessage getDucklist(final String chatId) throws IOException, NoDataFound, InvalidDataException {
         List<Partner> elitePartners = repository.getDuckList();
         StringBuffer result = new StringBuffer();
         if (elitePartners.size() == 0) {
@@ -311,7 +311,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
     }
 
     private OutgoingMessage getDebtors(final String chatId, final boolean isScheduled)
-            throws IOException, ParseException, NoDataFound {
+            throws IOException, ParseException, NoDataFound, InvalidDataException {
         List<Partner> debts = repository.getDebtors();
         if (debts.size() == 0 && !isScheduled) {
                 throw new NoDataFound(Constants.NOT_FOUND_DATA);
@@ -579,7 +579,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
         }
 
     }
-    private OutgoingMessage getTodayDebtors(final String chatId) throws NoDataFound, IOException {
+    private OutgoingMessage getTodayDebtors(final String chatId) throws NoDataFound, IOException, InvalidDataException {
         List<Partner> persons =  repository.getTodayDebtors();
         String text;
         if (persons.size() != 0) {
