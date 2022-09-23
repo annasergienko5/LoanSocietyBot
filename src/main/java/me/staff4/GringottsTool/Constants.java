@@ -45,45 +45,9 @@ public interface Constants {
     String POLL_QUESTION = "Выдать ли пользователю %s займ на сумму %d?";
     String INCORRECT_AMOUNT_OF_MONEY = "Неверная запрашиваемая сумма";
     String INCORRECT_MONEY_TYPE = "Неверная запрашиваемая сумма. Укажи целое число";
-    String HELP_PUBLIC_CHAT = """
-            /id - получить id текущего чата
-            /status - баланс кассы
-            /debts - список должников
-            /cards - список держателей
-            /rules - правила кассы
-            /fast - попросить быстрый займ""";
-    String HELP_ADMIN_CHAT = """
-            /id - получить id текущего чата
-            /version - получить версию бота
-            /search - поиск участника
-            /status - баланс кассы
-            /debts - список должников
-            /cards - список держателей
-            /rules - правила кассы
-            /proxy - ссылка на наш прокси для телеги
-            /ducklist - список премиальных участников
-            /newloan - добавить займ в очередь
-            /queue - показать очередь
-            /sendToAll - создать рассылку""";
-    String HELP_PRIVAT_CHAT = """
-            /id - получить id текущего чата
-            /version - получить версию бота
-            /search - поиск участника
-            /fullsearch - поиск участника со статистикой и с полной кредитной историей.
-            /status - баланс кассы
-            /debts - список должников
-            /cards - список держателей
-            /rules - правила кассы
-            /aboutme - статистика по мне
-            /aboutmypayment - выписка по платежам
-            /proxy - ссылка на наш прокси для телеги
-            /ducklist - список премиальных участников
-            /loan - попросить займ (с голосованием)
-            /fast - попросить быстрый займ
-            /queue - показать очередь
-            /credithistory - история займов краткая
-            /credithistoryfull - история займов с транзакциями
-            """;
+    String HELP_PUBLIC_CHAT = "HelpFile/Help_Public_Chat";
+    String HELP_ADMIN_CHAT = "HelpFile/Help_Admin_Chat";
+    String HELP_PRIVAT_CHAT = "HelpFile/Help_Privat_Chat";
     String RULE = System.getenv("RULE");
     String PUBLIC_CHAT_ID = System.getenv("PUBLIC_CHAT_ID");
     String ADMIN_CHAT_ID = System.getenv("ADMIN_CHAT_ID");
@@ -196,4 +160,5 @@ public interface Constants {
     String FULL_SEARCH_FILENAME_ABOUT_FULLCREDIT = "Отчет от %s по %s";
     String EXPECTED_CELL_VALUE_DATE = "Дата в формате \"dd.MM.yyyy\"";
     String EXPECTED_CELL_VALUE_LAST_3_MONTH = "От \"1\" и больше.";
+    String ERROR_READ_FILE = "Ошибка чтения файла";
 }
