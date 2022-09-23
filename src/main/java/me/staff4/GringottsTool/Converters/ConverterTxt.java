@@ -1,5 +1,4 @@
 package me.staff4.GringottsTool.Converters;
-
 import me.staff4.GringottsTool.Constants;
 
 import java.io.IOException;
