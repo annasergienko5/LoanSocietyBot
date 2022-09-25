@@ -28,7 +28,6 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -71,7 +70,7 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
     public GoogleSheetRepository() throws GeneralSecurityException, IOException, GoogleTokenException {
     }
 
-    private  List<List<Object>> getDataFromTable(final String range) throws IOException, NoDataFound {
+    private List<List<Object>> getDataFromTable(final String range) throws IOException, NoDataFound {
         ValueRange response = sheets.spreadsheets().values().get(Constants.SHEET_ID, range).execute();
         List<List<Object>> values = response.getValues();
         if (values == null || values.isEmpty()) {
@@ -121,18 +120,14 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
             }
         }
         for (List<String> list : lists) {
-            int listSize = list.size();
-            for (int j = 0; j < (CARDS_PARAMETR_COUNT - listSize); j++) {
-                list.add(null);
-            }
-            String card = list.get(FIRST);
-            double sum = Double.parseDouble(list.get(SECOND).replace(",", "."));
-            String name = list.get(THIRD);
-            long numberPhone = Long.parseLong(list.get(FOURTH));
-            String city = list.get(FIFTH);
-            String bank = list.get(SIXTH);
-            String payWay = list.get(SEVENTH);
-            String link = list.get(EIGHTH);
+            var card = getElement(list, FIRST).orElse("unknown card");
+            var sum = getElement(list, THIRD).orElse("unknown sum");
+            var name = getElement(list, THIRD).orElse("unknown name");
+            var numberPhone = getElement(list, FOURTH).orElse("unknown phone");
+            var city = getElement(list, FIFTH).orElse("unknown city");
+            var bank = getElement(list, SIXTH).orElse("unknown bank");
+            var payWay = getElement(list, SEVENTH).orElse("unknown payWay");
+            var link = getElement(list, EIGHTH).orElse("unknown link");
             result.add(new Cards(card, sum, name, numberPhone, city, bank, payWay, link));
         }
         return result;
@@ -289,15 +284,16 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
             return null;
         }
         List<Partner> result = new ArrayList<>();
-            for (List<Object> row : values) {
-                    Partner partner = buildPartnerWithDebt(row, values.indexOf(row) + 2);
-                    if (partner != null) {
-                        result.add(partner);
-                    }
-                }
-            return new Sorter().sortDebtorsByDateToPay(result);
+        for (List<Object> row : values) {
+            Partner partner = buildPartnerWithDebt(row, values.indexOf(row) + 2);
+            if (partner != null) {
+                result.add(partner);
+            }
+        }
+        return new Sorter().sortDebtorsByDateToPay(result);
     }
-    private Partner buildPartnerWithDebt(final  List<Object> row, final int tableId) throws InvalidDataException {
+
+    private Partner buildPartnerWithDebt(final List<Object> row, final int tableId) throws InvalidDataException {
         final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
         if (row.size() >= NINTH) {
             String debtString = getElement(row, EIGHTH).orElse("").toString();
@@ -323,6 +319,7 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
         }
         return null;
     }
+
     public final List<Partner> getTodayDebtors() throws
             IOException, NoDataFound, InvalidDataException {
         List<List<Object>> values = getDataFromTable(TODAY_PAY_PERSONS_RANGE);
@@ -343,6 +340,7 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
         }
         return null;
     }
+
     public final List<Partner> getDuckList() throws IOException, NoDataFound, InvalidDataException {
         List<List<Object>> names = getDataFromTable(DUCK_LIST_RANGE);
         ArrayList<Partner> partners = new ArrayList<>();
@@ -364,6 +362,7 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
         }
         return partners;
     }
+
     public final List<String> getProxy() throws IOException, NoDataFound {
         List<List<Object>> values = getDataFromTable(PROXY_RANGE);
         List<String> proxyList = new ArrayList<>();
@@ -372,6 +371,7 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
         }
         return proxyList;
     }
+
     public final List<Transaction> getTransactions(final Partner partner) throws IOException, InvalidDataException {
         String personRequestRange = "Займы!%s:%s".formatted(partner.getTableId(), partner.getTableId());
         ValueRange datesResponse = sheets.spreadsheets().values().get(Constants.SHEET_ID, "Займы!1:1").execute();
@@ -491,7 +491,7 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
     }
 
     private int getNumberInQueue(final int tableId)
-            throws InvalidDataException, NoDataFound, IOException,  NumberFormatException {
+            throws InvalidDataException, NoDataFound, IOException, NumberFormatException {
         Queue<QueueItem> queues = getQueue();
         int count = 2;
         for (QueueItem q : queues) {
