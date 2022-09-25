@@ -5,9 +5,9 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public final class Cards {
     private String card;
-    private double sum;
+    private String sum;
     private String name;
-    private long numberPhone;
+    private String numberPhone;
     private String city;
     private String bank;
     private String payWay;
@@ -18,7 +18,7 @@ public final class Cards {
         StringBuffer res = new StringBuffer();
         res.append("\n").append(name)
                 .append("\nбанк: ").append(bank)
-                .append(String.format("\nСБП: `%d`", numberPhone))
+                .append(String.format("\nСБП: `%s`", numberPhone))
                 .append(String.format("\nномер карты: `%s`", card))
                 .append("\nсумма на карте: ").append(sum)
                 .append("\nгород: ").append(city);
