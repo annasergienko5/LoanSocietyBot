@@ -300,6 +300,7 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
             if (!debtString.equals("0") & !debtString.isBlank()) {
                 String dayToPay = getElement(row, NINTH).orElse("").toString();
                 String name = getElement(row, FIRST).orElse("").toString();
+                String tgId = getElement(row, SECOND).orElse("").toString();
                 int debt;
                 try {
                     debt = Integer.parseInt(debtString);
@@ -312,8 +313,15 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
                     throw new InvalidDataException("Error in buildPartnerWithDebt",
                             DEBT_RANGE, EIGHTH, debtString, Constants.EXPECTED_CELL_VALUE_NUMERIC_DECIMAL, name);
                 }
+                try {
+                    Long.parseLong(tgId);
+                } catch (NumberFormatException e) {
+                    throw new InvalidDataException("Error in buildPartnerWithDebt",
+                            DEBT_RANGE, SECOND, tgId, Constants.EXPECTED_CELL_VALUE_TG_ID, name);
+                }
                 Partner partner = new Partner(name, debt, dayToPay);
                 partner.setTableId(tableId);
+                partner.setTgId(tgId);
                 return partner;
             }
         }

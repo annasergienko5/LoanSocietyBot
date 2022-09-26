@@ -598,8 +598,8 @@ public class MessageHandler implements Runnable, Healthcheckable {
     private String getStringAboutTodayDebts(final List<Partner> debts) {
         StringBuilder result = new StringBuilder();
         for (Partner partner : debts) {
-            String text = String.format(Constants.SIMPLE_DEBTS, partner.getName(), partner.getDebt(),
-                    partner.getReturnDate());
+            String text = String.format(Constants.SIMPLE_DEBTS, Long.parseLong(partner.getTgId()), partner.getName(),
+                    partner.getDebt(), partner.getReturnDate());
             result.append(text);
         }
         return result.toString();
