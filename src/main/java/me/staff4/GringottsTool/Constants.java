@@ -130,7 +130,7 @@ public interface Constants {
                                 
             """;
     String SIMPLE_DEBTS = """
-            Участник:\t<strong>%s</strong>
+            Участник:\t<strong><a href="tg://user?id=%d">%s</a></strong>
             Текущий займ:\t<strong>%s</strong>₽
             Вернуть до:\t<strong>%s</strong>
 
@@ -161,4 +161,6 @@ public interface Constants {
     String EXPECTED_CELL_VALUE_DATE = "Дата в формате \"dd.MM.yyyy\"";
     String EXPECTED_CELL_VALUE_LAST_3_MONTH = "От \"1\" и больше.";
     String ERROR_READ_FILE = "Ошибка чтения файла";
+    String EXPECTED_CELL_VALUE_TG_ID = "Числовое значение без разделительных знаков, арабскими цифрами."
+            + " Значение должно содержать tgId.  \nПример: \"5197856969\"";
 }
