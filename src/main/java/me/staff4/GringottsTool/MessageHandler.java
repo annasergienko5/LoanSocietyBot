@@ -635,7 +635,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
             CreditHistory creditHistory = new CreditHistory(transactions);
             String textWithCreditHistory = String.format(Constants.ABOUT_CREDIT_HISTORY_MESSAGE_PARSEMODE_OFF,
                     partner.getName(), creditHistory.fullString(false));
-            txtFilePath = new ConverterTxt().toTxtFile(textWithCreditHistory);
+            txtFilePath = new ConverterTxt().saveToTxtFile(textWithCreditHistory);
             aboutTransactions = Constants.TRANSACTIONS_BY_FILE;
             DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy");
             LocalDate nowDate = LocalDate.now(ZoneId.of(Constants.CRON_TIMEZONE));
