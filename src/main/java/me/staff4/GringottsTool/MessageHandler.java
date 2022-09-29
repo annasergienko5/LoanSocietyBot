@@ -557,6 +557,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
                 putToOutQueue(new OutgoingMessage(OutgoingMessageType.ERROR, chatId, e.getMessage(),
                         incomingMessage.getMessageId()));
             } catch (InvalidDataException e) {
+                log.info(e.getMessage(), e);
                 putToOutQueue(new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.INVALID_DATA_IN_CELLS,
                         incomingMessage.getMessageId()));
                 putToOutQueue(new OutgoingMessage(OutgoingMessageType.ERROR, Constants.ADMIN_CHAT_ID, errorMessage

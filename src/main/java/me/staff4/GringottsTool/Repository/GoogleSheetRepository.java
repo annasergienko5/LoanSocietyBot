@@ -400,12 +400,12 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
                     String cellValue = row.get(i).toString();
                     if (!cellValue.isBlank()) {
                         String date = ((dates.get(FIRST)).get(i)).toString();
-                        int value;
+                        float value;
                         try {
-                            value = Integer.parseInt(cellValue);
+                            value = Float.parseFloat(cellValue.replace(",", "."));
                         } catch (NumberFormatException ignored) {
                             throw new InvalidDataException("Error in getTransactions", personRequestRange, i,
-                                    cellValue, Constants.EXPECTED_CELL_VALUE_NUMERIC_DECIMAL, partner.getName());
+                                    cellValue, Constants.EXPECTED_CELL_VALUE_FLOAT, partner.getName());
                         }
                         Transaction transaction = new Transaction(date, value);
                         transactions.add(transaction);

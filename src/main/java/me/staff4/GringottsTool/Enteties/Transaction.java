@@ -6,7 +6,7 @@ import lombok.Getter;
 @Getter
 public final class Transaction {
     private final String date;
-    private final int value;
+    private final float value;
     public String getString(final boolean isHtmlParseModeOn) {
         String template;
         if (isHtmlParseModeOn) {
