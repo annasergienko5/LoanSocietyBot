@@ -12,7 +12,7 @@ import java.util.List;
 public final class Loan {
     private String dateStart;
     private String dateEnd;
-    private int value;
+    private float value;
     private int loanId;
     private List<Transaction> transactions;
 

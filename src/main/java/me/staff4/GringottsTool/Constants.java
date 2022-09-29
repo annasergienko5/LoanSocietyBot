@@ -29,6 +29,7 @@ public interface Constants {
             """;
     String EXPECTED_CELL_VALUE_NUMERIC_DECIMAL = "Числовое значение без разделительных знаков, арабскими цифрами."
             + " Пример: \"2000\"";
+    String EXPECTED_CELL_VALUE_FLOAT = "Числовое значение. Пример: \"250 или -3,42\"";
     String NOT_PARAMETERS = "Нет параметров поиска. Укажи через пробел после /search";
     String NOT_PARAMETERS_FULLSEARCH = "Нет параметров поиска. Укажи через пробел после /fullsearch";
     String NOT_MONEY = "Нет суммы займа или тг. Укажи через пробел после /newloan";
@@ -79,18 +80,18 @@ public interface Constants {
             """;
     String TRANSACTION = """
             Дата:\t<strong>%s</strong>
-            Сумма транзакций:\t<strong>%,+d</strong> ₽
+            Сумма транзакций:\t<strong>%,+.2f</strong> ₽
             """;
     String TRANSACTION_PARSEMODE_OFF = """
             Дата:\t%s
-            Сумма транзакций:\t%,+d ₽
+            Сумма транзакций:\t%,+.2f ₽
             """;
     String LOAN_WITH_TRANSACTIONS = """
                                 
             <strong>Займ №:\t%s</strong>
             Дата открытия:\t<strong>%s</strong>
             Дата закрытия:\t<strong>%s</strong>
-            Сумма займа:\t<strong>%,+d</strong> ₽
+            Сумма займа:\t<strong>%,+.2f</strong> ₽
                                 
             <em>Список транзакций по займу:</em>
             %s
@@ -101,7 +102,7 @@ public interface Constants {
             Займ №:\t%s
             Дата открытия:\t%s
             Дата закрытия:\t%s
-            Сумма займа:\t%,+d ₽
+            Сумма займа:\t%+.2f ₽
                                 
             Список транзакций по займу:
             %s
@@ -112,7 +113,7 @@ public interface Constants {
             <strong>Займ №:\t%s</strong>
             Дата открытия:\t<strong>%s</strong>
             Дата закрытия:\t<strong>%s</strong>
-            Сумма займа:\t<strong>%,+d</strong> ₽
+            Сумма займа:\t<strong>%,+.2f</strong> ₽
             <strong>___</strong>
             """;
     String LOAN_WITHOUT_TRANSACTIONS_PARSEMODE_OFF = """
@@ -120,7 +121,7 @@ public interface Constants {
             Займ №:\t%s
             Дата открытия:\t%s
             Дата закрытия:\t%s
-            Сумма займа:\t%,+d ₽
+            Сумма займа:\t%,+.2f ₽
             ___
             """;
     String TODAY_DEBTS_MESSAGE = """
@@ -157,7 +158,7 @@ public interface Constants {
     String TRANSACTIONS_BY_FILE = "Транзакции по займам записаны в файл:";
     String ERROR_WRITING_TXT_FILE = "Ошибка записи txt-файла.";
     String ERROR_DELETING_TEMP_FILE = "Ошибка удаления временного файла.";
-    String FULL_SEARCH_FILENAME_ABOUT_FULLCREDIT = "Отчет от %s по %s";
+    String FULL_SEARCH_FILENAME_ABOUT_FULLCREDIT = "Отчет по %s от %s";
     String EXPECTED_CELL_VALUE_DATE = "Дата в формате \"dd.MM.yyyy\"";
     String EXPECTED_CELL_VALUE_LAST_3_MONTH = "От \"1\" и больше.";
     String ERROR_READ_FILE = "Ошибка чтения файла";

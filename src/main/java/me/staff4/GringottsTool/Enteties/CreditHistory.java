@@ -8,12 +8,12 @@ public final class CreditHistory {
 
     public CreditHistory(final List<Transaction> transactions) {
         this.loans = new ArrayList<>();
-        int previousBalance = 0;
+        float previousBalance = 0;
         int loanId = 1;
         Loan loan = new Loan();
         for (Transaction transaction : transactions) {
-            int value = transaction.getValue();
-            int currentBalance = value + previousBalance;
+            float value = transaction.getValue();
+            float currentBalance = value + previousBalance;
             if ((currentBalance) < 0) {
                 loan.setLoanId(loanId);
                 if (value < 0) {
