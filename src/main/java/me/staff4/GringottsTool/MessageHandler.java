@@ -249,7 +249,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
     private OutgoingMessage addNewLoan(final String chatId, final String tableId, final String sumString)
             throws NoDataFound, IOException, InvalidDataException {
         int sum = Integer.parseInt(sumString);
-            return new OutgoingMessage(OutgoingMessageType.TEXT, chatId, repository.addQueueItem(tableId, sum));
+        return new OutgoingMessage(OutgoingMessageType.TEXT, chatId, repository.addQueueItem(tableId, sum));
     }
 
     private OutgoingMessage getId(final String chatId) {
@@ -284,8 +284,8 @@ public class MessageHandler implements Runnable, Healthcheckable {
         Partner partner = repository.getPartnerByTgId(String.valueOf(userTgId));
         Contributions contributions = repository.getContributions().get(partner.getTableId() - 2);
         if (contributions != null) {
-                return new OutgoingMessage(OutgoingMessageType.TEXT, chatId, contributions.toString());
-            }
+            return new OutgoingMessage(OutgoingMessageType.TEXT, chatId, contributions.toString());
+        }
         throw new NoDataFound(Constants.NOT_FOUND_DATA);
     }
 
@@ -316,7 +316,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
             throws IOException, ParseException, NoDataFound, InvalidDataException {
         List<Partner> debts = repository.getDebtors();
         if (debts.size() == 0 && !isScheduled) {
-                throw new NoDataFound(Constants.NOT_FOUND_DATA);
+            throw new NoDataFound(Constants.NOT_FOUND_DATA);
         } else if (debts.size() != 0) {
             String debtorsString = getStringAboutAllDebtors(debts);
             OutgoingMessage sendMessage = new OutgoingMessage(OutgoingMessageType.TEXT, chatId, debtorsString);
@@ -574,6 +574,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
             }
         }
     }
+
     private void putToOutQueue(final OutgoingMessage outgoingMessage) {
         try {
             outQueue.put(outgoingMessage);
@@ -582,8 +583,9 @@ public class MessageHandler implements Runnable, Healthcheckable {
         }
 
     }
+
     private OutgoingMessage getTodayDebtors(final String chatId) throws NoDataFound, IOException, InvalidDataException {
-        List<Partner> persons =  repository.getTodayDebtors();
+        List<Partner> persons = repository.getTodayDebtors();
         String text;
         if (persons.size() != 0) {
             text = String.format(Constants.TODAY_DEBTS_MESSAGE, getStringAboutTodayDebts(persons));
@@ -605,6 +607,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
         }
         return result.toString();
     }
+
     private OutgoingMessage getFullSearch(final String chatId, final String[] inputText,
                                           final long tgId)
             throws NoDataFound, IOException, NumberFormatException, InvalidDataException {
@@ -623,6 +626,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
             return getPersonHistoryMessage(partners.get(0), chatId);
         }
     }
+
     private OutgoingMessage getPersonHistoryMessage(final Partner partner, final String chatId)
             throws InvalidDataException, IOException {
         String aboutTransactions;
