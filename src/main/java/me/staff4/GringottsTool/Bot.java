@@ -1,14 +1,12 @@
 package me.staff4.GringottsTool;
 
 
+import lombok.extern.slf4j.Slf4j;
 import me.staff4.GringottsTool.DTO.IncomingMessage;
 import me.staff4.GringottsTool.DTO.IncomingMessageType;
 import me.staff4.GringottsTool.DTO.OutgoingMessage;
 import me.staff4.GringottsTool.DTO.OutgoingMessageType;
 import me.staff4.GringottsTool.Exeptions.HealthExeption;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.polls.SendPoll;
@@ -28,17 +26,15 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.concurrent.BlockingQueue;
 
+@Slf4j
 public final class Bot extends SpringWebhookBot implements Runnable, Healthcheckable {
 
     private final BlockingQueue<IncomingMessage> inQueue;
     private final BlockingQueue<OutgoingMessage> outQueue;
-    private final Logger log = LogManager.getLogger();
     private String botPath;
     private String botUserName;
     private String botToken;
-    private static final String CRON_DEBT_SCHEDULE = "${cron.expression.debt}";
-    private static final String CRON_TODAY_PAYERS = "${cron.expression.todayPayers}";
-    private static final String CRON_ZONE = "${cron.expression.zone}";
+
     private static final long TIME_DIVISOR = 1000L;
     private static final int MINUTE = 5;
     private static final long SECOND_IN_1_MINUTE = 60L;
@@ -164,31 +160,6 @@ public final class Bot extends SpringWebhookBot implements Runnable, Healthcheck
         this.botUserName = botUserName;
     }
 
-    @Scheduled(cron = CRON_DEBT_SCHEDULE, zone = CRON_ZONE)
-    public void reportAboutDebts() {
-        log.info("Making everyMonth request about Debts...");
-        try {
-            inQueue.put(IncomingMessage.builder().type(IncomingMessageType.SYSTEM_COMMAND).
-                    chatId(Constants.ADMIN_CHAT_ID).
-                    text("getDebtors").
-                    build());
-        } catch (InterruptedException e) {
-            executeMessage(Constants.ERROR_OUT_WRITE_IN_BOT, Constants.ADMIN_CHAT_ID);
-        }
-    }
-
-    @Scheduled(cron = CRON_TODAY_PAYERS, zone = CRON_ZONE)
-    public void reportAboutTodayDebts() {
-        log.info("Making everyDay request about Debts...");
-        try {
-            inQueue.put(IncomingMessage.builder().type(IncomingMessageType.SYSTEM_COMMAND).
-                    chatId(Constants.ADMIN_CHAT_ID).
-                    text("getTodayDebtors").
-                    build());
-        } catch (InterruptedException e) {
-            executeMessage(Constants.ERROR_OUT_WRITE_IN_BOT, Constants.ADMIN_CHAT_ID);
-        }
-    }
 
     private void executeMessage(final String text, final String chatID) {
         try {

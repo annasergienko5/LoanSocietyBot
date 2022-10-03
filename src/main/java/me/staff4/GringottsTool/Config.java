@@ -4,6 +4,10 @@ import me.staff4.GringottsTool.DTO.IncomingMessage;
 import me.staff4.GringottsTool.DTO.OutgoingMessage;
 import me.staff4.GringottsTool.Exeptions.EnvironmentNullExeption;
 import me.staff4.GringottsTool.Exeptions.HealthExeption;
+import me.staff4.GringottsTool.SystemCommands.DefSystemCommandManager;
+import me.staff4.GringottsTool.SystemCommands.Executors.SystemCommandExecutorCommand;
+import me.staff4.GringottsTool.Cron.ScheduledCommands;
+import me.staff4.GringottsTool.SystemCommands.SystemCommandManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +35,7 @@ public class Config {
     @Autowired
     private ApplicationContext applicationContext;
 
-    private final Logger log =  LogManager.getLogger();
+    private final Logger log = LogManager.getLogger();
 
     @Bean
     public void checkENV() throws EnvironmentNullExeption {
@@ -109,6 +113,18 @@ public class Config {
         bot.setBotUserName(Constants.BOT_USERNAME);
         bot.setBotToken(Constants.TOKEN_BOT);
         return bot;
+    }
+
+    @Bean
+    public SystemCommandManager systemCommandManager(
+            final BlockingQueue<IncomingMessage> inQueue,
+            final List<SystemCommandExecutorCommand> executors) {
+        return new DefSystemCommandManager(inQueue, executors);
+    }
+
+    @Bean
+    public ScheduledCommands scheduledCommands(final SystemCommandManager manager) {
+        return new ScheduledCommands(manager);
     }
 
     @Bean
