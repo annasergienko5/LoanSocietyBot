@@ -1,5 +1,6 @@
 package me.staff4.GringottsTool.Repository;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import me.staff4.GringottsTool.Constants;
 import me.staff4.GringottsTool.Enteties.Cards;
 import me.staff4.GringottsTool.Enteties.Contributions;
@@ -30,13 +31,15 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
+
 
 @Component
 public class GoogleSheetRepository implements Repository, Healthcheckable {
     private static final String QUEUE_LOAN = "Очередь!A2:C";
-    private static final String CARDS_RANGE = "Держатели!A2:B";
+    private static final String CARDS_RANGE = "Карточки!A2:G";
     private static final String INFO_RANGE = "Сводка!B7:B11";
     private static final String PARTNERS_RANGE = "Участники!A2:M";
     private static final String IS_PARTNER_RANGE = "Участники!B2:B";
@@ -105,32 +108,29 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
     public final List<Cards> getCards() throws NoDataFound, IOException {
         List<List<Object>> values = getDataFromTable(CARDS_RANGE);
         List<Cards> result = new ArrayList<>();
-        List<List<String>> lists = new ArrayList<>();
-        int i = -1;
-        for (List<? extends Object> row : values) {
-            if (row.size() > 1 && !row.get(1).toString().equals("")) {
-                i++;
-                lists.add(new ArrayList<>());
-                lists.get(i).add(row.get(FIRST).toString());
-                lists.get(i).add(row.get(SECOND).toString());
-                continue;
+        for (List<Object> list : values) {
+            String name = unknownCheck(getElement(list, FIRST).get().toString());
+            String city = unknownCheck(getElement(list, SECOND).get().toString());
+            String card = unknownCheck(getElement(list, THIRD).get().toString());
+            String bank = unknownCheck(getElement(list, FOURTH).get().toString());
+            String numberPhone = unknownCheck(getElement(list, FIFTH).get().toString());
+            String sum = unknownCheck(getElement(list, SIXTH).get().toString());
+            Map<?, ?> meta = null;
+            if (getElement(list, SEVENTH).isPresent()) {
+                ObjectMapper objectMapper = new ObjectMapper();
+                String json = getElement(list, SEVENTH).get().toString();
+                meta = objectMapper.readValue(json, Map.class);
             }
-            if (row.size() != 0 && !row.get(FIRST).toString().equals("")) {
-                lists.get(i).add(row.get(FIRST).toString());
-            }
-        }
-        for (List<String> list : lists) {
-            var card = getElement(list, FIRST).orElse("unknown card");
-            var sum = getElement(list, THIRD).orElse("unknown sum");
-            var name = getElement(list, THIRD).orElse("unknown name");
-            var numberPhone = getElement(list, FOURTH).orElse("unknown phone");
-            var city = getElement(list, FIFTH).orElse("unknown city");
-            var bank = getElement(list, SIXTH).orElse("unknown bank");
-            var payWay = getElement(list, SEVENTH).orElse("unknown payWay");
-            var link = getElement(list, EIGHTH).orElse("unknown link");
-            result.add(new Cards(card, sum, name, numberPhone, city, bank, payWay, link));
+            result.add(new Cards(card, sum, name, numberPhone, city, bank, meta));
         }
         return result;
+    }
+
+    private String unknownCheck(final String text) {
+        if (text.equals("")) {
+            return "unknown";
+        }
+        return text;
     }
 
     public final Info getInfo() throws IOException, NoDataFound {
