@@ -350,17 +350,8 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
         for (List<? extends Object> row : names) {
             String name = row.get(0).toString();
             String elite = row.get(TWELFTH).toString();
-            if (!elite.isBlank()) {
-                int duck;
-                try {
-                    duck = Integer.parseInt(row.get(TWELFTH).toString());
-                } catch (NumberFormatException e) {
-                    throw new InvalidDataException("getDuckList", DUCK_LIST_RANGE, TWELFTH, elite,
-                            Constants.EXPECTED_CELL_VALUE_LAST_3_MONTH, name);
-                }
-                if (duck >= 1) {
-                    partners.add(new Partner(name));
-                }
+            if (elite.equals("0")) {
+                partners.add(new Partner(name));
             }
         }
         return partners;
