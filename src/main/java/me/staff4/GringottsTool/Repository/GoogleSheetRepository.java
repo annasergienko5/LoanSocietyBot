@@ -60,7 +60,6 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
     private static final int ELEVENTH = 10;
     private static final int TWELFTH = 11;
     private static final int THIRTEENTH = 12;
-    private static final int CARDS_PARAMETR_COUNT = 7;
     private static final int BEGIN_OF_TRANSACTION_RANGE = 5;
     private static final int MAX_LOAN_RATIO = 5;
     private static final double OVERDUE_REPAYMENT_RATIO = 0.5;
@@ -109,12 +108,15 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
         List<List<Object>> values = getDataFromTable(CARDS_RANGE);
         List<Cards> result = new ArrayList<>();
         for (List<Object> list : values) {
-            String name = unknownCheck(getElement(list, FIRST).get().toString());
-            String city = unknownCheck(getElement(list, SECOND).get().toString());
-            String card = unknownCheck(getElement(list, THIRD).get().toString());
-            String bank = unknownCheck(getElement(list, FOURTH).get().toString());
-            String numberPhone = unknownCheck(getElement(list, FIFTH).get().toString());
-            String sum = unknownCheck(getElement(list, SIXTH).get().toString());
+            String name = getElement(list, FIRST).get().toString();
+            String city = getElement(list, SECOND).get().toString();
+            String card = getElement(list, THIRD).get().toString();
+            String bank = getElement(list, FOURTH).get().toString();
+            String numberPhone = getElement(list, FIFTH).get().toString();
+            String sum = getElement(list, SIXTH).get().toString();
+            if (card.equals("") && numberPhone.equals("")) {
+                continue;
+            }
             Map<?, ?> meta = null;
             if (getElement(list, SEVENTH).isPresent()) {
                 ObjectMapper objectMapper = new ObjectMapper();
@@ -124,13 +126,6 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
             result.add(new Cards(card, sum, name, numberPhone, city, bank, meta));
         }
         return result;
-    }
-
-    private String unknownCheck(final String text) {
-        if (text.equals("")) {
-            return "unknown";
-        }
-        return text;
     }
 
     public final Info getInfo() throws IOException, NoDataFound {

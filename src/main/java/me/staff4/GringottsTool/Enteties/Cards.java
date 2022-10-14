@@ -17,19 +17,21 @@ public final class Cards {
     @Override
     public String toString() {
         StringBuffer res = new StringBuffer();
-        res.append("\n").append(name)
-                .append("\nгород: ").append(city)
-                .append("\nбанк: ").append(bank)
-                .append("\nсумма на карте: ").append(sum);
-        if (numberPhone.equals("unknown")) {
-            res.append(String.format("\nСБП: %s", numberPhone));
-        } else {
-            res.append(String.format("\nСБП: `%s`", numberPhone));
+        res.append("\n*").append(name).append("*");
+        if (!bank.equals("")) {
+            res.append("\n").append(bank);
         }
-        if (card.equals("unknown")) {
-            res.append(String.format("\nномер карты: %s", card));
-        } else {
-            res.append(String.format("\nномер карты: `%s`", card));
+        if (!card.equals("")) {
+            res.append(String.format("\n`%s`", card));
+        }
+        if (!numberPhone.equals("")) {
+            res.append(String.format("\n`%s`", numberPhone));
+        }
+        if (!sum.equals("")) {
+            res.append(String.format("\nсумма на карте: `%,.2f₽`", Float.parseFloat(sum.replaceAll(",", "."))));
+        }
+        if (!city.equals("")) {
+            res.append("\n").append(city);
         }
         if (meta != null) {
             for (Object key : meta.keySet()) {
