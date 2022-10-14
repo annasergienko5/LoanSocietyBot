@@ -403,7 +403,7 @@ public class MessageHandler implements Runnable, Healthcheckable {
         }
         String info = repository.getInfo().toString();
         String decision;
-        if ((double) sum > resultList.get(0).getSumContributions()) {
+        if ((double) sum > resultList.get(0).getSumContributions() * Constants.MINIMUM_LOAN_COEFFICIENT) {
             decision = Constants.LOAN_DENIED;
         } else {
             decision = Constants.LOAN_APPROVED + inputText;
