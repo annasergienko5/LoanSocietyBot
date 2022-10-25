@@ -98,15 +98,13 @@ public class MessageHandler implements Runnable, Healthcheckable {
 
     private void systemMessage(final String inputText, final String chatId) throws NoDataFound, IOException,
             ParseException, InvalidDataException {
-        OutgoingMessage message = null;
-        if (inputText.equals("getTodayDebtors")) {
-            message = getTodayDebtors(chatId);
-        } else if (inputText.equals("getDebtors")) {
-            message = getDebtors(chatId, true);
-        } else {
-            throw new IOException("Problems with scheduled notifications. "
+        OutgoingMessage message = switch (inputText) {
+            case "getTodayDebtors" -> getTodayDebtors(chatId);
+            case "getDebtors" -> getDebtors(chatId, true);
+            case "getOverdueDebtors" -> getOverdueDebtors(chatId, true);
+            default -> throw new IOException("Problems with scheduled notifications. "
                     + "systemMessage() received wrong inputText.");
-        }
+        };
         if (message != null) {
             sendToChats(message);
         }
@@ -138,6 +136,8 @@ public class MessageHandler implements Runnable, Healthcheckable {
                 return getStatus(chatId);
             case "/debts":
                 return getDebtors(chatId, false);
+            case "/overduedebts":
+                return getOverdueDebtors(chatId, false);
             case "/cards":
                 return getCards(chatId);
             case "/rules":
@@ -189,6 +189,8 @@ public class MessageHandler implements Runnable, Healthcheckable {
                 return getStatus(chatId);
             case "/debts":
                 return getDebtors(chatId, false);
+            case "/overduedebts":
+                return getOverdueDebtors(chatId, false);
             case "/cards":
                 return getCards(chatId);
             case "/rules":
@@ -326,6 +328,39 @@ public class MessageHandler implements Runnable, Healthcheckable {
         return null;
     }
 
+    private OutgoingMessage getOverdueDebtors(final String chatId, final boolean isScheduled)
+            throws IOException, ParseException, NoDataFound, InvalidDataException {
+        List<Partner> debts = repository.getDebtors();
+        if (debts.size() == 0 && !isScheduled) {
+            throw new NoDataFound(Constants.NOT_FOUND_DATA);
+        }
+        if (debts.size() != 0) {
+            String debtorsString = getStringAboutOverdueDebtors(debts);
+            OutgoingMessage sendMessage = new OutgoingMessage(OutgoingMessageType.TEXT, chatId, debtorsString);
+            sendMessage.setEnableMarkdown(true);
+            return sendMessage;
+        }
+        return null;
+    }
+
+    private String getStringAboutOverdueDebtors(final List<Partner> debts) throws ParseException {
+        List<Partner> overdueDebtor = new ArrayList<>();
+        StringBuilder result = new StringBuilder();
+        Date dateNow = new Date();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy");
+        for (Partner partner : debts) {
+            Date date = dateFormat.parse(partner.getReturnDate());
+            if (date.getTime() <= dateNow.getTime()) {
+                overdueDebtor.add(partner);
+            }
+        }
+        result.append(Constants.OVERDUE);
+        for (Partner partner : overdueDebtor) {
+            result.append(String.format(Constants.OVERDUE_DEBTORS, partner.getName(), partner.getDebt(),
+                    partner.getReturnDate()));
+        }
+        return result.toString();
+    }
     private String getStringAboutAllDebtors(final List<Partner> debts) throws ParseException, NoDataFound, IOException {
         List<Partner> overdueDebtor = new ArrayList<>();
         List<Partner> notOverdueDebtor = new ArrayList<>();

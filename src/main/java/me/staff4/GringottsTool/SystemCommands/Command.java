@@ -1,7 +1,7 @@
 package me.staff4.GringottsTool.SystemCommands;
 
 public enum Command {
-    DEBTORS, TODAY_DEBTORS;
+    DEBTORS, TODAY_DEBTORS, OVERDUE_DEBTORS;
 
     public static boolean is(final String c) {
         for (var command : Command.values()) {

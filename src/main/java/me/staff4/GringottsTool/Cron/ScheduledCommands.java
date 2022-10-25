@@ -7,6 +7,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 public class ScheduledCommands {
     private static final String CRON_DEBT_SCHEDULE = "${cron.expression.debt}";
     private static final String CRON_TODAY_PAYERS = "${cron.expression.todayPayers}";
+    private static final String CRON_OVERDUE_DEBTORS = "${cron.expression.overdueDebtors}";
     private static final String CRON_ZONE = "${cron.expression.zone}";
 
     private final SystemCommandManager manager;
@@ -25,5 +26,11 @@ public class ScheduledCommands {
     @Scheduled(cron = CRON_TODAY_PAYERS, zone = CRON_ZONE)
     private void triggerTodayDebts() {
         manager.trigger(Command.TODAY_DEBTORS);
+    }
+
+
+    @Scheduled(cron = CRON_OVERDUE_DEBTORS, zone = CRON_ZONE)
+    private void triggerOverdueDebtors() {
+        manager.trigger(Command.OVERDUE_DEBTORS);
     }
 }
