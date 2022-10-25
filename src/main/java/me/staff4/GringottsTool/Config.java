@@ -53,6 +53,7 @@ public class Config {
         envMap.put("CRON_TIMEZONE", System.getenv("CRON_TIMEZONE"));
         envMap.put("DEBT_REMINDER_TIME", System.getenv("DEBT_REMINDER_TIME"));
         envMap.put("TODAY_PAYERS_REMINDER_TIME", System.getenv("TODAY_PAYERS_REMINDER_TIME"));
+        envMap.put("OVERDUE_DEBTORS_REMINDER_TIME", System.getenv("OVERDUE_DEBTORS_REMINDER_TIME"));
         for (Map.Entry<String, String> env : envMap.entrySet()) {
             if (env.getValue() == null || env.getValue().isEmpty()) {
                 throw new EnvironmentNullExeption(env.getKey() + " = null or empty");
