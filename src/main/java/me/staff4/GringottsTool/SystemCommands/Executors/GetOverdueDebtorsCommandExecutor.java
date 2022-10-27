@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 public class GetOverdueDebtorsCommandExecutor extends AbsAdminCommandExecutor implements SystemCommandExecutorCommand {
     @Override
     public final void exec(final SystemCommandExecutorResponder responder) {
-        super.sendToAdminChat(responder, "getOverdueDebtors");
+        super.sendToAdminChat(responder, "/overduedebts");
     }
 
     @Override
