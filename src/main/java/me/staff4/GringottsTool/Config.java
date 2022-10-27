@@ -1,12 +1,15 @@
 package me.staff4.GringottsTool;
 
+import me.staff4.GringottsTool.Cron.ScheduledCommands;
 import me.staff4.GringottsTool.DTO.IncomingMessage;
 import me.staff4.GringottsTool.DTO.OutgoingMessage;
 import me.staff4.GringottsTool.Exeptions.EnvironmentNullExeption;
 import me.staff4.GringottsTool.Exeptions.HealthExeption;
+import me.staff4.GringottsTool.MessageHadler.Commands.Interfaces.*;
+import me.staff4.GringottsTool.MessageHadler.DefIncomingMessageRouterManager;
+import me.staff4.GringottsTool.MessageHadler.IncomingMessageHandlerManager;
 import me.staff4.GringottsTool.SystemCommands.DefSystemCommandManager;
 import me.staff4.GringottsTool.SystemCommands.Executors.SystemCommandExecutorCommand;
-import me.staff4.GringottsTool.Cron.ScheduledCommands;
 import me.staff4.GringottsTool.SystemCommands.SystemCommandManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -126,6 +129,18 @@ public class Config {
     @Bean
     public ScheduledCommands scheduledCommands(final SystemCommandManager manager) {
         return new ScheduledCommands(manager);
+    }
+
+    @Bean
+    public IncomingMessageHandlerManager incomingMessageHandlerManager(
+            final List<AdminMessageCommandExecutor> adminExecutors,
+            final List<PublicMessageCommandExecutor> publicExecutors,
+            final List<PrivateMessageCommandExecutor> privatExecutors,
+            final List<AllAvailableMessageCommandExecutor> allAvailableExecutors,
+            final List<SystemMessageCommandExecutor> systemMessageExecutors,
+            final BlockingQueue<OutgoingMessage> outQueue) {
+        return new DefIncomingMessageRouterManager(publicExecutors, privatExecutors, adminExecutors,
+                allAvailableExecutors, systemMessageExecutors, outQueue);
     }
 
     @Bean
