@@ -1,6 +1,6 @@
 package me.staff4.GringottsTool.Sorters;
 
-import me.staff4.GringottsTool.Enteties.Partner;
+import me.staff4.GringottsTool.Entities.Partner;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 

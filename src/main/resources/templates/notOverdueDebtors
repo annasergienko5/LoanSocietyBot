@@ -1,0 +1,5 @@
+*${name}*
+${value}₽
+Вернуть до: ${returnDate}
+Последний взнос: ${lastContribution}
+

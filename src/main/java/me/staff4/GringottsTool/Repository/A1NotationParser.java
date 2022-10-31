@@ -1,5 +1,8 @@
 package me.staff4.GringottsTool.Repository;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public final class A1NotationParser {
     private static final int COUNT_OF_ALPHABET = 26;
     public String toA1Notation(final int columnNumber) {

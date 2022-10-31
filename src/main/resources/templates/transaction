@@ -1,0 +1,2 @@
+Дата:	<strong>${date}</strong>
+Сумма транзакций:	<strong>${value}</strong> ₽

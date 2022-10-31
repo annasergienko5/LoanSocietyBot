@@ -1,11 +1,11 @@
-package me.staff4.GringottsTool.Enteties;
+package me.staff4.GringottsTool.Entities;
 
 import lombok.AllArgsConstructor;
 
 import java.util.Map;
 
 @AllArgsConstructor
-public final class Cards {
+public final class CardsEntity {
     private String card;
     private String sum;
     private String name;

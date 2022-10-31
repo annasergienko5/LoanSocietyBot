@@ -1,0 +1,6 @@
+
+<strong>Займ №:	${loanId}</strong>
+Дата открытия:	<strong>${dateStart}</strong>
+Дата закрытия:	<strong>${dateEnd}</strong>
+Сумма займа:	<strong>${value}</strong> ₽
+<strong>___</strong>

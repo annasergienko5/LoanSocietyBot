@@ -4,7 +4,7 @@ import me.staff4.GringottsTool.Constants;
 import me.staff4.GringottsTool.DTO.IncomingMessage;
 import me.staff4.GringottsTool.DTO.OutgoingMessage;
 import me.staff4.GringottsTool.DTO.OutgoingMessageType;
-import me.staff4.GringottsTool.Enteties.Partner;
+import me.staff4.GringottsTool.Entities.Partner;
 import me.staff4.GringottsTool.Exeptions.NoDataFound;
 import me.staff4.GringottsTool.MessageHadler.Commands.Interfaces.AdminMessageCommandExecutor;
 import me.staff4.GringottsTool.MessageHadler.Commands.Interfaces.MessageCommandExecutorResponder;

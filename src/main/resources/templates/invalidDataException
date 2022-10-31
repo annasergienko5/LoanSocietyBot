@@ -1,0 +1,5 @@
+Ошибка в диапазоне таблицы: ${sheetRange}
+Столбец:    ${columnA1Notation}
+Строка с именем:    ${name}
+Найденное значение: ${cellValue}
+Ожидаемое значение: ${expectedValue}

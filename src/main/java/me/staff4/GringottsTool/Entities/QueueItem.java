@@ -1,4 +1,4 @@
-package me.staff4.GringottsTool.Enteties;
+package me.staff4.GringottsTool.Entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

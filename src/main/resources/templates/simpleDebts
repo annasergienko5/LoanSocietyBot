@@ -1,0 +1,4 @@
+Участник:   <strong><a href="tg://user?id=${userTgId}">${name}</a></strong>
+Текущий займ:   <strong>${value}</strong>₽
+Вернуть до: <strong>${returnDate}</strong>
+

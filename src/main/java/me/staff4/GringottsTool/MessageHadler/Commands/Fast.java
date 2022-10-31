@@ -4,13 +4,14 @@ import me.staff4.GringottsTool.Constants;
 import me.staff4.GringottsTool.DTO.IncomingMessage;
 import me.staff4.GringottsTool.DTO.OutgoingMessage;
 import me.staff4.GringottsTool.DTO.OutgoingMessageType;
-import me.staff4.GringottsTool.Enteties.Partner;
+import me.staff4.GringottsTool.Entities.Partner;
 import me.staff4.GringottsTool.Exeptions.InvalidDataException;
 import me.staff4.GringottsTool.Exeptions.NoDataFound;
 import me.staff4.GringottsTool.MessageHadler.Commands.Interfaces.MessageCommandExecutorResponder;
 import me.staff4.GringottsTool.MessageHadler.Commands.Interfaces.PrivateMessageCommandExecutor;
 import me.staff4.GringottsTool.MessageHadler.Commands.Interfaces.PublicMessageCommandExecutor;
 import me.staff4.GringottsTool.MessageHadler.MessageCommand;
+import me.staff4.GringottsTool.Templates.TemplateEngine;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -31,7 +32,7 @@ public final class Fast extends AbsGetCommand implements PublicMessageCommandExe
         if (!getRepository().isPartner(incomingMessage.getUserTgId())) {
             return;
         }
-        int sum;
+        float sum;
         String chatId = incomingMessage.getChatId();
         long userTgId = incomingMessage.getUserTgId();
         String[] inputTextWithout = incomingMessage.getText().split("@", 2);
@@ -41,13 +42,13 @@ public final class Fast extends AbsGetCommand implements PublicMessageCommandExe
         }
         String inputText = inputTextAll[1];
         try {
-            sum = Integer.parseInt(inputText);
+            sum = Float.parseFloat(inputText);
         } catch (NumberFormatException e) {
             responder.put(new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.INCORRECT_MONEY_TYPE));
             return;
         }
         if (sum <= 0) {
-            responder.put(new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.INCORRECT_AMOUNT_OF_MONEY));
+            responder.put(new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.INCORRECT_MONEY_TYPE));
             return;
         }
         List<Partner> resultList = getRepository().getPartners(String.valueOf(userTgId));
@@ -62,7 +63,7 @@ public final class Fast extends AbsGetCommand implements PublicMessageCommandExe
         } else {
             decision = Constants.LOAN_APPROVED + inputText;
             StringBuilder messageToAdmins = new StringBuilder();
-            messageToAdmins.append(String.format(Constants.FAST_MESSAGE_TO_ADMINS, userTgId, sum));
+            messageToAdmins.append(TemplateEngine.fastMessageToAdmins(String.valueOf(userTgId), sum));
             messageToAdmins.append("\n\n" + resultList.get(0).toString() + "\n" + info);
             OutgoingMessage sendMessageToAdmins = new OutgoingMessage(OutgoingMessageType.TEXT, Constants.ADMIN_CHAT_ID,
                     messageToAdmins.toString());

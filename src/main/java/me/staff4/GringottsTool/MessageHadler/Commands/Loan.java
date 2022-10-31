@@ -4,11 +4,12 @@ import me.staff4.GringottsTool.Constants;
 import me.staff4.GringottsTool.DTO.IncomingMessage;
 import me.staff4.GringottsTool.DTO.OutgoingMessage;
 import me.staff4.GringottsTool.DTO.OutgoingMessageType;
-import me.staff4.GringottsTool.Enteties.Partner;
+import me.staff4.GringottsTool.Entities.Partner;
 import me.staff4.GringottsTool.Exeptions.NoDataFound;
 import me.staff4.GringottsTool.MessageHadler.Commands.Interfaces.MessageCommandExecutorResponder;
 import me.staff4.GringottsTool.MessageHadler.Commands.Interfaces.PrivateMessageCommandExecutor;
 import me.staff4.GringottsTool.MessageHadler.MessageCommand;
+import me.staff4.GringottsTool.Templates.TemplateEngine;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -37,15 +38,15 @@ public final class Loan extends AbsGetCommand implements PrivateMessageCommandEx
         }
         String inputText = inputTextArray[1];
         String[] text = inputText.split(" ", 2);
-        int money;
+        float money;
         try {
-            money = Integer.parseInt(text[0]);
+            money = Float.parseFloat(text[0]);
         } catch (NumberFormatException e) {
             responder.put(new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.NO_MONEY_LOAN));
             return;
         }
-        int numberOfLoanCommandParamets = 2;
-        if (text.length < numberOfLoanCommandParamets) {
+        int numberOfLoanCommandParameters = 2;
+        if (text.length < numberOfLoanCommandParameters) {
             responder.put(new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.NO_TARGET_LOAN));
             return;
         }
@@ -70,7 +71,7 @@ public final class Loan extends AbsGetCommand implements PrivateMessageCommandEx
         infoMessage.setEnableMarkdown(true);
         responder.put(targetMessage);
         responder.put(infoMessage);
-        String pollText = String.format(Constants.POLL_QUESTION, partner.getName(), money);
+        String pollText = TemplateEngine.pollQuestion(partner.getName(), money);
         OutgoingMessage pollMessage = new OutgoingMessage(OutgoingMessageType.POLL, Constants.PUBLIC_CHAT_ID, pollText);
         pollMessage.setUserTgId(chatId);
         pollMessage.setOptions(answers);

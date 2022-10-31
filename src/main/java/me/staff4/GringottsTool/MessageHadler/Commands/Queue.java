@@ -2,7 +2,7 @@ package me.staff4.GringottsTool.MessageHadler.Commands;
 
 import me.staff4.GringottsTool.DTO.IncomingMessage;
 import me.staff4.GringottsTool.DTO.OutgoingMessage;
-import me.staff4.GringottsTool.Enteties.QueueItem;
+import me.staff4.GringottsTool.Entities.QueueItem;
 import me.staff4.GringottsTool.Exeptions.InvalidDataException;
 import me.staff4.GringottsTool.Exeptions.NoDataFound;
 import me.staff4.GringottsTool.MessageHadler.Commands.Interfaces.AdminMessageCommandExecutor;

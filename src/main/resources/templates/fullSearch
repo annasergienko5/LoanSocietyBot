@@ -1,0 +1,4 @@
+<strong>Информация по запросу на Участника:</strong>
+${partner}
+<strong>Кредитная история Участника:</strong>
+${aboutTransactions}
