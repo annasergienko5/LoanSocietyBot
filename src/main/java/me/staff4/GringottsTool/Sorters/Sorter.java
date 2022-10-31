@@ -1,6 +1,6 @@
 package me.staff4.GringottsTool.Sorters;
 
-import me.staff4.GringottsTool.Enteties.Partner;
+import me.staff4.GringottsTool.Entities.Partner;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

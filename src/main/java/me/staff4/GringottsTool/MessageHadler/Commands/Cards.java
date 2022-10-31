@@ -3,6 +3,7 @@ package me.staff4.GringottsTool.MessageHadler.Commands;
 import me.staff4.GringottsTool.Constants;
 import me.staff4.GringottsTool.DTO.IncomingMessage;
 import me.staff4.GringottsTool.DTO.OutgoingMessage;
+import me.staff4.GringottsTool.Entities.CardsEntity;
 import me.staff4.GringottsTool.Exeptions.InvalidDataException;
 import me.staff4.GringottsTool.Exeptions.NoDataFound;
 import me.staff4.GringottsTool.MessageHadler.Commands.Interfaces.AdminMessageCommandExecutor;
@@ -31,11 +32,11 @@ public final class Cards extends AbsGetCommand implements PublicMessageCommandEx
             return;
         }
         StringBuffer res = new StringBuffer();
-        List<me.staff4.GringottsTool.Enteties.Cards> cards = getRepository().getCards();
+        List<CardsEntity> cards = getRepository().getCards();
         if (cards.isEmpty()) {
             throw new NoDataFound(Constants.NOT_FOUND_DATA);
         }
-        for (me.staff4.GringottsTool.Enteties.Cards card : cards) {
+        for (CardsEntity card : cards) {
             res.append("\n").append(card.toString());
         }
         OutgoingMessage outgoingMessage = getOutMessage(incomingMessage);

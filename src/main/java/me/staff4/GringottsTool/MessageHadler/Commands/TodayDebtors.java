@@ -1,14 +1,14 @@
 package me.staff4.GringottsTool.MessageHadler.Commands;
 
-import me.staff4.GringottsTool.Constants;
 import me.staff4.GringottsTool.DTO.IncomingMessage;
 import me.staff4.GringottsTool.DTO.OutgoingMessage;
-import me.staff4.GringottsTool.Enteties.Partner;
+import me.staff4.GringottsTool.Entities.Partner;
 import me.staff4.GringottsTool.Exeptions.InvalidDataException;
 import me.staff4.GringottsTool.Exeptions.NoDataFound;
 import me.staff4.GringottsTool.MessageHadler.Commands.Interfaces.MessageCommandExecutorResponder;
 import me.staff4.GringottsTool.MessageHadler.Commands.Interfaces.SystemMessageCommandExecutor;
 import me.staff4.GringottsTool.MessageHadler.MessageCommand;
+import me.staff4.GringottsTool.Templates.TemplateEngine;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 
@@ -31,7 +31,7 @@ public final class TodayDebtors extends AbsGetCommand implements SystemMessageCo
         List<Partner> persons = getRepository().getTodayDebtors();
         String text;
         if (persons.size() != 0) {
-            text = String.format(Constants.TODAY_DEBTS_MESSAGE, getStringAboutTodayDebts(persons));
+            text = TemplateEngine.todayDebtsMessage(getStringAboutTodayDebts(persons));
         } else {
             return;
         }
@@ -45,7 +45,7 @@ public final class TodayDebtors extends AbsGetCommand implements SystemMessageCo
     private String getStringAboutTodayDebts(final List<Partner> debts) {
         StringBuilder result = new StringBuilder();
         for (Partner partner : debts) {
-            String text = String.format(Constants.SIMPLE_DEBTS, Long.parseLong(partner.getTgId()), partner.getName(),
+            String text = TemplateEngine.simpleDebts(partner.getTgId(), partner.getName(),
                     partner.getDebt(), partner.getReturnDate());
             result.append(text);
         }

@@ -2,12 +2,12 @@ package me.staff4.GringottsTool.Repository;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.staff4.GringottsTool.Constants;
-import me.staff4.GringottsTool.Enteties.Cards;
-import me.staff4.GringottsTool.Enteties.Contributions;
-import me.staff4.GringottsTool.Enteties.Info;
-import me.staff4.GringottsTool.Enteties.Partner;
-import me.staff4.GringottsTool.Enteties.QueueItem;
-import me.staff4.GringottsTool.Enteties.Transaction;
+import me.staff4.GringottsTool.Entities.CardsEntity;
+import me.staff4.GringottsTool.Entities.Contributions;
+import me.staff4.GringottsTool.Entities.Info;
+import me.staff4.GringottsTool.Entities.Partner;
+import me.staff4.GringottsTool.Entities.QueueItem;
+import me.staff4.GringottsTool.Entities.Transaction;
 import me.staff4.GringottsTool.Exeptions.GoogleTokenException;
 import me.staff4.GringottsTool.Exeptions.HealthExeption;
 import me.staff4.GringottsTool.Exeptions.InvalidDataException;
@@ -16,8 +16,10 @@ import me.staff4.GringottsTool.Healthcheckable;
 import com.google.api.services.sheets.v4.Sheets;
 import com.google.api.services.sheets.v4.model.ValueRange;
 import me.staff4.GringottsTool.Sorters.Sorter;
+import me.staff4.GringottsTool.Templates.TemplateEngine;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -34,7 +36,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
-
 
 @Component
 public class GoogleSheetRepository implements Repository, Healthcheckable {
@@ -65,6 +66,8 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
     private static final double OVERDUE_REPAYMENT_RATIO = 0.5;
     private static final int NUMBER_OF_OVERDUES_WITHOUT_RATIO = 6;
     private static final int GETPARTNERS_MAX_PARAMETR_COUNT = 3;
+    @Autowired
+    private A1NotationParser a1NotationParser;
 
     private Sheets sheets = GoogleSheets.getSheetsService();
     private Logger log = LogManager.getLogger();
@@ -104,9 +107,9 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
         return result;
     }
 
-    public final List<Cards> getCards() throws NoDataFound, IOException {
+    public final List<CardsEntity> getCards() throws NoDataFound, IOException {
         List<List<Object>> values = getDataFromTable(CARDS_RANGE);
-        List<Cards> result = new ArrayList<>();
+        List<CardsEntity> result = new ArrayList<>();
         for (List<Object> list : values) {
             String name = getElement(list, FIRST).get().toString();
             String city = getElement(list, SECOND).get().toString();
@@ -123,7 +126,7 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
                 String json = getElement(list, SEVENTH).get().toString();
                 meta = objectMapper.readValue(json, Map.class);
             }
-            result.add(new Cards(card, sum, name, numberPhone, city, bank, meta));
+            result.add(new CardsEntity(card, sum, name, numberPhone, city, bank, meta));
         }
         return result;
     }
@@ -302,17 +305,19 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
                     LocalDate.parse(dayToPay, dateTimeFormatter);
                 } catch (DateTimeParseException e) {
                     log.info(dateTimeFormatter, e);
-                    throw new InvalidDataException("Error in buildPartnerWithDebt",
-                            DEBT_RANGE, NINTH, dayToPay, Constants.EXPECTED_CELL_VALUE_DATE, name);
+                    throw new InvalidDataException(TemplateEngine.invalidDataException(DEBT_RANGE,
+                            a1NotationParser.toA1Notation(NINTH), name, dayToPay,
+                            Constants.EXPECTED_CELL_VALUE_DATE));
                 } catch (NumberFormatException e) {
-                    throw new InvalidDataException("Error in buildPartnerWithDebt",
-                            DEBT_RANGE, EIGHTH, debtString, Constants.EXPECTED_CELL_VALUE_NUMERIC_DECIMAL, name);
+                    throw new InvalidDataException(TemplateEngine.invalidDataException(DEBT_RANGE,
+                            a1NotationParser.toA1Notation(EIGHTH), name, debtString,
+                            Constants.EXPECTED_CELL_VALUE_NUMERIC_DECIMAL));
                 }
                 try {
                     Long.parseLong(tgId);
                 } catch (NumberFormatException e) {
-                    throw new InvalidDataException("Error in buildPartnerWithDebt",
-                            DEBT_RANGE, SECOND, tgId, Constants.EXPECTED_CELL_VALUE_TG_ID, name);
+                    throw new InvalidDataException(TemplateEngine.invalidDataException(DEBT_RANGE,
+                            a1NotationParser.toA1Notation(SECOND), name, tgId, Constants.EXPECTED_CELL_VALUE_TG_ID));
                 }
                 Partner partner = new Partner(name, debt, dayToPay);
                 partner.setTableId(tableId);
@@ -366,7 +371,8 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
         return proxyList;
     }
 
-    public final List<Transaction> getTransactions(final Partner partner) throws IOException, InvalidDataException {
+    public final List<Transaction> getTransactions(final Partner partner)
+            throws IOException, InvalidDataException {
         String personRequestRange = "Займы!%s:%s".formatted(partner.getTableId(), partner.getTableId());
         ValueRange datesResponse = sheets.spreadsheets().values().get(Constants.SHEET_ID, "Займы!1:1").execute();
         ValueRange personResponse = sheets.spreadsheets().values().get(Constants.SHEET_ID, personRequestRange)
@@ -390,8 +396,9 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
                         try {
                             value = Float.parseFloat(cellValue.replace(",", "."));
                         } catch (NumberFormatException ignored) {
-                            throw new InvalidDataException("Error in getTransactions", personRequestRange, i,
-                                    cellValue, Constants.EXPECTED_CELL_VALUE_FLOAT, partner.getName());
+                            throw new InvalidDataException(TemplateEngine.invalidDataException(personRequestRange,
+                                    a1NotationParser.toA1Notation(i), partner.getName(), cellValue,
+                                    Constants.EXPECTED_CELL_VALUE_FLOAT));
                         }
                         Transaction transaction = new Transaction(date, value);
                         transactions.add(transaction);
@@ -436,8 +443,9 @@ public class GoogleSheetRepository implements Repository, Healthcheckable {
             try {
                 sum = Integer.parseInt(row.get(THIRD).toString());
             } catch (NumberFormatException ignored) {
-                throw new InvalidDataException("Error in getQueue", QUEUE_LOAN, THIRD,
-                        row.get(THIRD).toString(), Constants.EXPECTED_CELL_VALUE_NUMERIC_DECIMAL, name);
+                throw new InvalidDataException(TemplateEngine.invalidDataException(QUEUE_LOAN,
+                        a1NotationParser.toA1Notation(THIRD), name, row.get(THIRD).toString(),
+                        Constants.EXPECTED_CELL_VALUE_NUMERIC_DECIMAL));
             }
             result.add(new QueueItem(name, tgId, sum));
         }

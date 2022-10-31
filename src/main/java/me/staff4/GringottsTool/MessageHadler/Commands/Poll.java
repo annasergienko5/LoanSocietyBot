@@ -8,6 +8,7 @@ import me.staff4.GringottsTool.Exeptions.NoDataFound;
 import me.staff4.GringottsTool.MessageHadler.Commands.Interfaces.MessageCommandExecutorResponder;
 import me.staff4.GringottsTool.MessageHadler.Commands.Interfaces.SystemMessageCommandExecutor;
 import me.staff4.GringottsTool.MessageHadler.MessageCommand;
+import me.staff4.GringottsTool.Templates.TemplateEngine;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
@@ -31,8 +32,8 @@ public final class Poll extends AbsGetCommand implements SystemMessageCommandExe
         } else {
             publicChat = Constants.PUBLIC_CHAT_ID.substring(1);
         }
-        String notificationText = String.format(Constants.POLL_NOTIFICATION, publicChat,
-                incomingMessage.getMessageId());
+        String notificationText = TemplateEngine.pollNotification(publicChat,
+                String.valueOf(incomingMessage.getMessageId()));
         for (String tgId : allPartners) {
             if (tgId.equals(String.valueOf(incomingMessage.getUserTgId())) || tgId.equals("")) {
                 continue;

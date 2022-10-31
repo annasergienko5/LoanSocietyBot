@@ -1,11 +1,11 @@
 package me.staff4.GringottsTool.Repository;
 
-import me.staff4.GringottsTool.Enteties.Transaction;
-import me.staff4.GringottsTool.Enteties.QueueItem;
-import me.staff4.GringottsTool.Enteties.Cards;
-import me.staff4.GringottsTool.Enteties.Contributions;
-import me.staff4.GringottsTool.Enteties.Info;
-import me.staff4.GringottsTool.Enteties.Partner;
+import me.staff4.GringottsTool.Entities.Transaction;
+import me.staff4.GringottsTool.Entities.QueueItem;
+import me.staff4.GringottsTool.Entities.CardsEntity;
+import me.staff4.GringottsTool.Entities.Contributions;
+import me.staff4.GringottsTool.Entities.Info;
+import me.staff4.GringottsTool.Entities.Partner;
 import me.staff4.GringottsTool.Exeptions.InvalidDataException;
 import me.staff4.GringottsTool.Exeptions.NoDataFound;
 
@@ -16,7 +16,7 @@ import java.util.Queue;
 @org.springframework.stereotype.Repository
 public interface Repository {
     List<Contributions> getContributions() throws NoDataFound, IOException;
-    List<Cards> getCards() throws NoDataFound, IOException;
+    List<CardsEntity> getCards() throws NoDataFound, IOException;
     Info getInfo() throws IOException, NoDataFound;
     List<Partner> getPartners(String nameOrTgId) throws IOException, NoDataFound;
     boolean isPartner(long checkingTgId) throws IOException, NoDataFound;

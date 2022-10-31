@@ -6,8 +6,14 @@ import me.staff4.GringottsTool.DTO.OutgoingMessage;
 import me.staff4.GringottsTool.DTO.OutgoingMessageType;
 import me.staff4.GringottsTool.Exeptions.InvalidDataException;
 import me.staff4.GringottsTool.Exeptions.NoDataFound;
-import me.staff4.GringottsTool.MessageHadler.Commands.Interfaces.*;
+import me.staff4.GringottsTool.MessageHadler.Commands.Interfaces.AdminMessageCommandExecutor;
+import me.staff4.GringottsTool.MessageHadler.Commands.Interfaces.AllAvailableMessageCommandExecutor;
+import me.staff4.GringottsTool.MessageHadler.Commands.Interfaces.MessageCommandExecutor;
+import me.staff4.GringottsTool.MessageHadler.Commands.Interfaces.PrivateMessageCommandExecutor;
+import me.staff4.GringottsTool.MessageHadler.Commands.Interfaces.PublicMessageCommandExecutor;
+import me.staff4.GringottsTool.MessageHadler.Commands.Interfaces.SystemMessageCommandExecutor;
 import me.staff4.GringottsTool.Repository.Repository;
+import me.staff4.GringottsTool.Templates.TemplateEngine;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,12 +74,12 @@ public class DefIncomingMessageRouterManager implements IncomingMessageHandlerMa
         }
         TypeChat typeChat = selectTypeChat.selectTypeChat(incomingMessage);
         String chatId = incomingMessage.getChatId();
-        String errorMessage = String.format(Constants.ERROR_IN_SOME_FUNCTION, incomingMessage.getText(),
-                chatId, incomingMessage.getUserTgId());
-        Optional<MessageCommandExecutor> commandExecuter = safeGet(typeChat, messageCommand);
+        String errorMessage = TemplateEngine.errorInSomeFunction(incomingMessage.getText(), chatId,
+                String.valueOf(incomingMessage.getUserTgId()));
+        Optional<MessageCommandExecutor> commandExecutor = safeGet(typeChat, messageCommand);
         try {
-            if (commandExecuter.isPresent()) {
-                commandExecuter.get().execute((this::safePut), incomingMessage);
+            if (commandExecutor.isPresent()) {
+                commandExecutor.get().execute((this::safePut), incomingMessage);
             } else {
                 log.info("unknown command " + messageCommand);
             }
@@ -90,7 +96,7 @@ public class DefIncomingMessageRouterManager implements IncomingMessageHandlerMa
             safePut(new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.INVALID_DATA_IN_CELLS,
                     incomingMessage.getMessageId()));
             safePut(new OutgoingMessage(OutgoingMessageType.ERROR, Constants.ADMIN_CHAT_ID, errorMessage
-                    + Constants.INVALID_DATA_IN_CELLS_TO_ADMIN + e.toMessage()));
+                    + Constants.INVALID_DATA_IN_CELLS_TO_ADMIN + e.getMessage()));
         } catch (NumberFormatException | ParseException e) {
             log.info(e.getMessage(), e);
             safePut(new OutgoingMessage(OutgoingMessageType.ERROR, chatId, Constants.INVALID_DATA_IN_CELLS,
@@ -108,9 +114,7 @@ public class DefIncomingMessageRouterManager implements IncomingMessageHandlerMa
         }
     }
 
-    private Optional<MessageCommandExecutor> safeGet(
-            final TypeChat typeChat,
-            final MessageCommand commandName) {
+    private Optional<MessageCommandExecutor> safeGet(final TypeChat typeChat, final MessageCommand commandName) {
         MessageCommandExecutor executor = switch (typeChat) {
             case ADMIN_CHAT -> adminExecutors.get(commandName);
             case PUBLIC_CHAT -> publicExecutors.get(commandName);
