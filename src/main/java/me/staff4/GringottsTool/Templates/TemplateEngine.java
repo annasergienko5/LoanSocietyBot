@@ -8,10 +8,13 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.io.FileReader;
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,13 +26,17 @@ public class TemplateEngine {
 
     private static String fillTemplate(final String fileName, final Map<String, Object> dataMap) {
         Writer writer;
-        try (FileReader reader = new FileReader("src/main/resources/templates/" + fileName)) {
+        TemplateEngine templateEngine = new TemplateEngine();
+        InputStream inputStream = templateEngine.getClass().getClassLoader().
+                getResourceAsStream("templates/" + fileName);
+        try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream, StandardCharsets.UTF_8)) {
+            BufferedReader reader = new BufferedReader(inputStreamReader);
             Template template = new Template(fileName, reader, config);
             writer = new StringWriter();
             template.process(dataMap, writer);
         } catch (TemplateException | IOException e) {
             e.printStackTrace();
-            return "template not found";
+            return "template not found: " + fileName;
         }
         return writer.toString();
     }
