@@ -1,5 +1,7 @@
-# GringottsTool
+# Касса взаимопомощи
 
+Телеграм-бот взаимодействут с гугл-таблицей, где храняться данные по кассе и ее участникам.
+Позволяет участникам и администраторам кассы смотреть различную информацию по своим/чужим взносам и займам, отправлять запросы на новые займы.
 
 
 ## Запуск
@@ -33,7 +35,7 @@
 * PORT - порт, который вы задали при запуске ngrok или другой локальный порт на который будут приходить обновления с сервера
 * APPLICATION_NAME - имя приложения (пример: Google Sheet Service)
 * CREDENTIALS_FILE_PATH - полный путь к файлу  json для подключения к google api (файл может лежать в любой директории) 
-Пример: "CREDENTIALS_FILE_PATH=/home/user/Projects/gringottstool/token/Web Client 4.json"
+Пример: "CREDENTIALS_FILE_PATH=/home/user/IdeaProjects/LoanSocietyBot/token/Web Client 4.json"
 * SHEET_ID - id таблички из url (пример: https://docs.google.com/spreadsheets/d/1234abcd/edit#gid=1825291932 "1234abcd" - это id)
 * RULE - ссылка на правила
 * PUBLIC_CHAT_ID - идентификационный номер телеграмм общего чата ПОЛЬЗОВАТЕЛЕЙ приложения. Например:"PUBLIC_CHAT_ID=-730818881"
@@ -53,4 +55,4 @@
 с просроченным платежом по возврату займа в общий чат и чат админов. Выражение использует формат cron.
   Пример каждый понедельник в 10 утра:"TODAY_PAYERS_REMINDER_TIME=0 0 10 ? * MON"
 * TEMPORARY_FILES_DIRECTORY - полный путь к директории со временными файлами.
-Пример: "TEMPORARY_FILES_DIRECTORY=/home/user/IdeaProjects/gringottstool/temp"
+Пример: "TEMPORARY_FILES_DIRECTORY=/home/user/IdeaProjects/LoanSocietyBot/temp"
